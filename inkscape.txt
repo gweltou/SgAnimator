@@ -1,0 +1,2 @@
+Strollan    Ctrl+g
+Distrollañ  Ctrl+Maj+g
