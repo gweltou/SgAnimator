@@ -13,16 +13,16 @@ void keyPressed(KeyEvent event) {
       select(parts.get(selected_idx));
     }
   } else {
+    println((int) key);
     switch (key) {
-      case 'l':  // Load a new file
-        selectInput("Select a file", "fileSelected");
-        break;
       case 'p':  // Toggle animation
         playAnim = !playAnim;
-        rootShape.resetAnimation();
+        if (rootShape != null)
+          rootShape.resetAnimation();
         break;
       case 'r':  // Reset animation
-        rootShape.resetAnimation();
+        if (rootShape != null)
+          rootShape.resetAnimation();
         break;
       case 'm':  // Edit animation mode
         if (edit) {
@@ -33,9 +33,14 @@ void keyPressed(KeyEvent event) {
           //accordion.show();
         }
         break;
-      case 19: // CTRL + s, save
-        saveGeometry(rootShape);
-        saveAnimation(rootShape);
+      case 15:  // CTRL+o, load a new file
+        selectInput("Select a file", "fileSelected");
+        break;
+      case 19: // CTRL+s, save
+        if (rootShape != null) {
+          saveGeomAnim(rootShape);
+          //saveAnimation(rootShape);
+        }
         break;
       default:
         break;

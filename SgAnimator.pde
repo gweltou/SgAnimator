@@ -23,8 +23,8 @@ ControlP5 cp5;
 Accordion accordion;
 Textlabel partLabel;
 ComplexShape rootShape;
-//JSONObject animJson;
 File animFile = new File("/home/gweltaz/Dropbox/Projets/art generatif/processing/SgAnimator/anim.json");
+String baseFilename;
 Affine2 transform;
 ComplexShape selected = null;
 int selected_idx = 0;
@@ -68,7 +68,8 @@ void setup() {
     .setColorValue(0x00000000);
   
   lastTime = (float) millis() / 1000.0f;
-    
+  
+  textSize(20);
   //saveGeometry(rootShape);
 }
 
@@ -142,6 +143,10 @@ void draw() {
     renderer.drawPivot();
     renderer.drawMarker(0, 0);
     renderer.popMatrix();
+  } else {
+    text("CTRL+o    Open file\n"+
+         "CTRL+s    Save file\n"+
+         "p              play/pause animation", width/4, height/3);
   }
   
   stroke(0, 0, 255);
