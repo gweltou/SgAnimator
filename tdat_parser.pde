@@ -64,7 +64,7 @@ class PolygonParser {
           alpha = nextByte() / 254.f;
           x = nextFloat();
           y = nextFloat();
-          float radius = nextFloat() * 2.0f;
+          float radius = nextFloat();
           Circle circle = new Circle(x, y, radius);
           circle.setColor(red, green, blue, alpha);
           currentShape.addShape(circle);

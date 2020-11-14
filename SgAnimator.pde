@@ -1,3 +1,7 @@
+// TODO:
+//    Delete function button
+
+
 import com.badlogic.gdx.graphics.*;
 import com.badlogic.gdx.math.*;
 import com.badlogic.gdx.utils.*;
@@ -19,7 +23,7 @@ ControlP5 cp5;
 Accordion accordion;
 Textlabel partLabel;
 ComplexShape rootShape;
-JSONObject animJson;
+//JSONObject animJson;
 File animFile = new File("/home/gweltaz/Dropbox/Projets/art generatif/processing/SgAnimator/anim.json");
 Affine2 transform;
 ComplexShape selected = null;
@@ -43,10 +47,9 @@ void setup() {
   
   pp = new PolygonParser();
   
-  rootShape = buildAnimMesh();
+  //rootShape = buildAnimMesh();
   //rootShape = buildBlob();
-  parts = rootShape.getPartsList();
-  printArray(parts);
+  //parts = rootShape.getPartsList();
   
   int numFn = Animation.timeFunctions.length;
   functionNames = new String[numFn];
@@ -65,14 +68,9 @@ void setup() {
     .setColorValue(0x00000000);
   
   lastTime = (float) millis() / 1000.0f;
-  
-  Animation anim = new Animation(new TFSin());
-  println(anim.getTranslation());
-  println(anim.getScale());
-  println(anim.getRotationRad());
-  anim.update(1.f);
+    
+  //saveGeometry(rootShape);
 }
-
 
 
 ComplexShape buildBlob() {
@@ -94,7 +92,6 @@ ComplexShape buildBlob() {
     parent = segment;
     x += 50;
   }
-  
   return root;
 }
 
@@ -120,9 +117,7 @@ ComplexShape buildAnimMesh() {
   shape.getById("eyes").setAnimation(animEyes);
   Animation animBody = new Animation(new TFSin(3f, 2f, 0f, phase), Animation.AXE_Y);
   shape.getById("body").setAnimation(animBody);
-  
-  //selected = shape.getById("head");
-  
+    
   return shape;
 }
 
@@ -138,22 +133,23 @@ void select(ComplexShape part) {
 void draw() {
   float time = (float) millis() / 1000.0f;
   background(255);
-  renderer.pushMatrix(transform);
-  if (playAnim)
-    rootShape.updateAnimation(time-lastTime);
-  rootShape.draw(renderer); //<>//
-  renderer.drawMarker(0, 0);
-  renderer.popMatrix();
+  
+  if (rootShape != null) {
+    renderer.pushMatrix(transform);
+    if (playAnim)
+      rootShape.updateAnimation(time-lastTime);
+    rootShape.draw(renderer); //<>//
+    renderer.drawPivot();
+    renderer.drawMarker(0, 0);
+    renderer.popMatrix();
+  }
   
   stroke(0, 0, 255);
   noFill();
   if (setHinge) {
     fill(255, 0, 0);
     noStroke();
-    Vector2 point = new Vector2(mouseX, mouseY);
-    Affine2 unproject = new Affine2(transform).inv();
-    unproject.applyTo(point);
-    ellipse(point.x, point.y, 8, 8);
+    ellipse(mouseX, mouseY, 8, 8);
   }
   
   lastTime = time;

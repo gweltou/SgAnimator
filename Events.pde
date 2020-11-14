@@ -2,7 +2,7 @@
 ////    EVENTS
 ////
 void keyPressed(KeyEvent event) {
-  if (key == CODED) {
+  if (rootShape != null && key == CODED) {
     if (keyCode == LEFT || keyCode == DOWN) {
       selected_idx = (selected_idx-1);
       if (selected_idx < 0)
@@ -34,6 +34,7 @@ void keyPressed(KeyEvent event) {
         }
         break;
       case 19: // CTRL + s, save
+        saveGeometry(rootShape);
         saveAnimation(rootShape);
         break;
       default:
@@ -41,6 +42,7 @@ void keyPressed(KeyEvent event) {
     }
   }
 }
+
 
 void mouseWheel(MouseEvent event) {
   float z = pow(1.1, -event.getCount());
@@ -50,18 +52,19 @@ void mouseWheel(MouseEvent event) {
   transform.translate(point.x, point.y).scale(z, z).translate(-point.x, -point.y);
 }
 
+
 void mouseClicked(MouseEvent event) {
   if (event.getButton() == LEFT) {
     if (setHinge && !cp5.getController("hingebutton").isInside()) {
-      
       Vector2 point = new Vector2(mouseX, mouseY);
       Affine2 t = new Affine2(transform).inv();
       t.applyTo(point);
       selected.setLocalOrigin(point.x, point.y);
       ((Button) cp5.getController("hingebutton")).setOff();
     }
-  } 
+  }
 }
+
 
 void mouseDragged(MouseEvent event) {
   if (event.getButton() == RIGHT) {
