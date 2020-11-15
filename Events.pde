@@ -13,7 +13,6 @@ void keyPressed(KeyEvent event) {
       select(parts.get(selected_idx));
     }
   } else {
-    println((int) key);
     switch (key) {
       case 'p':  // Toggle animation
         playAnim = !playAnim;

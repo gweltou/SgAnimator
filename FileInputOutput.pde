@@ -31,7 +31,7 @@ void fileSelected(File selection) throws IOException {
 
 
 class DummyPShape extends PShape {
-  // This class exists only to access PShape private matrix
+  // This class exists only to access PShape private matrix variable
   DummyPShape(PShape parent) {
     super();
     copyMatrix(parent, this);
@@ -52,7 +52,6 @@ Drawable pShapeToComplexShape(PShape svgShape) {
 }
 
 Drawable pShapeToComplexShape(PShape svgShape, PMatrix3D matrix, int depth) {
-  matrix.print();
   StringBuilder prefix = new StringBuilder();
   for (int i=0; i<depth; i++)
     prefix.append('-');
@@ -109,25 +108,32 @@ ComplexShape JSONToComplexShape(JSONObject element) {
   cs.setId(element.getString("id"));
   println("id", cs.getId());
 
-  JSONArray children = element.getJSONArray("children");
-  if (children != null) {
-    for (int i=0; i<children.size(); i++) {
-      cs.addShape(JSONToComplexShape(children.getJSONObject(i)));
-      println("child", cs.getShapes().get(cs.getShapes().size()-1));
-    }
-  }
-
   JSONArray shapes = element.getJSONArray("shapes");
   if (shapes != null) {
     for (int i=0; i<shapes.size(); i++) {
-      Polygon p = new Polygon();
-      JSONObject jsonPolygon = shapes.getJSONObject(i);
-      p.setVertices(jsonPolygon.getJSONArray("vertices").getFloatArray());
-      //p.setTriangles(jsonPolygon.getJSONArray("triangles").getIntArray());
-      float[] c = jsonPolygon.getJSONArray("color").getFloatArray();
-      p.setColor(c[0], c[1], c[2], c[3]);
-      cs.addShape(p);
-      println(p);
+      JSONObject jsonChild = shapes.getJSONObject(i);
+      if (jsonChild.hasKey("type")) {  // Treat as simple shape
+        String type = jsonChild.getString("type");
+        if (type.equals("polygon")) {
+          Polygon p = new Polygon();
+          p.setVertices(jsonChild.getJSONArray("vertices").getFloatArray());
+          //p.setTriangles(jsonPolygon.getJSONArray("triangles").getIntArray());
+          float[] c = jsonChild.getJSONArray("color").getFloatArray();
+          p.setColor(c[0], c[1], c[2], c[3]);
+          cs.addShape(p);
+          println(p);
+        } else if (type.equals("circle")) {
+          float[] params = jsonChild.getJSONArray("params").getFloatArray();
+          Circle c = new Circle(params[0], params[1], params[2]);
+          float[] co = jsonChild.getJSONArray("color").getFloatArray();
+          c.setColor(co[0], co[1], co[2], co[3]);
+          cs.addShape(c);
+          println(c);
+        }
+      } else if (jsonChild.hasKey("id")) {  // Treat as ComplexShape
+        cs.addShape(JSONToComplexShape(jsonChild));
+        println("child", cs.getShapes().get(cs.getShapes().size()-1));
+      }
     }
   }
   
@@ -152,13 +158,13 @@ JSONObject complexShapeToJSON(ComplexShape cs) {
   element.setJSONArray("origin", localOrigin);
 
   JSONArray shapes = new JSONArray();
-  JSONArray children = new JSONArray();
   for (Drawable shape : cs.getShapes()) {
     if (shape instanceof ComplexShape) {
-      children.append(complexShapeToJSON((ComplexShape) shape));
+      shapes.append(complexShapeToJSON((ComplexShape) shape));
     } else if (shape instanceof Polygon) {
       Polygon p = (Polygon) shape;
       JSONObject s = new JSONObject();
+      s.setString("type", "polygon");
 
       JSONArray colorArray = new JSONArray();
       colorArray.append(p.getColor().r);
@@ -183,14 +189,33 @@ JSONObject complexShapeToJSON(ComplexShape cs) {
 
       shapes.append(s);
     } else if (shape instanceof Circle) {
+      Circle c = (Circle) shape;
+      JSONObject s = new JSONObject();
+      s.setString("type", "circle");
       
+      JSONArray colorArray = new JSONArray();
+      colorArray.append(c.getColor().r);
+      colorArray.append(c.getColor().g);
+      colorArray.append(c.getColor().b);
+      colorArray.append(c.getColor().a);
+      s.setJSONArray("color", colorArray);
+      
+      JSONArray paramsArray = new JSONArray();
+      paramsArray.append(c.getCenter().x);
+      paramsArray.append(c.getCenter().y);
+      paramsArray.append(c.getRadius());
+      s.setJSONArray("params", paramsArray);
+      
+      s.setInt("segments", 8); 
+      
+      shapes.append(s);
     }
   }
 
   if (shapes.size() > 0)
     element.setJSONArray("shapes", shapes);
-  if (children.size() > 0)
-    element.setJSONArray("children", children);
+  //if (children.size() > 0)
+  //  element.setJSONArray("children", children);
 
   return element;
 }
@@ -246,38 +271,6 @@ ComplexShape loadGeometry(File shapeFile) {
   ComplexShape shape = pp.parse(shapeFile);
   return shape;
 }
-
-
-/*
-void saveAnimation(ComplexShape shape) {
-  if (animFile == null)
-    return;
-
-  println("Saving animation to", animFile.getAbsolutePath());
-
-  // Create empty anim file
-  JSONObject root = new JSONObject();
-  JSONArray groups = new JSONArray();
-  int i = 0;
-  for (String id : shape.getIdList()) {
-    ComplexShape part = shape.getById(id);
-    Animation anim = part.getAnimation();
-    if (anim != null) {
-      JSONObject group = new JSONObject();
-      group.setString("id", id);
-      group.setString("function", anim.getFunction().getClass().getName());
-      group.setString("axe", Animation.axeName[anim.getAxe()]);
-      for (TFParam param : anim.getFunction().getParams()) {
-        group.setFloat(param.name, param.value);
-      }
-      groups.setJSONObject(i++, group);
-    }
-  }
-  root.setJSONArray("groups", groups);
-  saveJSONObject(root, animFile.getAbsolutePath());
-  println("Animation saved to", animFile.getAbsolutePath());
-}
-*/
 
 
 void loadAnimation(JSONObject json, ComplexShape shape) {

@@ -146,7 +146,7 @@ void draw() {
   } else {
     text("CTRL+o    Open file\n"+
          "CTRL+s    Save file\n"+
-         "p              play/pause animation", width/4, height/3);
+         "p              play/pause animation", width/4, height/4);
   }
   
   stroke(0, 0, 255);

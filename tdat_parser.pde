@@ -36,7 +36,7 @@ class PolygonParser {
           } else if (nc == 'c') {
             // close group
             for (int i=0; i<stack.size(); i++) {
-              print("- ");
+              print("-");
             }
             ComplexShape parent = stack.pop();
             parent.addShape(currentShape);
