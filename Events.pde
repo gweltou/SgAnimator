@@ -23,13 +23,19 @@ void keyPressed(KeyEvent event) {
         if (rootShape != null)
           rootShape.resetAnimation();
         break;
-      case 'm':  // Edit animation mode
-        if (edit) {
-          edit = false;
-          //accordion.hide();
-        } else {
-          edit = true;
-          //accordion.show();
+      case 'd':  // Edit animation mode
+        if (rootShape != null) {
+          if (showUI) {
+            showUI = false;
+            accordion.hide();
+            partLabel.hide();
+            renderer.setSelected(null);
+          } else {
+            showUI = true;
+            accordion.show();
+            partLabel.show();
+            renderer.setSelected(selected);
+          }
         }
         break;
       case 15:  // CTRL+o, load a new file
@@ -38,7 +44,6 @@ void keyPressed(KeyEvent event) {
       case 19: // CTRL+s, save
         if (rootShape != null) {
           saveGeomAnim(rootShape);
-          //saveAnimation(rootShape);
         }
         break;
       default:

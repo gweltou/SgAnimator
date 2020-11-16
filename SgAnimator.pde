@@ -1,5 +1,6 @@
 // TODO:
 //    Delete function button
+//    Copy and Paste buttons
 
 
 import com.badlogic.gdx.graphics.*;
@@ -32,10 +33,11 @@ ArrayList<ComplexShape> parts;
 String[] functionNames;
 float lastTime;
 
-boolean edit = false;
+boolean showUI = false;
 boolean paramLocked = true;
 boolean setHinge = false;
 boolean playAnim = true;
+boolean mustUpdateUI = false;
 
 
 
@@ -70,7 +72,6 @@ void setup() {
   lastTime = (float) millis() / 1000.0f;
   
   textSize(20);
-  //saveGeometry(rootShape);
 }
 
 
@@ -87,7 +88,6 @@ ComplexShape buildBlob() {
     float[] verts = {x, 10, x+50, 6, x+50, -6, x, -10};
     segment.addShape(new Polygon(verts));
     segment.setLocalOrigin(x, 0);
-    //segment.setPosition(x, 0);
     segment.setAnimation(new Animation(new TFSin(0.2f, 0.3f, 0f, x*0.012f), Animation.AXE_ROT));
     parent.addShape(segment);
     parent = segment;
@@ -102,7 +102,6 @@ ComplexShape buildAnimMesh() {
   
   float phase = random(PI);
   float phase2 = random(PI);
-  //float phase3 = random(PI);
   
   Animation animHead = new Animation(new TFSin(2.1f, 0.05f, 0f, phase2), Animation.AXE_ROT);
   shape.getById("head").setAnimation(animHead);
@@ -125,8 +124,9 @@ ComplexShape buildAnimMesh() {
 
 void select(ComplexShape part) {
   println(part);
+  showUI = true;
   selected = part;
-  displayUI();
+  updateUI();
   renderer.setSelected(part);
 }
 
@@ -140,13 +140,22 @@ void draw() {
     if (playAnim)
       rootShape.updateAnimation(time-lastTime);
     rootShape.draw(renderer); //<>//
-    renderer.drawPivot();
-    renderer.drawMarker(0, 0);
+    if (showUI) {
+      renderer.drawPivot();
+      renderer.drawMarker(0, 0);
+    }
     renderer.popMatrix();
   } else {
-    text("CTRL+o    Open file\n"+
-         "CTRL+s    Save file\n"+
-         "p              play/pause animation", width/4, height/4);
+    text("CTRL+o\n"+
+         "CTRL+s\n"+
+         "p\n"+
+         "r\n"+
+         "d\n", width/4, height/4);
+    text("Open file (svg or json)\n"+
+         "Save json file\n"+
+         "play/pause animation\n"+
+         "reset animation\n"+
+         "display/hide UI\n", width/2, height/4);
   }
   
   stroke(0, 0, 255);
@@ -155,6 +164,11 @@ void draw() {
     fill(255, 0, 0);
     noStroke();
     ellipse(mouseX, mouseY, 8, 8);
+  }
+  
+  if (mustUpdateUI == true) {
+    updateUI();
+    mustUpdateUI = false;
   }
   
   lastTime = time;

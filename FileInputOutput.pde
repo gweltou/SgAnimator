@@ -23,6 +23,10 @@ void fileSelected(File selection) throws IOException {
       }
     } else if (filename.endsWith("json")) {
       rootShape = loadGeomAnim(selection);
+      selected_idx = 0;
+      selected = null;
+      parts = rootShape.getPartsList();
+      baseFilename = filename.substring(0, filename.length()-4);
     } else {
       println("Bad filename");
     }

@@ -1,6 +1,7 @@
 PFont defaultFont;
 
-void displayUI() {
+
+void updateUI() {
   int spacing = 4;
   int barHeight = 18;
   
@@ -46,7 +47,18 @@ void displayUI() {
      .close()
      ;
   pos.set(spacing, 2*spacing + cp5.getController("axe").getHeight());
-  pos.add(0.f, 2*spacing);
+  pos.add(0.f, spacing);
+  
+  // Hinge selection bang
+  cp5.addButton("hingebutton")
+     .setPosition(pos.x, pos.y)
+     .setSize(80, 20)
+     .setSwitch(true)
+     .activateBy(ControlP5.PRESS)
+     .setLabel("Set hinge point")
+     .setGroup(g)
+     ;
+  pos.add(0, cp5.getController("hingebutton").getHeight()+spacing);
   
   if (selected.getAnimation() != null) {
     Animation anim = selected.getAnimation();
@@ -55,6 +67,7 @@ void displayUI() {
        .setValue(Arrays.asList(Animation.timeFunctions).indexOf(anim.getFunction().getClass()));
     cp5.getController("axe").setValue(anim.getAxe() >= 0 ? anim.getAxe() : 0);    
     
+    pos.add(0, spacing);
     for (TFParam param : anim.getFunction().getParams()) {
       switch (param.type) {
         case TFParam.SLIDER:
@@ -80,17 +93,41 @@ void displayUI() {
       pos.add(0, cp5.getController(param.name).getHeight() + spacing);
     }
     pos.add(0.f, 2*spacing);
+    
+    // Copy animation
+    cp5.addButton("copybutton")
+       .setPosition(pos.x, pos.y)
+       .setSize(60, 20)
+       .setSwitch(true)
+       .activateBy(ControlP5.PRESS)
+       .setLabel("Copy")
+       .setGroup(g)
+       ;
+    pos.add(cp5.getController("copybutton").getWidth()+spacing, 0);
+    
+    // Paste animation
+    cp5.addButton("pastebutton")
+       .setPosition(pos.x, pos.y)
+       .setSize(60, 20)
+       .setSwitch(true)
+       .activateBy(ControlP5.PRESS)
+       .setLabel("Paste")
+       .setGroup(g)
+       ;
+    pos.add(cp5.getController("pastebutton").getWidth()+spacing, 0);
+    
+    // Delete animation
+    cp5.addButton("deletebutton")
+       .setPosition(pos.x, pos.y)
+       .setSize(60, 20)
+       .setSwitch(true)
+       .activateBy(ControlP5.PRESS)
+       .setLabel("Delete")
+       .setGroup(g)
+       ;
+    pos.add(0, cp5.getController("pastebutton").getHeight()+spacing);
   }
-  // Hinge selection bang
-  cp5.addButton("hingebutton")
-     .setPosition(pos.x, pos.y)
-     .setSize(80, 20)
-     .setSwitch(true)
-     .activateBy(ControlP5.PRESS)
-     .setLabel("Set hinge point")
-     .setGroup(g)
-     ;
-  pos.add(0, cp5.getController("hingebutton").getHeight());
+  
   g.setBackgroundHeight((int) pos.y + 2*spacing);
   
   accordion = cp5.addAccordion("acc")
@@ -137,15 +174,14 @@ void controlEvent(ControlEvent event) throws InstantiationException, IllegalAcce
       TimeFunction tf = ctor.newInstance();
       if (selected.getAnimation() == null) {
         selected.setAnimation(new Animation(tf));
-        //displayUI();
+        mustUpdateUI = true;
       } else {
         // Transfer compatible parameters to new TimeFunction
         for (TFParam param : selected.getAnimation().getFunction().getParams()) {
           tf.setParam(param.name, param.value);
         }
-        selected.getAnimation().setFunction(tf);
-        // BUG INSSOLUBLE
-        //displayUI(); //<>//
+        selected.getAnimation().setFunction(tf); //<>//
+        mustUpdateUI = true;
       }
     } else if (name.equals("axe")) {
       playAnim = true;
