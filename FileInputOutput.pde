@@ -1,6 +1,11 @@
 //
 // File INPUT/OUTPUT
 //
+
+
+EarClippingTriangulator triangulator = new EarClippingTriangulator();
+
+
 void fileSelected(File selection) throws IOException { 
   if (selection == null) {
     println("Window was closed or the user hit cancel.");
@@ -12,11 +17,17 @@ void fileSelected(File selection) throws IOException {
       selected_idx = 0;
       selected = null;
       parts = rootShape.getPartsList();
+      partsName = new String[parts.size()];
+      for (int i=0; i<parts.size(); i++) {
+        partsName[i] = parts.get(i).getId();
+      }
+      partsList.setItems(partsName);
       baseFilename = filename.substring(0, filename.length()-4);
+      cp5.getController("parts list").show();
     } 
     else if (filename.endsWith("tdat")) {
       rootShape = loadGeometry(selection);
-      animFile = new File(filename.replace(".tdat", ".json"));
+      File animFile = new File(filename.replace(".tdat", ".json"));
       if (animFile.exists()) {
         JSONObject rootElement = loadJSONObject(selection);
         loadAnimation(rootElement.getJSONObject("animation"), rootShape);
@@ -26,7 +37,13 @@ void fileSelected(File selection) throws IOException {
       selected_idx = 0;
       selected = null;
       parts = rootShape.getPartsList();
+      partsName = new String[parts.size()];
+      for (int i=0; i<parts.size(); i++) {
+        partsName[i] = parts.get(i).getId();
+      }
+      partsList.setItems(partsName);
       baseFilename = filename.substring(0, filename.length()-4);
+      cp5.getController("parts list").show();
     } else {
       println("Bad filename");
     }
@@ -79,7 +96,6 @@ Drawable pShapeToComplexShape(PShape svgShape, PMatrix3D matrix, int depth) {
     shape = cs;
   } else if (family == PShape.PATH) {
     int vertexCount = svgShape.getVertexCount();
-    EarClippingTriangulator triangulator = new EarClippingTriangulator();
     Polygon poly = new Polygon();
     float[] verts = new float[vertexCount*2];
     for (int i=0; i<vertexCount; i++) {
@@ -89,6 +105,7 @@ Drawable pShapeToComplexShape(PShape svgShape, PMatrix3D matrix, int depth) {
       verts[2*i + 1] = vertex.y;
     }
     poly.setVertices(verts);
+    poly.setTriangles(triangulator.computeTriangles(verts).toArray());
     poly.setColor(pColorToGDXColor(svgShape.getFill(999)));
     shape = poly;
   } else if (family == PShape.PRIMITIVE && kind == PShape.ELLIPSE) {
@@ -121,7 +138,13 @@ ComplexShape JSONToComplexShape(JSONObject element) {
         if (type.equals("polygon")) {
           Polygon p = new Polygon();
           p.setVertices(jsonChild.getJSONArray("vertices").getFloatArray());
-          //p.setTriangles(jsonPolygon.getJSONArray("triangles").getIntArray());
+          
+          int[] triangles = jsonChild.getJSONArray("triangles").getIntArray();
+          short[] trianglesShort = new short[triangles.length];
+          for (int j=0; j<triangles.length; j++)
+            trianglesShort[j] = (short) triangles[j];
+          p.setTriangles(trianglesShort);
+          
           float[] c = jsonChild.getJSONArray("color").getFloatArray();
           p.setColor(c[0], c[1], c[2], c[3]);
           cs.addShape(p);
@@ -183,13 +206,12 @@ JSONObject complexShapeToJSON(ComplexShape cs) {
       }
       s.setJSONArray("vertices", verticesArray);
 
-      /*
       JSONArray trianglesArray = new JSONArray();
-      for (float triangle : p.getTriangles()) {
+      for (short triangle : p.getTriangles()) {
         trianglesArray.append(triangle);
       }
       s.setJSONArray("triangles", trianglesArray);
-      */
+      
 
       shapes.append(s);
     } else if (shape instanceof Circle) {
@@ -268,6 +290,7 @@ void saveGeomAnim(ComplexShape shape) {
   
   //saveJSONObject(root, filename, "compact");
   saveJSONObject(root, filename);
+  println("File saved to " + filename);
 }
 
 

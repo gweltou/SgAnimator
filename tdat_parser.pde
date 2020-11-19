@@ -53,7 +53,7 @@ class PolygonParser {
           float[] verts = new float[n*2];
           for (int i=0; i<verts.length; i++)
             verts[i] = nextFloat();
-          Polygon shape = new Polygon(verts);
+          Polygon shape = new Polygon(verts, null);
           shape.setColor(red, green, blue, alpha);
           currentShape.addShape(shape);
           break;
