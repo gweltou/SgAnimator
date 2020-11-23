@@ -23,7 +23,7 @@ void fileSelected(File selection) throws IOException {
       }
       partsList.setItems(partsName);
       baseFilename = filename.substring(0, filename.length()-4);
-      cp5.getController("parts list").show();
+      cp5.getController("partslist").show();
     } 
     else if (filename.endsWith("tdat")) {
       rootShape = loadGeometry(selection);
@@ -43,7 +43,7 @@ void fileSelected(File selection) throws IOException {
       }
       partsList.setItems(partsName);
       baseFilename = filename.substring(0, filename.length()-4);
-      cp5.getController("parts list").show();
+      cp5.getController("partslist").show();
     } else {
       println("Bad filename");
     }
@@ -271,22 +271,28 @@ void saveGeomAnim(ComplexShape shape) {
   int i = 0;
   for (String id : shape.getIdList()) {
     ComplexShape part = shape.getById(id);
-    Animation anim = part.getAnimation();
-    if (anim != null) {
+    ArrayList<Animation> animations = part.getAnimationList();
+    if (!animations.isEmpty()) {
       JSONObject group = new JSONObject();
       group.setString("id", id);
-      group.setString("function", anim.getFunction().getClass().getName());
-      group.setString("axe", Animation.axeName[anim.getAxe()]);
-      for (TFParam param : anim.getFunction().getParams()) {
-        group.setFloat(param.name, param.value);
+      JSONArray animationArray = new JSONArray();
+      for (Animation anim : animations) {
+        JSONObject jsonFuncAxe = new JSONObject();
+        jsonFuncAxe.setString("function", anim.getFunction().getClass().getName());
+        jsonFuncAxe.setString("axe", Animation.axeName[anim.getAxe()]);
+        for (TFParam param : anim.getFunction().getParams()) {
+          jsonFuncAxe.setFloat(param.name, param.value);
+        }
+        animationArray.append(jsonFuncAxe);
       }
+      group.setJSONArray("functions", animationArray);
       groups.setJSONObject(i++, group);
     }
   }
-  JSONObject jsonAnim = new JSONObject();
-  jsonAnim.setJSONArray("groups", groups);
-  jsonAnim.setString("name", "noname");
-  root.setJSONObject("animation", jsonAnim);
+  JSONObject jsonFullAnimation = new JSONObject();
+  jsonFullAnimation.setJSONArray("groups", groups);
+  jsonFullAnimation.setString("name", "noname");
+  root.setJSONObject("animation", jsonFullAnimation);
   
   //saveJSONObject(root, filename, "compact");
   saveJSONObject(root, filename);
@@ -303,22 +309,26 @@ ComplexShape loadGeometry(File shapeFile) {
 void loadAnimation(JSONObject json, ComplexShape shape) {
   // Load JSON file
   JSONArray groups = json.getJSONArray("groups");
-  for (int i = 0; i < groups.size(); i++) {
+  for (int i=0; i<groups.size(); i++) {
     JSONObject group = groups.getJSONObject(i);
     String id = group.getString("id");
-    int axe = Arrays.asList(Animation.axeName).indexOf(group.getString("axe"));
-    try {
-      Class c = Class.forName(group.getString("function"));
-      TimeFunction fn = (TimeFunction) c.newInstance();
-      for (TFParam param : fn.getParams()) {
-        float value = group.getFloat(param.name);
-        fn.setParam(param.name, value);
+    JSONArray functions = group.getJSONArray("functions");
+    ArrayList<Animation> animationList = new ArrayList();
+    for (int j=0; j<functions.size(); j++) {
+      JSONObject jsonFuncAxe = functions.getJSONObject(j);
+      int axe = Arrays.asList(Animation.axeName).indexOf(jsonFuncAxe.getString("axe"));
+      try {
+        Class c = Class.forName(jsonFuncAxe.getString("function"));
+        TimeFunction fn = (TimeFunction) c.newInstance();
+        for (TFParam param : fn.getParams()) {
+          float value = jsonFuncAxe.getFloat(param.name);
+          fn.setParam(param.name, value);
+        }
+        animationList.add(new Animation(fn, axe));
+      } catch (Exception e) {
+        println("Could not recreate animation function from json file");
       }
-      Animation anim = new Animation(fn, axe);
-      shape.getById(id).setAnimation(anim);
-    } 
-    catch (Exception e) {
-      println("Could not recreate animation function from json file");
     }
+    shape.getById(id).setAnimationList(animationList);
   }
 }

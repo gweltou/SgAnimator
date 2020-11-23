@@ -1,6 +1,5 @@
 // TODO:
   // Prompt to load Geometry and/or Animations when loading a file
-  // ScrollableList to select parts without using the arrow keys
   // Add a textField to name Animations
   // Add a chart for every Animation to show function progression over time
 
@@ -25,7 +24,6 @@ PolygonParser pp;
 ControlP5 cp5;
 Accordion accordion;
 ComplexShape rootShape;
-//File animFile = new File("/home/gweltaz/Dropbox/Projets/art generatif/processing/SgAnimator/anim.json");
 String baseFilename;
 Affine2 transform;
 ComplexShape selected = null;
@@ -88,37 +86,14 @@ ComplexShape buildBlob() {
     float[] verts = {x, 10, x+50, 6, x+50, -6, x, -10};
     segment.addShape(new Polygon(verts, null));
     segment.setLocalOrigin(x, 0);
-    segment.setAnimation(new Animation(new TFSin(0.2f, 0.3f, 0f, x*0.012f), Animation.AXE_ROT));
+    ArrayList<Animation> anims = new ArrayList();
+    anims.add(new Animation(new TFSin(0.2f, 0.3f, 0f, x*0.012f), Animation.AXE_ROT));
+    segment.setAnimationList(anims);
     parent.addShape(segment);
     parent = segment;
     x += 50;
   }
   return root;
-}
-
-
-ComplexShape buildAnimMesh() {
-  ComplexShape shape = loadGeometry(sketchFile("dessin.tdat"));
-  
-  float phase = random(PI);
-  float phase2 = random(PI);
-  
-  Animation animHead = new Animation(new TFSin(2.1f, 0.05f, 0f, phase2), Animation.AXE_ROT);
-  shape.getById("head").setAnimation(animHead);
-  Animation animOg = new Animation(new TFRandomSmooth(4f, 0.1f, -0.18f, 0.1f, .1f), Animation.AXE_ROT);
-  shape.getById("og").setAnimation(animOg);
-  Animation animOd = new Animation(new TFRandomSmooth(4f, 0.1f, 0.18f, -0.1f, .1f), Animation.AXE_ROT);
-  shape.getById("od").setAnimation(animOd);
-  Animation animNpd = new Animation(new TFSin(3f, 0.05f, 0f, phase+3.6f), Animation.AXE_ROT);
-  shape.getById("npd").setAnimation(animNpd);
-  Animation animNpg = new Animation(new TFSin(3f, -0.05f, 0f, phase+3.6f), Animation.AXE_ROT);
-  shape.getById("npg").setAnimation(animNpg);
-  Animation animEyes = new Animation(new TFEyes(7f, 0.05f, 0.8f, 0.2f, 1), Animation.AXE_SY);
-  shape.getById("eyes").setAnimation(animEyes);
-  Animation animBody = new Animation(new TFSin(3f, 2f, 0f, phase), Animation.AXE_Y);
-  shape.getById("body").setAnimation(animBody);
-    
-  return shape;
 }
 
 

@@ -3,20 +3,15 @@
 ////
 void keyPressed(KeyEvent event) {
   if (rootShape != null && key == CODED) {
-    if (keyCode == LEFT) {
+    if (keyCode == UP) {
       selected_idx = (selected_idx-1);
       if (selected_idx < 0)
         selected_idx += parts.size();
-      select(parts.get(selected_idx));
-    } else if (keyCode == RIGHT) {
+      partsList.setValue(selected_idx);
+    } else if (keyCode == DOWN) {
       selected_idx = (selected_idx+1) % parts.size();
-      select(parts.get(selected_idx));
-    /*} else if (keyCode == DOWN) {
-      for (ComplexShape shape : parts) {
-        Animation anim = new Animation(new TFFixed());
-        shape.transitionAnimation(anim, 0.2f);
-      }
-    }*/}
+      partsList.setValue(selected_idx);
+    }
   } else {
     switch (key) {
       case 'p':  // Toggle animation
@@ -34,11 +29,13 @@ void keyPressed(KeyEvent event) {
             showUI = false;
             accordion.hide();
             partsList.hide();
+            hingeButton.hide();
             renderer.setSelected(null);
           } else {
             showUI = true;
             accordion.show();
             partsList.show();
+            hingeButton.show();
             renderer.setSelected(selected);
           }
         }
@@ -59,7 +56,7 @@ void keyPressed(KeyEvent event) {
 
 
 void mouseWheel(MouseEvent event) {
-  if (!cp5.getController("parts list").isInside()) {
+  if (!cp5.getController("partslist").isInside()) {
     float z = pow(1.1, -event.getCount());
     Affine2 unproject = new Affine2(transform).inv();
     Vector2 point = new Vector2(mouseX, mouseY);
@@ -77,6 +74,7 @@ void mouseClicked(MouseEvent event) {
       t.applyTo(point);
       selected.setLocalOrigin(point.x, point.y);
       ((Button) cp5.getController("hingebutton")).setOff();
+      playAnim = true;
     }
   }
 }
@@ -100,50 +98,78 @@ void controlEvent(ControlEvent event) throws InstantiationException, IllegalAcce
   if (event.isController() && !paramLocked) {
     String name = event.getName();
     float value = event.getValue();
+    //println("event", name, value);
     
-    if (name.equals("parts list")) {
+    if (name.equals("partslist")) {
       select(parts.get(int(value)));
-    } else if (name.equals("function")) {
-      playAnim = true;
+    }
+    else if (name.startsWith("function")) {
+      String[] m = match(name, "function(\\d)");
+      int animNum = parseInt(m[1]);
       Class<TimeFunction> tfclass = Animation.timeFunctions[(int) event.getValue()];
       Constructor<TimeFunction> ctor = tfclass.getConstructor();
       TimeFunction tf = ctor.newInstance();
-      if (selected.getAnimation() == null) {
-        selected.setAnimation(new Animation(tf));
-        mustUpdateUI = true;
-      } else {
+      int numberOfAnimations = selected.getAnimationList().size();
+      if (animNum < numberOfAnimations) {
         // Transfer compatible parameters to new TimeFunction
-        for (TFParam param : selected.getAnimation().getFunction().getParams()) {
+        for (TFParam param : selected.getAnimation(animNum).getFunction().getParams()) {
           tf.setParam(param.name, param.value);
         }
-        selected.getAnimation().setFunction(tf);
-        mustUpdateUI = true;
+        selected.getAnimation(animNum).setFunction(tf);
+      } else {
+        selected.addAnimation(new Animation(tf));
       }
-    } else if (name.equals("axe")) {
+      selected.resetAnimation();
+      mustUpdateUI = true;
       playAnim = true;
-      selected.getAnimation().setAxe((int) value);
-    } else if (name.equals("hingebutton")) {
-      playAnim = false;
+    }
+    else if (name.startsWith("axe")) {
+      String[] m = match(name, "axe(\\d)");
+      int animNum = parseInt(m[1]);
+      selected.getAnimation(animNum).setAxe((int) value);
+      playAnim = true;
+    }
+    else if (name.equals("hingebutton")) {
       setHinge = ((Button) cp5.getController("hingebutton")).isOn();
       rootShape.resetAnimation();
-    } else if (name.equals("copybutton")) {
-      println("copybutton");
-      animationClipboard = selected.getAnimation();
+      playAnim = false;
+    }
+    else if (name.startsWith("copybutton")) {
+      String[] m = match(name, "copybutton(\\d)");
+      int animNum = parseInt(m[1]);
+      println("copybutton"+animNum);
+      animationClipboard = selected.getAnimation(animNum).copy();
       mustUpdateUI = true;
-    } else if (name.equals("pastebutton")) {
-      println("pastebutton");
+    }
+    else if (name.startsWith("pastebutton")) {
+      String[] m = match(name, "pastebutton(\\d)");
+      int animNum = parseInt(m[1]);
+      println("pastebutton"+animNum);
       if (animationClipboard != null) {
-        selected.setAnimation(animationClipboard);
+        selected.resetAnimation();
+        if (animNum < selected.getAnimationList().size()) {
+          selected.setAnimation(animNum, animationClipboard);
+        } else {
+          selected.addAnimation(animationClipboard);
+        }
         mustUpdateUI = true;
       }
-    } else if (name.equals("deletebutton")) {
+    }
+    else if (name.startsWith("deletebutton")) {
+      String[] m = match(name, "deletebutton(\\d)");
+      int animNum = parseInt(m[1]);
       selected.resetAnimation(); // So transform matrix is set to identity
-      selected.setAnimation(null);
+      selected.removeAnimation(animNum);
       mustUpdateUI = true;
-    } else {
-      playAnim = true;
-      println("control event", event);
-      selected.getAnimation().getFunction().setParam(name, value);
+    }
+    else {
+      String[] m = match(name, "([a-z]+)(\\d)");
+      if (m != null) {
+        String paramName = m[1];
+        int animNum = parseInt(m[2]);
+         selected.getAnimation(animNum).getFunction().setParam(paramName, value);
+        playAnim = true;
+      }
     }
   }
 }
