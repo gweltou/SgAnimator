@@ -5,6 +5,8 @@ int barHeight = 18;
 int accordionWidth = 250;
 ScrollableList partsList;
 Button hingeButton;
+Textfield animName;
+Button prevAnimButton, nextAnimButton;
 
 
 void setupUI() {
@@ -18,6 +20,7 @@ void setupUI() {
      .setType(ScrollableList.LIST)
      .setFont(defaultFont)
      .setPosition(margin, margin)
+     .setHeight(height-2*margin)
      //.setBarHeight(barHeight)
      .setItemHeight(barHeight)
      .setBarVisible(false)
@@ -29,6 +32,31 @@ void setupUI() {
      .setSwitch(true)
      .activateBy(ControlP5.PRESS)
      .setLabel("Set hinge point")
+     .hide()
+     ;
+   
+   PVector pos = new PVector(-60+width/2, margin);
+   animName = cp5.addTextfield("animname")
+     .setPosition(pos.x, pos.y)
+     .setSize(120,24)
+     .setFont(defaultFont)
+     .setFocus(true)
+     .setColor(color(255,255,255))
+     .setLabelVisible(false)
+     .hide()
+     //.setColorBackground(color(29,50,190));
+     ;
+   prevAnimButton = cp5.addButton("prevanim")
+     .setLabel("<<")
+     .setPosition(pos.x-24-3, pos.y)
+     .setSize(24, 24)
+     .hide()
+     ;
+   
+   nextAnimButton = cp5.addButton("nextanim")
+     .setLabel(">>")
+     .setPosition(pos.x+120+3, pos.y)
+     .setSize(24, 24)
      .hide()
      ;
 }
@@ -229,6 +257,7 @@ void drawBottomButtons(Group g, int animNum, PVector pos) {
 
 CallbackListener toFront = new CallbackListener() {
   public void controlEvent(CallbackEvent theEvent) {
+      theEvent.getController().getParent().bringToFront();
       theEvent.getController().bringToFront();
       ((ScrollableList)theEvent.getController()).open();
   }

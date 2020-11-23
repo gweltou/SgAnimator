@@ -14,6 +14,9 @@ void fileSelected(File selection) throws IOException {
     String filename = selection.getAbsolutePath();
     if (filename.endsWith("svg")) {
       rootShape = (ComplexShape) pShapeToComplexShape(loadShape(filename));
+      if (rootShape == null)
+        return;
+      
       selected_idx = 0;
       selected = null;
       parts = rootShape.getPartsList();
@@ -106,7 +109,8 @@ Drawable pShapeToComplexShape(PShape svgShape, PMatrix3D matrix, int depth) {
     }
     poly.setVertices(verts);
     poly.setTriangles(triangulator.computeTriangles(verts).toArray());
-    poly.setColor(pColorToGDXColor(svgShape.getFill(999)));
+    try { poly.setColor(pColorToGDXColor(svgShape.getFill(999))); }
+    catch (Exception e) { poly.setColor(0.f, 0.f, 0.f, 1.f); e.printStackTrace(); }
     shape = poly;
   } else if (family == PShape.PRIMITIVE && kind == PShape.ELLIPSE) {
     float[] params = svgShape.getParams();
@@ -115,7 +119,8 @@ Drawable pShapeToComplexShape(PShape svgShape, PMatrix3D matrix, int depth) {
     PVector center = matrix.mult(new PVector(params[0]+r/2, params[1]+r/2), null);
     PVector radiusPoint = matrix.mult(new PVector(params[0]+ r, 0), null);
     Circle c = new Circle(center.x, center.y, radiusPoint.x-center.x);
-    c.setColor(pColorToGDXColor(svgShape.getFill(999)));
+    try { c.setColor(pColorToGDXColor(svgShape.getFill(0))); }
+    catch (Exception e) { c.setColor(0.f, 0.f, 0.f, 1.f); e.printStackTrace(); }
     shape = c;
   }
   println(prefix.toString(), shape);

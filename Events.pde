@@ -76,11 +76,19 @@ void mouseClicked(MouseEvent event) {
       ((Button) cp5.getController("hingebutton")).setOff();
       playAnim = true;
     }
+    hingeButton.hide();
+  } else {
+    // RIGHT CLICK opens context menu (hinge button)
+    if (selected != null) {
+      hingeButton.setPosition(mouseX, mouseY);
+      hingeButton.show();
+    }
   }
 }
 
 
 void mouseDragged(MouseEvent event) {
+  hingeButton.hide();
   if (event.getButton() == RIGHT) {
     int dx = mouseX-pmouseX;
     int dy = mouseY-pmouseY;

@@ -1,7 +1,11 @@
 // TODO:
   // Prompt to load Geometry and/or Animations when loading a file
-  // Add a textField to name Animations
+  
   // Add a chart for every Animation to show function progression over time
+  
+  // Animation swap bar
+  // Add a textField to name Animations
+  
 
 import com.badlogic.gdx.graphics.*;
 import com.badlogic.gdx.math.*;
@@ -124,16 +128,18 @@ void draw() {
     fill(0);
     text("CTRL+o\n"+
          "CTRL+s\n"+
-         "Left/Right\n"+
+         "Up/Down\n"+
          "p\n"+
          "r\n"+
-         "d\n", width/4, height/4);
+         "d\n"+
+         "right click\n", width/4, height/4);
     text("Open file (svg or json)\n"+
          "Save json file\n"+
-         "Select next/previous shape\n"+
+         "Select next/previous shape group\n"+
          "play/pause animation\n"+
          "reset animation\n"+
-         "display/hide UI\n", width/2, height/4);
+         "display/hide UI\n"+
+         "show context menu\n", width/2, height/4);
     text("Ver. "+version, width-110, height-20);
   }
   
