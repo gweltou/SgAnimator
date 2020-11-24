@@ -56,7 +56,7 @@ void keyPressed(KeyEvent event) {
 
 
 void mouseWheel(MouseEvent event) {
-  if (!cp5.getController("partslist").isInside()) {
+  if (!partsList.isInside()) {
     float z = pow(1.1, -event.getCount());
     Affine2 unproject = new Affine2(transform).inv();
     Vector2 point = new Vector2(mouseX, mouseY);

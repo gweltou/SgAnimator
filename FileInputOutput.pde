@@ -284,7 +284,7 @@ void saveGeomAnim(ComplexShape shape) {
       for (Animation anim : animations) {
         JSONObject jsonFuncAxe = new JSONObject();
         jsonFuncAxe.setString("function", anim.getFunction().getClass().getName());
-        jsonFuncAxe.setString("axe", Animation.axeName[anim.getAxe()]);
+        jsonFuncAxe.setString("axe", Animation.axeNames[anim.getAxe()]);
         for (TFParam param : anim.getFunction().getParams()) {
           jsonFuncAxe.setFloat(param.name, param.value);
         }
@@ -321,7 +321,7 @@ void loadAnimation(JSONObject json, ComplexShape shape) {
     ArrayList<Animation> animationList = new ArrayList();
     for (int j=0; j<functions.size(); j++) {
       JSONObject jsonFuncAxe = functions.getJSONObject(j);
-      int axe = Arrays.asList(Animation.axeName).indexOf(jsonFuncAxe.getString("axe"));
+      int axe = Arrays.asList(Animation.axeNames).indexOf(jsonFuncAxe.getString("axe"));
       try {
         Class c = Class.forName(jsonFuncAxe.getString("function"));
         TimeFunction fn = (TimeFunction) c.newInstance();

@@ -3,6 +3,8 @@ int spacing = 4;
 int margin = 2*spacing;
 int barHeight = 18;
 int accordionWidth = 250;
+ControlP5 cp5;
+Accordion accordion;
 ScrollableList partsList;
 Button hingeButton;
 Textfield animName;
@@ -59,6 +61,7 @@ void setupUI() {
      .setSize(24, 24)
      .hide()
      ;
+   
 }
 
 
@@ -70,10 +73,10 @@ void updateUI() {
   
   // Remove accordion and create new one
   if (accordion != null) {
-    cp5.remove("acc");
+    cp5.remove("accordion");
     accordion = null;
   }
-  accordion = cp5.addAccordion("acc")
+  accordion = cp5.addAccordion("accordion")
                  .setPosition(width-accordionWidth-margin, margin)
                  .setWidth(accordionWidth)
                  .setMinItemHeight(0)
@@ -118,7 +121,7 @@ void updateUI() {
        .setItemHeight(barHeight)
        .onEnter(toFront)
        .onLeave(close)
-       .addItems(Animation.axeName)
+       .addItems(Animation.axeNames)
        .setValue(anim.getAxe() >= 0 ? anim.getAxe() : 0)
        .moveTo(g)
        .close()
@@ -147,6 +150,31 @@ void updateUI() {
              .setValue(true)
              .setMode(ControlP5.SWITCH)
              .setGroup(g)
+             ;
+          break;
+        case TFParam.NUMBERBOX:
+          cp5.addNumberbox(param.name+animNum)
+             .setLabel(param.name)
+             .setPosition(pos.x, pos.y)
+             .setSize(60,20)
+             .setRange(param.min, param.max)
+             .setMultiplier(0.1) // set the sensitifity of the numberbox
+             .setDirection(Controller.HORIZONTAL) // change the control direction to left/right
+             .setValue(param.value)
+             .setGroup(g)
+             ;
+          break;
+        case TFParam.EASING:
+          cp5.addScrollableList(param.name+animNum)
+             .setLabel("easing function")
+             .setPosition(pos.x, pos.y)
+             .setBarHeight(barHeight)
+             .setItemHeight(barHeight)
+             .onEnter(toFront)
+             .onLeave(close)
+             .addItems(Animation.interpolationNames)
+             .setGroup(g)
+             .close()
              ;
           break;
       }
@@ -192,7 +220,7 @@ void updateUI() {
      .setItemHeight(barHeight)
      .onEnter(toFront)
      .onLeave(close)
-     .addItems(Animation.axeName)
+     .addItems(Animation.axeNames)
      .moveTo(g)
      .close()
      ;

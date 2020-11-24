@@ -18,6 +18,7 @@ import controlP5.*;
 import java.util.Deque;
 import java.util.ArrayDeque;
 import java.util.*;
+import java.lang.reflect.Field;
 
 
 String version = "0.1";
@@ -25,8 +26,6 @@ String version = "0.1";
 
 Renderer renderer;
 PolygonParser pp;
-ControlP5 cp5;
-Accordion accordion;
 ComplexShape rootShape;
 String baseFilename;
 Affine2 transform;
