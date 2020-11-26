@@ -144,11 +144,15 @@ void updateUI() {
           break;
         case TFParam.TOGGLE:
           cp5.addToggle(param.name+animNum)
-             .setLabel(param.name)
+             .setLabelVisible(false)
              .setPosition(pos.x, pos.y)
-             .setSize(50,20)
-             .setValue(true)
-             .setMode(ControlP5.SWITCH)
+             .setSize(20,20)
+             .setValue(param.value > 0.5 ? true : false)
+             .setGroup(g)
+             ;
+          cp5.addTextlabel("label"+pos.y)
+             .setPosition(pos.x + 20 + spacing, pos.y + 4)
+             .setText(param.name.toUpperCase())
              .setGroup(g)
              ;
           break;

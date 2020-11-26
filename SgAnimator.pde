@@ -1,5 +1,6 @@
 // TODO:
   // Prompt to load Geometry and/or Animations when loading a file
+  // Mettre les angles en degrees
   
   // Add a chart for every Animation to show function progression over time
   
@@ -44,7 +45,6 @@ boolean playAnim = true;
 boolean mustUpdateUI = false;
 
 
-
 void settings() {
   size(800, 600);
 }
@@ -58,7 +58,6 @@ void setup() {
   
   pp = new PolygonParser();
   
-  //rootShape = buildAnimMesh();
   //rootShape = buildBlob();
   //parts = rootShape.getPartsList();
   

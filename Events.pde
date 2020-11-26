@@ -56,6 +56,10 @@ void keyPressed(KeyEvent event) {
 
 
 void mouseWheel(MouseEvent event) {
+  // Deactivate mouseWheel when above accordion
+  if (mouseX > width-accordionWidth)
+    return;
+  
   if (!partsList.isInside()) {
     float z = pow(1.1, -event.getCount());
     Affine2 unproject = new Affine2(transform).inv();
@@ -175,7 +179,8 @@ void controlEvent(ControlEvent event) throws InstantiationException, IllegalAcce
       if (m != null) {
         String paramName = m[1];
         int animNum = parseInt(m[2]);
-         selected.getAnimation(animNum).getFunction().setParam(paramName, value);
+        selected.getAnimation(animNum).getFunction().setParam(paramName, value);
+        selected.getAnimation(animNum).getFunction().reset();
         playAnim = true;
       }
     }
