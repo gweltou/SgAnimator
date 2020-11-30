@@ -1,14 +1,48 @@
-PFont defaultFont;
-int spacing = 4;
-int margin = 2*spacing;
-int barHeight = 18;
-int accordionWidth = 250;
 ControlP5 cp5;
 Accordion accordion;
-ScrollableList partsList;
-Button hingeButton;
+MyScrollableList partsList;
+Button pivotButton;
 Textfield animName;
 Button prevAnimButton, nextAnimButton;
+PFont defaultFont;
+int spacing = 4;
+int margin = spacing;
+int barHeight = 18;
+int accordionWidth = 250;
+
+
+class MyScrollableList extends ScrollableList {
+  int oldItemHover = -1;
+  
+  public MyScrollableList(ControlP5 theControlP5 , String theName) { super(theControlP5, theName); }
+    
+  public void highlightPart() {
+    if (itemHover != oldItemHover) {
+      if (itemHover >= 0 && itemHover < avatar.getPartsList().length) {
+        renderer.setSelected(avatar.getPartsList()[itemHover]);
+      }
+    }
+    oldItemHover = itemHover;
+  } 
+  
+  @Override protected void onEnter() {
+    super.onEnter();
+    highlightPart();
+  }
+  @Override protected void onLeave() {
+    super.onLeave();
+    renderer.setSelected(selected);
+    //highlightPart();
+  }
+  @Override protected void onMove() {
+    super.onMove();
+    highlightPart();
+  }
+  @Override protected void onScroll( int theValue ) {
+    super.onScroll( theValue );
+    //highlightPart();
+  }
+}
 
 
 void setupUI() {
@@ -17,7 +51,7 @@ void setupUI() {
 
   cp5 = new ControlP5(this);
   
-  partsList = cp5.addScrollableList("partslist")
+  partsList = (MyScrollableList) new MyScrollableList(cp5, "partslist")
      .setLabel("parts list")
      .setType(ScrollableList.LIST)
      .setFont(defaultFont)
@@ -27,24 +61,30 @@ void setupUI() {
      .setItemHeight(barHeight)
      .setBarVisible(false)
      .hide();
+    ;
   
-  hingeButton = cp5.addButton("hingebutton")
+  pivotButton = cp5.addButton("pivotbutton")
      .setPosition(300, 10)
-     .setSize(80, 20)
+     .setSize(70, 20)
      .setSwitch(true)
      .activateBy(ControlP5.PRESS)
-     .setLabel("Set hinge point")
+     .setLabel("Set pivot")
      .hide()
      ;
+     
+   accordion = cp5.addAccordion("accordion");
    
    PVector pos = new PVector(-60+width/2, margin);
    animName = cp5.addTextfield("animname")
+     //.setLabelVisible(false) // Doesn't work
+     .setLabel("")
+     .setText("anim0")
      .setPosition(pos.x, pos.y)
      .setSize(120,24)
      .setFont(defaultFont)
-     .setFocus(true)
+     .setFocus(false)
      .setColor(color(255,255,255))
-     .setLabelVisible(false)
+     .setAutoClear(false)
      .hide()
      //.setColorBackground(color(29,50,190));
      ;
@@ -61,7 +101,6 @@ void setupUI() {
      .setSize(24, 24)
      .hide()
      ;
-   
 }
 
 
@@ -69,7 +108,6 @@ void updateUI() {
   paramLocked = true;
   
   partsList.open().show();
-  hingeButton.show();
   
   // Remove accordion and create new one
   if (accordion != null) {
@@ -142,7 +180,7 @@ void updateUI() {
              .setGroup(g)
              ;
           break;
-        case TFParam.TOGGLE:
+        case TFParam.CHECKBOX:
           cp5.addToggle(param.name+animNum)
              .setLabelVisible(false)
              .setPosition(pos.x, pos.y)
@@ -150,8 +188,23 @@ void updateUI() {
              .setValue(param.value > 0.5 ? true : false)
              .setGroup(g)
              ;
-          cp5.addTextlabel("label"+pos.y)
+          cp5.addTextlabel(param.name+animNum+"label")
              .setPosition(pos.x + 20 + spacing, pos.y + 4)
+             .setText(param.name.toUpperCase())
+             .setGroup(g)
+             ;
+          break;
+        case TFParam.TOGGLE:
+          cp5.addToggle(param.name+animNum)
+             .setLabelVisible(false)
+             .setPosition(pos.x, pos.y)
+             .setSize(40,20)
+             .setMode(ControlP5.SWITCH)
+             .setValue(param.value > 0.5 ? true : false)
+             .setGroup(g)
+             ;
+          cp5.addTextlabel(param.name+animNum+"label")
+             .setPosition(pos.x + 40 + spacing, pos.y + 4)
              .setText(param.name.toUpperCase())
              .setGroup(g)
              ;
@@ -167,6 +220,11 @@ void updateUI() {
              .setValue(param.value)
              .setGroup(g)
              ;
+          cp5.addTextlabel(param.name+animNum+"label")
+             .setPosition(pos.x + 60 + spacing, pos.y + 4)
+             .setText(param.name.toUpperCase())
+             .setGroup(g)
+             ;
           break;
         case TFParam.EASING:
           cp5.addScrollableList(param.name+animNum)
@@ -177,6 +235,7 @@ void updateUI() {
              .onEnter(toFront)
              .onLeave(close)
              .addItems(Animation.interpolationNames)
+             .setValue((int) param.value)
              .setGroup(g)
              .close()
              ;
@@ -237,7 +296,6 @@ void updateUI() {
   accordion.addItem(g)
            .open();
   
-  
   paramLocked = false;
 }
 
@@ -285,6 +343,27 @@ void drawBottomButtons(Group g, int animNum, PVector pos) {
     pos.add(0, 20+2*spacing);
 }
 
+
+void showUI() {
+  showUI = true;
+  accordion.show();
+  partsList.show();
+  animName.show();
+  prevAnimButton.show();
+  nextAnimButton.show();
+  renderer.setSelected(selected);
+}
+
+void hideUI() {
+  showUI = false;
+  accordion.hide();
+  partsList.hide();
+  pivotButton.hide();
+  animName.hide();
+  prevAnimButton.hide();
+  nextAnimButton.hide();
+  renderer.setSelected(null);
+}
 
 
 CallbackListener toFront = new CallbackListener() {

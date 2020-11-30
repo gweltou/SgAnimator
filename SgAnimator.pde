@@ -1,11 +1,8 @@
 // TODO:
   // Prompt to load Geometry and/or Animations when loading a file
-  // Mettre les angles en degrees
+  // Change animation order buttons
   
   // Add a chart for every Animation to show function progression over time
-  
-  // Animation swap bar
-  // Add a textField to name Animations
   
 
 import com.badlogic.gdx.graphics.*;
@@ -13,6 +10,7 @@ import com.badlogic.gdx.math.*;
 import com.badlogic.gdx.utils.*;
 import gwel.spacegame.anim.*;
 import gwel.spacegame.graphics.*;
+import gwel.spacegame.entities.*;
 
 import controlP5.*;
 
@@ -22,25 +20,27 @@ import java.util.*;
 import java.lang.reflect.Field;
 
 
-String version = "0.1";
+String version = "0.2";
 
 
 Renderer renderer;
 PolygonParser pp;
-ComplexShape rootShape;
+Avatar avatar;
 String baseFilename;
 Affine2 transform;
 ComplexShape selected = null;
 int selected_idx = 0;
-ArrayList<ComplexShape> parts;
 String[] partsName;
 String[] functionsName;
+AnimationCollection animationCollection;
+int fullAnimationIndex = 0;
+boolean fullAnimationDirty = false;
 Animation animationClipboard;
 float lastTime;
 
 boolean showUI = false;
 boolean paramLocked = false;
-boolean setHinge = false;
+boolean setPivot = false;
 boolean playAnim = true;
 boolean mustUpdateUI = false;
 
@@ -69,7 +69,6 @@ void setup() {
   }
   
   setupUI();
-  textSize(20);
   
   lastTime = (float) millis() / 1000.0f;
 }
@@ -108,22 +107,49 @@ void select(ComplexShape part) {
 }
 
 
+void saveFullAnimation(String animName, int animIndex) {
+  HashMap<String, Animation[]> fullAnimation = new HashMap();
+  
+  if (animName == null || animName.trim().isEmpty())
+    animName = "anim"+animIndex;
+  
+  for (ComplexShape part : avatar.getPartsList()) {
+    if (!part.getAnimationList().isEmpty())
+      fullAnimation.put(part.getId(), part.getAnimationList().toArray(new Animation[0]));
+  }
+  
+  if (animIndex >= animationCollection.size()) {
+    animationCollection.addFullAnimation(animName, fullAnimation);
+  } else {
+    animationCollection.updateFullAnimation(animIndex, animName, fullAnimation);
+  }
+  
+  fullAnimationDirty = false;
+}
+
+
 void draw() {
   float time = (float) millis() / 1000.0f;
   background(255);
   
-  if (rootShape != null) {
+  if (avatar != null) {
     renderer.pushMatrix(transform);
     if (playAnim)
-      rootShape.updateAnimation(time-lastTime);
-    rootShape.draw(renderer); //<>//
+      avatar.updateAnimation(time-lastTime);
+    avatar.draw(renderer);
     if (showUI) {
       renderer.drawPivot();
       renderer.drawMarker(0, 0);
     }
     renderer.popMatrix();
+    if (playAnim == false && (frameCount>>5)%2 == 0) {
+      fill(255, 0, 0);
+      textSize(30);
+      text("PAUSED", -58+width/2, height/2);
+    }
   } else {
     fill(0);
+    textSize(20);
     text("CTRL+o\n"+
          "CTRL+s\n"+
          "Up/Down\n"+
@@ -136,20 +162,18 @@ void draw() {
          "Select next/previous shape group\n"+
          "play/pause animation\n"+
          "reset animation\n"+
-         "display/hide UI\n"+
-         "show context menu\n", width/2, height/4);
+         "show/hide UI\n"+
+         "place pivot\n", width/2, height/4);
     text("Ver. "+version, width-110, height-20);
   }
   
-  stroke(0, 0, 255);
-  noFill();
-  if (setHinge) {
+  if (setPivot) {
     fill(255, 0, 0);
     noStroke();
     ellipse(mouseX, mouseY, 8, 8);
   }
   
-  if (mustUpdateUI == true) {
+  if (mustUpdateUI == true && selected != null) {
     updateUI();
     mustUpdateUI = false;
   }

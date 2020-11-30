@@ -69,7 +69,7 @@ class PolygonParser {
           circle.setColor(red, green, blue, alpha);
           currentShape.addShape(circle);
           break;
-        case 'h':  // Hinge/localOrigin
+        case 'h':  // Pivot/localOrigin
           x = nextFloat();
           y = nextFloat();
           currentShape.setLocalOrigin(x, y);

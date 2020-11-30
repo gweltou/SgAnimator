@@ -13,40 +13,44 @@ void fileSelected(File selection) throws IOException {
     println("User selected " + selection.getAbsolutePath());
     String filename = selection.getAbsolutePath();
     if (filename.endsWith("svg")) {
-      rootShape = (ComplexShape) pShapeToComplexShape(loadShape(filename));
-      if (rootShape == null)
+      ComplexShape shape = (ComplexShape) pShapeToComplexShape(loadShape(filename));
+      if (shape == null)
         return;
       
-      selected_idx = 0;
-      selected = null;
-      parts = rootShape.getPartsList();
-      partsName = new String[parts.size()];
-      for (int i=0; i<parts.size(); i++) {
-        partsName[i] = parts.get(i).getId();
+      // Go down the complexShape tree if the root is empty
+      while (shape.getShapes().size() == 1)
+        shape = (ComplexShape) shape.getShapes().get(0);
+      
+      animationCollection = new AnimationCollection();
+      avatar = new Avatar();
+      avatar.setShape(shape);
+      partsName = new String[avatar.getPartsList().length];
+      for (int i=0; i<partsName.length; i++) {
+        partsName[i] = avatar.getPartsList()[i].getId();
       }
       partsList.setItems(partsName);
+      selected_idx = 0;
+      selected = null;
       baseFilename = filename.substring(0, filename.length()-4);
-      cp5.getController("partslist").show();
-    } 
-    else if (filename.endsWith("tdat")) {
+      showUI();
+    /*} else if (filename.endsWith("tdat")) {
       rootShape = loadGeometry(selection);
       File animFile = new File(filename.replace(".tdat", ".json"));
       if (animFile.exists()) {
         JSONObject rootElement = loadJSONObject(selection);
-        loadAnimation(rootElement.getJSONObject("animation"), rootShape);
-      }
+        loadAnimation(rootElement.getJSONArray("animation"));
+      }*/
     } else if (filename.endsWith("json")) {
-      rootShape = loadGeomAnim(selection);
+      avatar = loadAvatarFile(selection);
       selected_idx = 0;
       selected = null;
-      parts = rootShape.getPartsList();
-      partsName = new String[parts.size()];
-      for (int i=0; i<parts.size(); i++) {
-        partsName[i] = parts.get(i).getId();
+      partsName = new String[avatar.getPartsList().length];
+      for (int i=0; i<partsName.length; i++) {
+        partsName[i] = avatar.getPartsList()[i].getId();
       }
       partsList.setItems(partsName);
-      baseFilename = filename.substring(0, filename.length()-4);
-      cp5.getController("partslist").show();
+      baseFilename = filename.substring(0, filename.length()-5);
+      showUI();
     } else {
       println("Bad filename");
     }
@@ -71,9 +75,11 @@ Color pColorToGDXColor(int c) {
   return new Color(red(c)/255.0, green(c)/255.0, blue(c)/255.0, alpha(c)/255.0);
 }
 
+
 Drawable pShapeToComplexShape(PShape svgShape) {
   return pShapeToComplexShape(svgShape, new PMatrix3D(), 0);
 }
+
 
 Drawable pShapeToComplexShape(PShape svgShape, PMatrix3D matrix, int depth) {
   StringBuilder prefix = new StringBuilder();
@@ -97,7 +103,8 @@ Drawable pShapeToComplexShape(PShape svgShape, PMatrix3D matrix, int depth) {
         cs.addShape(childShape);
     }
     shape = cs;
-  } else if (family == PShape.PATH) {
+  }
+  else if (family == PShape.PATH) {
     int vertexCount = svgShape.getVertexCount();
     Polygon poly = new Polygon();
     float[] verts = new float[vertexCount*2];
@@ -112,18 +119,40 @@ Drawable pShapeToComplexShape(PShape svgShape, PMatrix3D matrix, int depth) {
     try { poly.setColor(pColorToGDXColor(svgShape.getFill(999))); }
     catch (Exception e) { poly.setColor(0.f, 0.f, 0.f, 1.f); e.printStackTrace(); }
     shape = poly;
-  } else if (family == PShape.PRIMITIVE && kind == PShape.ELLIPSE) {
-    float[] params = svgShape.getParams();
-    float r = params[2];
-    // params[0], params[1] is top-left coordinate
-    PVector center = matrix.mult(new PVector(params[0]+r/2, params[1]+r/2), null);
-    PVector radiusPoint = matrix.mult(new PVector(params[0]+ r, 0), null);
-    Circle c = new Circle(center.x, center.y, radiusPoint.x-center.x);
-    try { c.setColor(pColorToGDXColor(svgShape.getFill(0))); }
-    catch (Exception e) { c.setColor(0.f, 0.f, 0.f, 1.f); e.printStackTrace(); }
-    shape = c;
   }
-  println(prefix.toString(), shape);
+  else if (family == PShape.PRIMITIVE ) {
+    float[] params = svgShape.getParams();
+    if (kind == PShape.ELLIPSE) {
+      float r = params[2];
+      // params[0], params[1] is top-left coordinate
+      PVector center = matrix.mult(new PVector(params[0]+r/2, params[1]+r/2), null);
+      PVector radiusPoint = matrix.mult(new PVector(params[0]+ r, 0), null);
+      Circle c = new Circle(center.x, center.y, radiusPoint.x-center.x);
+      try { c.setColor(pColorToGDXColor(svgShape.getFill(0))); }
+      catch (Exception e) { c.setColor(0.f, 0.f, 0.f, 1.f); e.printStackTrace(); }
+      shape = c;
+    }
+    else if (kind == PShape.RECT) {
+      float x = params[0];
+      float y = params[1];
+      float width = params[2];
+      float height = params[3];
+      PVector p0 = matrix.mult(new PVector(x, y), null);
+      PVector p1 = matrix.mult(new PVector(x+width, y), null);
+      PVector p2 = matrix.mult(new PVector(x+width, y+height), null);
+      PVector p3 = matrix.mult(new PVector(x, y+height), null);
+      float[] verts = new float[] {p0.x, p0.y, p1.x, p1.y, p2.x, p2.y, p3.x, p3.y};
+      Polygon poly = new Polygon();
+      poly.setVertices(verts);
+      poly.setTriangles(triangulator.computeTriangles(verts).toArray());
+      try { poly.setColor(pColorToGDXColor(svgShape.getFill(999))); }
+      catch (Exception e) { poly.setColor(0.f, 0.f, 0.f, 1.f); e.printStackTrace(); }
+      shape = poly;
+      for (float f:params)
+        println(f);
+    }
+  }
+  println(prefix.toString(), shape, family, kind);
   return shape;
 }
 
@@ -181,7 +210,6 @@ ComplexShape JSONToComplexShape(JSONObject element) {
 
 JSONObject complexShapeToJSON(ComplexShape cs) {
   JSONObject element = new JSONObject();
-
   element.setString("id", cs.getId());
 
   JSONArray localOrigin = new JSONArray();
@@ -216,8 +244,6 @@ JSONObject complexShapeToJSON(ComplexShape cs) {
         trianglesArray.append(triangle);
       }
       s.setJSONArray("triangles", trianglesArray);
-      
-
       shapes.append(s);
     } else if (shape instanceof Circle) {
       Circle c = (Circle) shape;
@@ -252,52 +278,65 @@ JSONObject complexShapeToJSON(ComplexShape cs) {
 }
 
 
-ComplexShape loadGeomAnim(File file) {
-  ComplexShape cs = null;
+Avatar loadAvatarFile(File file) {
+  Avatar avatar = new Avatar();
   JSONObject rootElement = loadJSONObject(file);
+  
   // Load shape first
-  if (rootElement.hasKey("geometry")) {
-    cs = JSONToComplexShape(rootElement.getJSONObject("geometry"));
-  }
+  if (rootElement.hasKey("geometry"))
+    avatar.setShape(JSONToComplexShape(rootElement.getJSONObject("geometry")));
+  
+  // AnimationCollection is kept separated for simplicity
+  // rather than storing and retrieving it from the Avatar class
+  fullAnimationIndex = 0;
   if (rootElement.hasKey("animation")) {
-    loadAnimation(rootElement.getJSONObject("animation"), cs);
+    animationCollection = loadAnimation(rootElement.getJSONArray("animation"));
+    //avatar.setAnimationCollection(animationCollection));
+    avatar.setFullAnimation(animationCollection.getFullAnimation(fullAnimationIndex));
+  } else {
+    animationCollection = new AnimationCollection();
   }
-  return cs;
+  
+  return avatar;
 }
 
 
-void saveGeomAnim(ComplexShape shape) {
+void saveAvatarFile(Avatar avatar) {
   String filename = baseFilename.concat(".json");
 
   JSONObject root = new JSONObject();
-  root.setJSONObject("geometry", complexShapeToJSON(shape));
+  root.setJSONObject("geometry", complexShapeToJSON(avatar.getShape()));
   
-  JSONArray groups = new JSONArray();
-  int i = 0;
-  for (String id : shape.getIdList()) {
-    ComplexShape part = shape.getById(id);
-    ArrayList<Animation> animations = part.getAnimationList();
-    if (!animations.isEmpty()) {
+  // Animations Collection
+  JSONArray jsonAnimCollection = new JSONArray();
+  for (String fullAnimName : animationCollection.getFullAnimationsNameList()) {
+    JSONArray groups = new JSONArray();
+    HashMap<String, Animation[]> fullAnimation = animationCollection.getFullAnimation(fullAnimName);
+    // Every part in a fullAnimation
+    for (Map.Entry<String, Animation[]> entry : fullAnimation.entrySet()) {
       JSONObject group = new JSONObject();
-      group.setString("id", id);
       JSONArray animationArray = new JSONArray();
-      for (Animation anim : animations) {
+      // Animations linked to a single part
+      for (Animation anim : entry.getValue()) {
         JSONObject jsonFuncAxe = new JSONObject();
         jsonFuncAxe.setString("function", anim.getFunction().getClass().getName());
         jsonFuncAxe.setString("axe", Animation.axeNames[anim.getAxe()]);
+        // Function parameters
         for (TFParam param : anim.getFunction().getParams()) {
           jsonFuncAxe.setFloat(param.name, param.value);
         }
         animationArray.append(jsonFuncAxe);
       }
+      group.setString("id", entry.getKey());
       group.setJSONArray("functions", animationArray);
-      groups.setJSONObject(i++, group);
+      groups.append(group);
     }
+    JSONObject jsonFullAnimation = new JSONObject();
+    jsonFullAnimation.setJSONArray("groups", groups);
+    jsonFullAnimation.setString("name", fullAnimName);
+    jsonAnimCollection.append(jsonFullAnimation);
   }
-  JSONObject jsonFullAnimation = new JSONObject();
-  jsonFullAnimation.setJSONArray("groups", groups);
-  jsonFullAnimation.setString("name", "noname");
-  root.setJSONObject("animation", jsonFullAnimation);
+  root.setJSONArray("animation", jsonAnimCollection);
   
   //saveJSONObject(root, filename, "compact");
   saveJSONObject(root, filename);
@@ -311,29 +350,37 @@ ComplexShape loadGeometry(File shapeFile) {
 }
 
 
-void loadAnimation(JSONObject json, ComplexShape shape) {
-  // Load JSON file
-  JSONArray groups = json.getJSONArray("groups");
-  for (int i=0; i<groups.size(); i++) {
-    JSONObject group = groups.getJSONObject(i);
-    String id = group.getString("id");
-    JSONArray functions = group.getJSONArray("functions");
-    ArrayList<Animation> animationList = new ArrayList();
-    for (int j=0; j<functions.size(); j++) {
-      JSONObject jsonFuncAxe = functions.getJSONObject(j);
-      int axe = Arrays.asList(Animation.axeNames).indexOf(jsonFuncAxe.getString("axe"));
-      try {
-        Class c = Class.forName(jsonFuncAxe.getString("function"));
-        TimeFunction fn = (TimeFunction) c.newInstance();
-        for (TFParam param : fn.getParams()) {
-          float value = jsonFuncAxe.getFloat(param.name);
-          fn.setParam(param.name, value);
+AnimationCollection loadAnimation(JSONArray jsonFullAnimationArray) {
+  AnimationCollection animCollection = new AnimationCollection();
+  
+  for (int k=0; k<jsonFullAnimationArray.size(); k++) {
+    HashMap<String, Animation[]> fullAnimation = new HashMap();
+    JSONObject jsonFullAnimation = jsonFullAnimationArray.getJSONObject(k);
+    String animName = jsonFullAnimation.getString("name");
+    JSONArray groups = jsonFullAnimation.getJSONArray("groups");
+    for (int i=0; i<groups.size(); i++) {
+      JSONObject group = groups.getJSONObject(i);
+      String id = group.getString("id");
+      JSONArray functions = group.getJSONArray("functions");
+      ArrayList<Animation> animationList = new ArrayList();
+      for (int j=0; j<functions.size(); j++) {
+        JSONObject jsonFuncAxe = functions.getJSONObject(j);
+        int axe = Arrays.asList(Animation.axeNames).indexOf(jsonFuncAxe.getString("axe"));
+        try {
+          Class c = Class.forName(jsonFuncAxe.getString("function"));
+          TimeFunction fn = (TimeFunction) c.newInstance();
+          for (TFParam param : fn.getParams()) {
+            float value = jsonFuncAxe.getFloat(param.name);
+            fn.setParam(param.name, value);
+          }
+          animationList.add(new Animation(fn, axe));
+        } catch (Exception e) {
+          println("Could not recreate animation function from json file");
         }
-        animationList.add(new Animation(fn, axe));
-      } catch (Exception e) {
-        println("Could not recreate animation function from json file");
       }
+      fullAnimation.put(id, animationList.toArray(new Animation[0]));
     }
-    shape.getById(id).setAnimationList(animationList);
+    animCollection.addFullAnimation(animName, fullAnimation);
   }
+  return animCollection;
 }
