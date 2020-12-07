@@ -1,0 +1,176 @@
+class Timeline {
+  private int sliderSpacing = 2;
+  private int sliderHeight = 120;
+  private int groupHeight = sliderHeight+40;
+  private int groupWidth = 400;
+  private int colorBackground = 0xff003652;
+  private int colorActiveStep = 0xff00709B;
+  private int colorSelected = 0xff9B7900;
+  private int colorSelectedActive = 0xffFFC905;
+  private int[][] colorMatrix = new int[][] {{colorBackground, colorActiveStep}, {colorSelected, colorSelectedActive}};
+  Group group;
+  Numberbox numSteps;
+  Numberbox duration;
+  Toggle loop;
+  TFTimetable fn;
+  Slider[] sliders;
+  int selectedSlider = 0;
+  int animNum;
+
+  Timeline(int animNum) {
+    paramLocked = true;
+    
+    this.animNum = animNum;
+    
+    group = cp5.addGroup("timeline")
+      .setPosition(width-accordionWidth-groupWidth-2*margin, margin+10)
+      .setWidth(groupWidth)
+      //.hideBar()
+      .setBackgroundHeight(groupHeight)
+      .setBackgroundColor(color(0, 100))
+      ;
+
+    numSteps = cp5.addNumberbox("tlnumsteps"+animNum)
+      .setLabel("Num steps")
+      .setPosition(margin, margin)
+      .setSize(60, 20)
+      .setRange(4, 32)
+      .setDirection(Controller.HORIZONTAL)
+      .setGroup(group)
+      ;
+
+    duration = cp5.addNumberbox("duration"+animNum)
+      .setLabel("duration")
+      .setPosition(70, margin)
+      .setSize(60, 20)
+      .setRange(0.5, 120)
+      .setMultiplier(0.05)
+      .setDirection(Controller.HORIZONTAL)
+      .setGroup(group)
+      ;
+
+    loop = cp5.addToggle("loop"+animNum)
+      .setLabelVisible(false)
+      .setPosition(340, margin)
+      .setSize(20, 20)
+      .setGroup(group)
+      ;
+    cp5.addTextlabel("looplabel"+animNum)
+      .setPosition(340 + 22, margin+5)
+      .setText("LOOP")
+      .setGroup(group)
+      ;
+
+    sliders = new Slider[32];
+    for (int i=0; i<32; i++) {
+      sliders[i] = new TimelineSlider(cp5, "tlslider"+i)
+        .setRange(-180, 180)
+        .setGroup(group)
+        .setVisible(false)
+        ;
+    }
+    
+    paramLocked = false;
+  }
+
+
+  public void setFunction(TFTimetable fn) {
+    this.fn = fn;
+    update();
+  }
+  
+  public TimeFunction getFunction() { return fn; }
+  
+  
+  public int getAnimNum() { return animNum; }
+
+
+  public void updateTable() {
+    int size = (int) numSteps.getValue();
+    println(size);
+    FloatArray array = new FloatArray(size);
+    for (int i=0; i<size; i++) {
+      array.add(sliders[i].getValue());
+    }
+    fn.setTable(array);
+    update();
+  }
+
+
+  public void setTableValue(int idx, float value) {
+    fn.setTableValue(idx, value);
+    selectedSlider = idx;
+  }
+  
+  public void hide() {
+    group.hide();
+  }
+  
+  public void show() {
+    group.show();
+  }
+
+
+  public void update() {
+    // Update all controllers according to the function parameters
+    paramLocked = true;
+
+    numSteps.setValue(fn.getTable().length);
+    duration.setValue((float) fn.getParam("duration").getValue());
+    loop.setValue((boolean) fn.getParam("loop").getValue());
+
+    int numSliders = fn.getTable().length;
+    float sliderWidthFloat = ((float) groupWidth - sliderSpacing*(numSliders-1)) / numSliders;
+    int sliderMinWidth = floor(sliderWidthFloat);
+    int sliderWidth;
+    float widthRemains = sliderWidthFloat - sliderMinWidth;
+    float widthRemainsCumul = 0f;
+    float posX = 0f;
+    for (int i=0; i<32; i++) {
+      widthRemainsCumul += widthRemains;
+      sliderWidth = sliderMinWidth+floor(widthRemainsCumul);
+      sliders[i].setPosition(posX, 40)
+        .setSize(sliderWidth, sliderHeight)
+        .setVisible(i<numSliders)
+        .setValue(i<numSliders ? fn.getTable()[i] : 0f)
+        ;
+
+      posX += sliderWidth+sliderSpacing;
+      if (floor(widthRemainsCumul) > 0)
+        widthRemainsCumul -= floor(widthRemainsCumul);
+    }
+
+    paramLocked = false;
+  }
+
+  public void highlightSliders() {
+    int[] step = fn.getActiveStep();
+    int n = (int) numSteps.getValue();
+    int selected;
+    int active;
+    for (int i=0; i<n; i++) {
+      selected = i==selectedSlider || i==selectedSlider+1 ? 1 : 0;
+      active = i==step[0] || i==step[1] ? 1 : 0;
+      sliders[i].setColorBackground(colorMatrix[selected][active])
+        .setColorForeground(active==1 ? 0xff08a2cf : 0xff00698c);
+    }
+  }
+
+  class TimelineSlider extends Slider {
+
+    public TimelineSlider(ControlP5 theControlP5, String theName) {
+      super(theControlP5, theName);
+      setSliderMode(Slider.FLEXIBLE);
+      setHandleSize(3);
+      setLabelVisible(false);
+    }
+
+    @Override
+      protected void onMove( ) {
+      if (mousePressed) {
+        float f = _myMin + (-(_myControlWindow.getPointer().getY() - (y(_myParent.getAbsolutePosition()) + y(position)) - getHeight())) * _myUnit;
+        setValue( PApplet.map(f, 0, 1, _myMinReal, _myMaxReal ) );
+      }
+    }
+  }
+}

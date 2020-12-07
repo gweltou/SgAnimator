@@ -1,9 +1,25 @@
 // TODO:
+  // EndStep switch for TFTimetable
+  // Shift buttons for TFTimetable
+  // Animation.fromJSON et Animation.toJSON
   // Prompt to load Geometry and/or Animations when loading a file
   // Change animation order buttons
+  // Draw invisible selected parts (even in background)
+  // Simplify interpolation list
+  // Negate toggle in Animations
+  // Generalize stop status on TimeFunctions
+      
+  // UV coords in polygon class
   
   // Add a chart for every Animation to show function progression over time
+
+/*
+  BUGS:
+  * Copy/paste for TFimetable
+  * can't load json when animation array is empty
+  *
   
+*/
 
 import com.badlogic.gdx.graphics.*;
 import com.badlogic.gdx.math.*;
@@ -20,11 +36,10 @@ import java.util.*;
 import java.lang.reflect.Field;
 
 
-String version = "0.2";
+String version = "0.4";
 
 
 Renderer renderer;
-PolygonParser pp;
 Avatar avatar;
 String baseFilename;
 Affine2 transform;
@@ -52,14 +67,12 @@ void settings() {
 
 void setup() {
   surface.setResizable(true);
+  surface.setTitle("Avatar5");
   
   renderer = new Renderer(this);
   transform = new Affine2();
-  
-  pp = new PolygonParser();
-  
+    
   //rootShape = buildBlob();
-  //parts = rootShape.getPartsList();
   
   int numFn = Animation.timeFunctions.length;
   functionsName = new String[numFn];
@@ -137,15 +150,19 @@ void draw() {
     if (playAnim)
       avatar.updateAnimation(time-lastTime);
     avatar.draw(renderer);
+    avatar.drawSelectedOnly(renderer);
     if (showUI) {
       renderer.drawPivot();
       renderer.drawMarker(0, 0);
     }
     renderer.popMatrix();
     if (playAnim == false && (frameCount>>5)%2 == 0) {
-      fill(255, 0, 0);
-      textSize(30);
-      text("PAUSED", -58+width/2, height/2);
+      fill(255, 0, 0, 127);
+      textSize(32);
+      text("PAUSED", -58+width/2, height-40);
+    }
+    if (timeline != null) {
+      timeline.highlightSliders();
     }
   } else {
     fill(0);

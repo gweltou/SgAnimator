@@ -28,6 +28,8 @@ void keyPressed(KeyEvent event) {
         if (avatar != null) {
           if (showUI) {
             hideUI();
+            if (timeline != null)
+              timeline.hide();
           } else {
             showUI();
           }
@@ -104,12 +106,16 @@ import java.lang.reflect.InvocationTargetException;
 
 void controlEvent(ControlEvent event) throws InstantiationException, IllegalAccessException, NoSuchMethodException, InvocationTargetException  {
   if (event.isController() && !paramLocked) {
+    if (timeline != null)
+      timeline.hide();
+    
     String name = event.getName();
     float value = event.getValue();
     //println("event", name, value);
     
     if (name.equals("partslist")) {
       select(avatar.getPartsList()[int(value)]);
+      selected_idx = int(partsList.getValue());
     }
     else if (name.equals("animname")) {
       // Change fullAnim name
@@ -146,7 +152,7 @@ void controlEvent(ControlEvent event) throws InstantiationException, IllegalAcce
       mustUpdateUI = true;
     }
     else if (name.startsWith("function")) {
-      String[] m = match(name, "function(\\d)");
+      String[] m = match(name, "function(\\d+)");
       int animNum = parseInt(m[1]);
       Class<TimeFunction> tfclass = Animation.timeFunctions[(int) event.getValue()];
       Constructor<TimeFunction> ctor = tfclass.getConstructor();
@@ -154,24 +160,33 @@ void controlEvent(ControlEvent event) throws InstantiationException, IllegalAcce
       int numberOfAnimations = selected.getAnimationList().size();
       if (animNum < numberOfAnimations) {
         // Transfer compatible parameters to new TimeFunction
-        for (TFParam param : selected.getAnimation(animNum).getFunction().getParams()) {
-          tf.setParam(param.name, param.value);
-        }
+        //for (TFParam param : selected.getAnimation(animNum).getFunction().getParams()) {
+        //  Object payload = param.getValue();
+        //  println(payload.getClass());
+        //  //tf.setParam(param.name, param.getValue()); // BROKEN
+        //}
         selected.getAnimation(animNum).setFunction(tf);
       } else {
         selected.addAnimation(new Animation(tf));
       }
       selected.resetAnimation();
+      if (tf instanceof TFTimetable) {
+        timeline = new Timeline(animNum);
+        timeline.setFunction((TFTimetable) tf);
+        timeline.show();
+      }
       mustUpdateUI = true;
       playAnim = true;
       fullAnimationDirty = true;
     }
     else if (name.startsWith("axe")) {
-      String[] m = match(name, "axe(\\d)");
+      String[] m = match(name, "axe(\\d+)");
       int animNum = parseInt(m[1]);
       selected.getAnimation(animNum).setAxe((int) value);
       playAnim = true;
       fullAnimationDirty = true;
+      if (timeline != null && animNum == timeline.getAnimNum())
+        timeline.show();
     }
     else if (name.equals("pivotbutton")) {
       setPivot = ((Button) cp5.getController("pivotbutton")).isOn();
@@ -179,14 +194,14 @@ void controlEvent(ControlEvent event) throws InstantiationException, IllegalAcce
       playAnim = false;
     }
     else if (name.startsWith("copybutton")) {
-      String[] m = match(name, "copybutton(\\d)");
+      String[] m = match(name, "copybutton(\\d+)");
       int animNum = parseInt(m[1]);
       println("copybutton"+animNum);
       animationClipboard = selected.getAnimation(animNum).copy();
       mustUpdateUI = true;
     }
     else if (name.startsWith("pastebutton")) {
-      String[] m = match(name, "pastebutton(\\d)");
+      String[] m = match(name, "pastebutton(\\d+)");
       int animNum = parseInt(m[1]);
       println("pastebutton"+animNum);
       if (animationClipboard != null) {
@@ -201,22 +216,45 @@ void controlEvent(ControlEvent event) throws InstantiationException, IllegalAcce
       }
     }
     else if (name.startsWith("deletebutton")) {
-      String[] m = match(name, "deletebutton(\\d)");
+      String[] m = match(name, "deletebutton(\\d+)");
       int animNum = parseInt(m[1]);
       selected.resetAnimation(); // So transform matrix is set to identity
       selected.removeAnimation(animNum);
       mustUpdateUI = true;
       fullAnimationDirty = true;
     }
+    else if (name.startsWith("showtimeline")) {
+      String[] m = match(name, "([a-z]+)(\\d+)");
+      if (m != null) {
+        int animNum = parseInt(m[2]);
+        timeline.setFunction((TFTimetable) selected.getAnimation(animNum).getFunction());
+      }
+      timeline.show();
+    }
+    else if (name.startsWith("tl")) {
+      // Timeline specific parameters
+      String[] m = match(name, "([a-z]+)(\\d+)");
+      if (m != null) {
+        if (m[1].equals("tlnumsteps")) {
+          timeline.updateTable();
+        } else if (m[1].equals("tlslider")) {
+          timeline.setTableValue(Integer.parseInt(m[2]), value);
+        }
+      }
+      timeline.show();
+    }
     else {
-      String[] m = match(name, "([a-z]+)(\\d)");
+      String[] m = match(name, "([a-z]+)(\\d+)");
       if (m != null) {
         String paramName = m[1];
         int animNum = parseInt(m[2]);
-        selected.getAnimation(animNum).getFunction().setParam(paramName, value);
-        selected.getAnimation(animNum).getFunction().reset();
+        TimeFunction fn = selected.getAnimation(animNum).getFunction();
+        fn.setParam(paramName, value);
+        fn.reset();
         playAnim = true;
         fullAnimationDirty = true;
+        if (timeline != null && timeline.getFunction() == fn)
+          timeline.show();
       }
     }
   }
