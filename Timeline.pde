@@ -1,8 +1,12 @@
+public final PFont BitFontStandard58 = new BitFont( CP.decodeBase64( BitFont.standard58base64 ) );
+
+
 class Timeline {
+  private int spacing = 2;
   private int sliderSpacing = 2;
   private int sliderHeight = 120;
   private int groupHeight = sliderHeight+40;
-  private int groupWidth = 400;
+  private int groupWidth = 360;
   private int colorBackground = 0xff003652;
   private int colorActiveStep = 0xff00709B;
   private int colorSelected = 0xff9B7900;
@@ -11,8 +15,11 @@ class Timeline {
   Group group;
   Numberbox numSteps;
   Numberbox duration;
-  Toggle loop;
+  Button lshift, rshift;
+  Toggle loop, smoothend;
+  ScrollableList easing;
   TFTimetable fn;
+  
   Slider[] sliders;
   int selectedSlider = 0;
   int animNum;
@@ -32,7 +39,7 @@ class Timeline {
 
     numSteps = cp5.addNumberbox("tlnumsteps"+animNum)
       .setLabel("Num steps")
-      .setPosition(margin, margin)
+      .setPosition(spacing, spacing)
       .setSize(60, 20)
       .setRange(4, 32)
       .setDirection(Controller.HORIZONTAL)
@@ -41,25 +48,74 @@ class Timeline {
 
     duration = cp5.addNumberbox("duration"+animNum)
       .setLabel("duration")
-      .setPosition(70, margin)
+      .setPosition(numSteps.getPosition()[0]+numSteps.getWidth()+spacing, spacing)
       .setSize(60, 20)
       .setRange(0.5, 120)
       .setMultiplier(0.05)
       .setDirection(Controller.HORIZONTAL)
       .setGroup(group)
       ;
+    
+    cp5.addScrollableList("tleasing"+animNum)
+        .setLabel("easing")
+        .setPosition(duration.getPosition()[0]+duration.getWidth()+spacing, spacing)
+        .setWidth(80)
+        .setBarHeight(20)
+        //.setItemHeight(barHeight)
+        .onEnter(toFront)
+        .onLeave(close)
+        .addItems(Animation.interpolationNames)
+        .setGroup(group)
+        .close()
+        ;
 
+    lshift = cp5.addButton("tllshift"+animNum)
+      .setLabel("<<")
+      .setPosition(220, spacing)
+      .setSize(20, 20)
+      .setGroup(group)
+      ;
+    
+    cp5.addTextlabel("shiftlabel"+animNum)
+      .setPosition(lshift.getPosition()[0]+6, spacing+24)
+      .setFont(BitFontStandard58)
+      .setText("SHIFT")
+      .setGroup(group)
+      ;
+    
+    rshift = cp5.addButton("tlrshift"+animNum)
+      .setLabel(">>")
+      .setPosition(lshift.getPosition()[0]+lshift.getWidth()+spacing, spacing)
+      .setSize(20, 20)
+      .setGroup(group)
+      ;
+    
     loop = cp5.addToggle("loop"+animNum)
       .setLabelVisible(false)
-      .setPosition(340, margin)
+      .setPosition(300, spacing)
       .setSize(20, 20)
       .setGroup(group)
       ;
     cp5.addTextlabel("looplabel"+animNum)
-      .setPosition(340 + 22, margin+5)
+      .setPosition(loop.getPosition()[0], spacing+24)
+      .setFont(BitFontStandard58)
       .setText("LOOP")
       .setGroup(group)
       ;
+    
+    smoothend = cp5.addToggle("smoothend"+animNum)
+      .setLabelVisible(false)
+      .setPosition(280, spacing)
+      .setSize(20, 20)
+      .setGroup(group)
+      ;
+    cp5.addTextlabel("smoothendlabel"+animNum)
+      .setPosition(smoothend.getPosition()[0]-10, spacing+24)
+      .setText("SMOOTHEND")
+      .setFont(BitFontStandard58)
+      .setGroup(group)
+      ;
+
 
     sliders = new Slider[32];
     for (int i=0; i<32; i++) {
@@ -87,7 +143,6 @@ class Timeline {
 
   public void updateTable() {
     int size = (int) numSteps.getValue();
-    println(size);
     FloatArray array = new FloatArray(size);
     for (int i=0; i<size; i++) {
       array.add(sliders[i].getValue());
@@ -117,7 +172,9 @@ class Timeline {
 
     numSteps.setValue(fn.getTable().length);
     duration.setValue((float) fn.getParam("duration").getValue());
+    //easing.setValue((int) fn.getParam("easing").getValue());
     loop.setValue((boolean) fn.getParam("loop").getValue());
+    smoothend.setValue((boolean) fn.getParam("smoothend").getValue());
 
     int numSliders = fn.getTable().length;
     float sliderWidthFloat = ((float) groupWidth - sliderSpacing*(numSliders-1)) / numSliders;

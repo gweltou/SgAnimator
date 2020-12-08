@@ -196,14 +196,12 @@ void controlEvent(ControlEvent event) throws InstantiationException, IllegalAcce
     else if (name.startsWith("copybutton")) {
       String[] m = match(name, "copybutton(\\d+)");
       int animNum = parseInt(m[1]);
-      println("copybutton"+animNum);
       animationClipboard = selected.getAnimation(animNum).copy();
       mustUpdateUI = true;
     }
     else if (name.startsWith("pastebutton")) {
       String[] m = match(name, "pastebutton(\\d+)");
       int animNum = parseInt(m[1]);
-      println("pastebutton"+animNum);
       if (animationClipboard != null) {
         selected.resetAnimation();
         if (animNum < selected.getAnimationList().size()) {
@@ -223,6 +221,29 @@ void controlEvent(ControlEvent event) throws InstantiationException, IllegalAcce
       mustUpdateUI = true;
       fullAnimationDirty = true;
     }
+    else if (name.startsWith("swapup")) {
+      String[] m = match(name, "swapup(\\d+)");
+      int animNum = parseInt(m[1]);
+      Animation moveup = selected.getAnimation(animNum);
+      selected.setAnimation(animNum, selected.getAnimation(animNum-1));
+      selected.setAnimation(animNum-1, moveup);
+      //updateUI();
+      keepsOpenAnimNum = animNum-1;
+      mustUpdateUI = true;
+      fullAnimationDirty = true;
+    }
+    else if (name.startsWith("swapdown")) {
+      String[] m = match(name, "swapdown(\\d+)");
+      int animNum = parseInt(m[1]);
+      Animation moveup = selected.getAnimation(animNum+1);
+      selected.setAnimation(animNum+1, selected.getAnimation(animNum));
+      selected.setAnimation(animNum, moveup);
+      //updateUI();
+      keepsOpenAnimNum = animNum+1;
+      mustUpdateUI = true;
+      fullAnimationDirty = true;
+    }
+    
     else if (name.startsWith("showtimeline")) {
       String[] m = match(name, "([a-z]+)(\\d+)");
       if (m != null) {

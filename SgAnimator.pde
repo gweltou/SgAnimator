@@ -3,11 +3,12 @@
   // Shift buttons for TFTimetable
   // Animation.fromJSON et Animation.toJSON
   // Prompt to load Geometry and/or Animations when loading a file
-  // Change animation order buttons
+  // Arrondir à 2 décimales les floats à sauvegarder dans les json
   // Draw invisible selected parts (even in background)
   // Simplify interpolation list
   // Negate toggle in Animations
   // Generalize stop status on TimeFunctions
+  // Option to duplicate previous AnimationCollection when new animCollection
       
   // UV coords in polygon class
   
@@ -17,7 +18,7 @@
   BUGS:
   * Copy/paste for TFimetable
   * can't load json when animation array is empty
-  *
+  * ordre de la pile d'animation de réordonne bizarrement lorsqu'on les réouvres après qu'elles aient étés fermés suite à un swap
   
 */
 
@@ -61,7 +62,8 @@ boolean mustUpdateUI = false;
 
 
 void settings() {
-  size(800, 600);
+  //size(1366, 704);
+  fullScreen();
 }
 
 
@@ -193,6 +195,13 @@ void draw() {
   if (mustUpdateUI == true && selected != null) {
     updateUI();
     mustUpdateUI = false;
+  }
+  if (keepsOpenAnimNum >= 0) {
+    for (int i=0; i<selected.getAnimationList().size()+1; i++) {
+      if (i != keepsOpenAnimNum)
+        accordion.close(i); 
+    }
+    keepsOpenAnimNum = -1;
   }
   
   lastTime = time;
