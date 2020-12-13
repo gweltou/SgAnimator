@@ -1,5 +1,5 @@
 ControlP5 cp5; //<>//
-Accordion accordion;
+FunctionAccordion accordion;
 MyScrollableList partsList;
 Button pivotButton;
 Textfield animName;
@@ -9,8 +9,8 @@ PFont defaultFont;
 int spacing = 4;
 int margin = spacing;
 int barHeight = 18;
-int accordionWidth = 200;
 int keepsOpenAnimNum = -1;
+int axeWidth = 72;
 
 
 class MyScrollableList extends ScrollableList {
@@ -36,17 +36,13 @@ class MyScrollableList extends ScrollableList {
   @Override protected void onLeave() {
     super.onLeave();
     renderer.setSelected(selected);
-    //highlightPart();
   }
   @Override protected void onMove() {
     super.onMove();
     highlightPart();
   }
-  @Override protected void onScroll( int theValue ) {
-    super.onScroll( theValue );
-    //highlightPart();
-  }
 }
+
 
 
 void setupUI() {
@@ -75,7 +71,7 @@ void setupUI() {
     .hide()
     ;
 
-  accordion = cp5.addAccordion("accordion");
+  accordion = new FunctionAccordion(cp5, "accordion");
 
   // Full Animation selector
   println(width, height);
@@ -92,6 +88,7 @@ void setupUI() {
     .setAutoClear(false)
     .hide()
     ;
+    
   prevAnimButton = cp5.addButton("prevanim")
     .setLabel("<<")
     .setPosition(pos.x-24-3, pos.y)
@@ -108,6 +105,7 @@ void setupUI() {
 }
 
 
+
 void updateUI() {
   paramLocked = true;
 
@@ -118,12 +116,8 @@ void updateUI() {
     cp5.remove("accordion");
     accordion = null;
   }
-  accordion = cp5.addAccordion("accordion")
-    .setPosition(width-accordionWidth-margin, margin)
-    .setWidth(accordionWidth)
-    .setMinItemHeight(0)
-    .setCollapseMode(ControlP5.MULTI)
-    ;
+  accordion = new FunctionAccordion(cp5, "accordion");
+  accordion.setPosition(width-accordion.getWidth()-margin, 1);
 
   PVector pos = new PVector();
   ArrayList<Animation> animationList = selected.getAnimationList();
@@ -136,7 +130,7 @@ void updateUI() {
     g = cp5.addGroup("animation"+animNum)
       .setLabel("animation "+animNum)
       //.setFont(defaultFont)
-      //.setBarHeight(barHeight)
+      .setBarHeight(barHeight)
       .setBackgroundColor(color(0, 100))
       ;
 
@@ -159,7 +153,7 @@ void updateUI() {
       .setLabel("axe")
       .setFont(defaultFont)
       .setPosition(pos.x, pos.y)
-      .setWidth(75)
+      .setWidth(axeWidth)
       .setBarHeight(barHeight)
       .setItemHeight(barHeight)
       .onEnter(toFront)
@@ -169,9 +163,22 @@ void updateUI() {
       .moveTo(g)
       .close()
       ;
+    pos.add(cp5.getController("axe"+animNum).getWidth() + spacing, 0);
+    
+    // Delete animation button
+    cp5.addButton("deletebutton"+animNum)
+      .setLabel("x")
+      .setColorBackground(0xffff0000)
+      .setPosition(pos.x, pos.y)
+      .setSize(barHeight, barHeight)
+      .activateBy(ControlP5.PRESS)
+      .setGroup(g)
+      ;
     pos.set(spacing, 2*spacing + cp5.getController("axe"+animNum).getHeight());
     pos.add(0.f, spacing);
 
+
+    // Draw specific parameters
     if (anim.getFunction() instanceof TFTimetable) {
       if (timeline == null) {
         timeline = new Timeline(animNum);
@@ -191,6 +198,7 @@ void updateUI() {
     }
     pos.add(0.f, spacing);
 
+
     drawBottomButtons(g, animNum, pos);
 
     g.setBackgroundHeight((int) pos.y);
@@ -203,7 +211,7 @@ void updateUI() {
   g = cp5.addGroup("animation"+animNum)
     .setLabel("animation "+animNum)
     //.setFont(defaultFont)
-    //.setBarHeight(barHeight)
+    .setBarHeight(barHeight)
     .setBackgroundColor(color(0, 100))
     ;
 
@@ -225,7 +233,7 @@ void updateUI() {
     .setLabel("axe")
     .setFont(defaultFont)
     .setPosition(pos.x, pos.y)
-    .setWidth(75)
+    .setWidth(axeWidth)
     .setBarHeight(barHeight)
     .setItemHeight(barHeight)
     .onEnter(toFront)
@@ -240,9 +248,13 @@ void updateUI() {
   drawBottomButtons(g, animNum, pos);
 
   g.setBackgroundHeight((int) pos.y);
-  accordion.addItem(g)
-    .open()
-    ;
+  accordion.addItem(g);
+  
+  if (keepsOpenAnimNum >= 0 && keepsOpenAnimNum<animationList.size()) {
+    accordion.open(keepsOpenAnimNum);
+  } else {
+    accordion.open(0);
+  }
 
   paramLocked = false;
 }
@@ -265,6 +277,7 @@ void drawParams(Group g, int animNum, PVector pos) {
         .setGroup(g)
         ;
       break;
+      
     case TFParam.CHECKBOX:
       cp5.addToggle(param.name+animNum)
         .setLabelVisible(false)
@@ -279,6 +292,7 @@ void drawParams(Group g, int animNum, PVector pos) {
         .setGroup(g)
         ;
       break;
+      
     case TFParam.TOGGLE:
       cp5.addToggle(param.name+animNum)
         .setLabelVisible(false)
@@ -294,6 +308,7 @@ void drawParams(Group g, int animNum, PVector pos) {
         .setGroup(g)
         ;
       break;
+      
     case TFParam.NUMBERBOX:
       cp5.addNumberbox(param.name+animNum)
         .setLabel("")
@@ -312,6 +327,7 @@ void drawParams(Group g, int animNum, PVector pos) {
         .setGroup(g)
         ;
       break;
+      
     case TFParam.EASING:
       cp5.addScrollableList(param.name+animNum)
         .setLabel("easing function")
@@ -332,6 +348,7 @@ void drawParams(Group g, int animNum, PVector pos) {
 }
 
 
+
 void drawBottomButtons(Group g, int animNum, PVector pos) {
   boolean bottomButtons = false;
 
@@ -345,39 +362,27 @@ void drawBottomButtons(Group g, int animNum, PVector pos) {
       .setGroup(g)
       ;
     pos.add(cp5.getController("copybutton"+animNum).getWidth()+spacing, 0);
-
-    // Delete animation
-    cp5.addButton("deletebutton"+animNum)
-      .setLabel("delete")
-      .setPosition(pos.x, pos.y)
-      .setSize(42, 20)
-      .activateBy(ControlP5.PRESS)
-      .setGroup(g)
-      ;
-    pos.add(cp5.getController("deletebutton"+animNum).getWidth()+2*spacing, 0);
     
     // Swap position buttons
     cp5.addButton("swapup"+animNum)
       .setLabel("up")
-      .setPosition(accordionWidth-42-margin, pos.y)
+      .setPosition(accordion.getWidth()-42-margin, pos.y)
       .setSize(20, 20)
       .activateBy(ControlP5.PRESS)
       .setGroup(g)
       ;
     if (animNum < 1)
       cp5.getController("swapup"+animNum).hide();
-    //pos.add(cp5.getController("swapup"+animNum).getWidth()+2, 0);
     
     cp5.addButton("swapdown"+animNum)
       .setLabel("dwn")
-      .setPosition(accordionWidth-20-margin, pos.y)
+      .setPosition(accordion.getWidth()-20-margin, pos.y)
       .setSize(20, 20)
       .activateBy(ControlP5.PRESS)
       .setGroup(g)
       ;
     if (animNum == selected.getAnimationList().size()-1)
       cp5.getController("swapdown"+animNum).hide();
-    //pos.add(cp5.getController("swapdown"+animNum).getWidth()+2*spacing, 0);
     
     bottomButtons = true;
   }
@@ -386,7 +391,7 @@ void drawBottomButtons(Group g, int animNum, PVector pos) {
     // Paste animation
     cp5.addButton("pastebutton"+animNum)
       .setLabel("paste")
-      .setPosition(accordionWidth-margin-42, pos.y)
+      .setPosition(pos.x, pos.y)
       .setSize(42, 20)
       .activateBy(ControlP5.PRESS)
       .setGroup(g)
@@ -397,6 +402,7 @@ void drawBottomButtons(Group g, int animNum, PVector pos) {
   if (bottomButtons == true)
     pos.add(0, 20+2*spacing);
 }
+
 
 
 void showUI() {
@@ -419,6 +425,7 @@ void hideUI() {
   nextAnimButton.hide();
   renderer.setSelected(null);
 }
+
 
 
 CallbackListener toFront = new CallbackListener() {

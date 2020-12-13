@@ -52,12 +52,8 @@ void keyPressed(KeyEvent event) {
 }
 
 
+
 void mouseWheel(MouseEvent event) {
-  // Deactivate mouseWheel when above accordion
-  // TODO: find a better way
-  if (mouseX > width-accordionWidth)
-    return;
-  
   if (!partsList.isInside()) {
     float z = pow(1.1, -event.getCount());
     Affine2 unproject = new Affine2(transform).inv();
@@ -66,6 +62,7 @@ void mouseWheel(MouseEvent event) {
     transform.translate(point.x, point.y).scale(z, z).translate(-point.x, -point.y);
   }
 }
+
 
 
 void mouseClicked(MouseEvent event) {
@@ -87,6 +84,7 @@ void mouseClicked(MouseEvent event) {
     }
   }
 }
+
 
 
 void mouseDragged(MouseEvent event) {
@@ -117,6 +115,7 @@ void controlEvent(ControlEvent event) throws InstantiationException, IllegalAcce
       select(avatar.getPartsList()[int(value)]);
       selected_idx = int(partsList.getValue());
     }
+    
     else if (name.equals("animname")) {
       // Change fullAnim name
       println(animName.getText());
@@ -151,6 +150,7 @@ void controlEvent(ControlEvent event) throws InstantiationException, IllegalAcce
       }
       mustUpdateUI = true;
     }
+    
     else if (name.startsWith("function")) {
       String[] m = match(name, "function(\\d+)");
       int animNum = parseInt(m[1]);
@@ -188,11 +188,13 @@ void controlEvent(ControlEvent event) throws InstantiationException, IllegalAcce
       if (timeline != null && animNum == timeline.getAnimNum())
         timeline.show();
     }
+    
     else if (name.equals("pivotbutton")) {
       setPivot = ((Button) cp5.getController("pivotbutton")).isOn();
       avatar.resetAnimation();
       playAnim = false;
     }
+    
     else if (name.startsWith("copybutton")) {
       String[] m = match(name, "copybutton(\\d+)");
       int animNum = parseInt(m[1]);
@@ -213,6 +215,7 @@ void controlEvent(ControlEvent event) throws InstantiationException, IllegalAcce
         fullAnimationDirty = true;
       }
     }
+    
     else if (name.startsWith("deletebutton")) {
       String[] m = match(name, "deletebutton(\\d+)");
       int animNum = parseInt(m[1]);
@@ -221,6 +224,7 @@ void controlEvent(ControlEvent event) throws InstantiationException, IllegalAcce
       mustUpdateUI = true;
       fullAnimationDirty = true;
     }
+    
     else if (name.startsWith("swapup")) {
       String[] m = match(name, "swapup(\\d+)");
       int animNum = parseInt(m[1]);

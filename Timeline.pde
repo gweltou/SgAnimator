@@ -30,7 +30,7 @@ class Timeline {
     this.animNum = animNum;
     
     group = cp5.addGroup("timeline")
-      .setPosition(width-accordionWidth-groupWidth-2*margin, margin+10)
+      .setPosition(width-accordion.getWidth()-groupWidth-2*margin, margin+10)
       .setWidth(groupWidth)
       //.hideBar()
       .setBackgroundHeight(groupHeight)
@@ -90,19 +90,6 @@ class Timeline {
       .setGroup(group)
       ;
     
-    loop = cp5.addToggle("loop"+animNum)
-      .setLabelVisible(false)
-      .setPosition(300, spacing)
-      .setSize(20, 20)
-      .setGroup(group)
-      ;
-    cp5.addTextlabel("looplabel"+animNum)
-      .setPosition(loop.getPosition()[0], spacing+24)
-      .setFont(BitFontStandard58)
-      .setText("LOOP")
-      .setGroup(group)
-      ;
-    
     smoothend = cp5.addToggle("smoothend"+animNum)
       .setLabelVisible(false)
       .setPosition(280, spacing)
@@ -110,12 +97,25 @@ class Timeline {
       .setGroup(group)
       ;
     cp5.addTextlabel("smoothendlabel"+animNum)
-      .setPosition(smoothend.getPosition()[0]-10, spacing+24)
+      .setPosition(smoothend.getPosition()[0]-15, spacing+24)
       .setText("SMOOTHEND")
       .setFont(BitFontStandard58)
       .setGroup(group)
       ;
-
+    
+    loop = cp5.addToggle("loop"+animNum)
+      .setLabelVisible(false)
+      .setPosition(330, spacing)
+      .setSize(20, 20)
+      .setGroup(group)
+      ;
+    cp5.addTextlabel("looplabel"+animNum)
+      .setPosition(loop.getPosition()[0]-2, spacing+24)
+      .setFont(BitFontStandard58)
+      .setText("LOOP")
+      .setGroup(group)
+      ;
+    
 
     sliders = new Slider[32];
     for (int i=0; i<32; i++) {
