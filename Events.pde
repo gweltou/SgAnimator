@@ -11,14 +11,15 @@ void keyPressed(KeyEvent event) {
     } else if (keyCode == DOWN) {
       selected_idx = (selected_idx+1) % avatar.getPartsList().length;
       partsList.setValue(selected_idx);
+    } else if (keyCode == SHIFT && selected != null) {
+      playAnim = false;
+      avatar.resetAnimation();
     }
   } else if (!animName.isFocus()) {
     switch (key) {
       case 'p':  // Toggle animation
-        if (avatar != null) {
+        if (avatar != null)
           playAnim = !playAnim;
-          avatar.resetAnimation();
-        }
         break;
       case 'r':  // Reset animation
         if (avatar != null)
@@ -51,6 +52,16 @@ void keyPressed(KeyEvent event) {
   }
 }
 
+
+void keyReleased() {
+  if (key == CODED && keyCode == SHIFT) {
+    if (selected != null) {
+      selected.hardTransform(hardTransform);
+      hardTransform.idt();
+      playAnim = true;
+    }
+  }
+}
 
 
 void mouseWheel(MouseEvent event) {
@@ -92,8 +103,13 @@ void mouseDragged(MouseEvent event) {
   if (event.getButton() == RIGHT) {
     int dx = mouseX-pmouseX;
     int dy = mouseY-pmouseY;
-    // scale translation by the zoom factor
-    transform.translate(dx/transform.m00, dy/transform.m11);
+    if (keyPressed && keyCode == SHIFT) {
+      // scale translation by the zoom factor
+      hardTransform.translate(dx/transform.m00, dy/transform.m11);
+    } else {
+      // scale translation by the zoom factor
+      transform.translate(dx/transform.m00, dy/transform.m11);
+    }
   }
 }
 
@@ -262,8 +278,15 @@ void controlEvent(ControlEvent event) throws InstantiationException, IllegalAcce
       if (m != null) {
         if (m[1].equals("tlnumsteps")) {
           timeline.updateTable();
-        } else if (m[1].equals("tlslider")) {
+        }
+        else if (m[1].equals("tlslider")) {
           timeline.setTableValue(Integer.parseInt(m[2]), value);
+        }
+        else if (m[1].equals("tllshift")) {
+          timeline.lshift();
+        }
+        else if (m[1].equals("tlrshift")) {
+          timeline.rshift();
         }
       }
       timeline.show();

@@ -19,16 +19,16 @@ class Timeline {
   Toggle loop, smoothend;
   ScrollableList easing;
   TFTimetable fn;
-  
+
   Slider[] sliders;
   int selectedSlider = 0;
   int animNum;
 
   Timeline(int animNum) {
     paramLocked = true;
-    
+
     this.animNum = animNum;
-    
+
     group = cp5.addGroup("timeline")
       .setPosition(width-accordion.getWidth()-groupWidth-2*margin, margin+10)
       .setWidth(groupWidth)
@@ -55,19 +55,19 @@ class Timeline {
       .setDirection(Controller.HORIZONTAL)
       .setGroup(group)
       ;
-    
+
     cp5.addScrollableList("tleasing"+animNum)
-        .setLabel("easing")
-        .setPosition(duration.getPosition()[0]+duration.getWidth()+spacing, spacing)
-        .setWidth(80)
-        .setBarHeight(20)
-        //.setItemHeight(barHeight)
-        .onEnter(toFront)
-        .onLeave(close)
-        .addItems(Animation.interpolationNames)
-        .setGroup(group)
-        .close()
-        ;
+      .setLabel("easing")
+      .setPosition(duration.getPosition()[0]+duration.getWidth()+spacing, spacing)
+      .setWidth(80)
+      .setBarHeight(20)
+      //.setItemHeight(barHeight)
+      .onEnter(toFront)
+      .onLeave(close)
+      .addItems(Animation.interpolationNamesSimp)
+      .setGroup(group)
+      .close()
+      ;
 
     lshift = cp5.addButton("tllshift"+animNum)
       .setLabel("<<")
@@ -75,21 +75,21 @@ class Timeline {
       .setSize(20, 20)
       .setGroup(group)
       ;
-    
+
     cp5.addTextlabel("shiftlabel"+animNum)
       .setPosition(lshift.getPosition()[0]+6, spacing+24)
       .setFont(BitFontStandard58)
       .setText("SHIFT")
       .setGroup(group)
       ;
-    
+
     rshift = cp5.addButton("tlrshift"+animNum)
       .setLabel(">>")
       .setPosition(lshift.getPosition()[0]+lshift.getWidth()+spacing, spacing)
       .setSize(20, 20)
       .setGroup(group)
       ;
-    
+
     smoothend = cp5.addToggle("smoothend"+animNum)
       .setLabelVisible(false)
       .setPosition(280, spacing)
@@ -102,7 +102,7 @@ class Timeline {
       .setFont(BitFontStandard58)
       .setGroup(group)
       ;
-    
+
     loop = cp5.addToggle("loop"+animNum)
       .setLabelVisible(false)
       .setPosition(330, spacing)
@@ -115,7 +115,7 @@ class Timeline {
       .setText("LOOP")
       .setGroup(group)
       ;
-    
+
 
     sliders = new Slider[32];
     for (int i=0; i<32; i++) {
@@ -125,7 +125,7 @@ class Timeline {
         .setVisible(false)
         ;
     }
-    
+
     paramLocked = false;
   }
 
@@ -134,11 +134,15 @@ class Timeline {
     this.fn = fn;
     update();
   }
-  
-  public TimeFunction getFunction() { return fn; }
-  
-  
-  public int getAnimNum() { return animNum; }
+
+  public TimeFunction getFunction() { 
+    return fn;
+  }
+
+
+  public int getAnimNum() { 
+    return animNum;
+  }
 
 
   public void updateTable() {
@@ -156,11 +160,11 @@ class Timeline {
     fn.setTableValue(idx, value);
     selectedSlider = idx;
   }
-  
+
   public void hide() {
     group.hide();
   }
-  
+
   public void show() {
     group.show();
   }
@@ -213,8 +217,26 @@ class Timeline {
     }
   }
 
-  class TimelineSlider extends Slider {
+  public void lshift() {
+    int n = (int) numSteps.getValue();
+    float first = sliders[0].getValue();
+    for (int i=0; i<n-1; i++)
+      sliders[i].setValue(sliders[i+1].getValue());
+    sliders[n-1].setValue(first);
+    updateTable();
+  }
 
+  public void rshift() {
+    int n = (int) numSteps.getValue();
+    float last = sliders[n-1].getValue();
+    for (int i=n-1; i>0; i--)
+      sliders[i].setValue(sliders[i-1].getValue());
+    sliders[0].setValue(last);
+    updateTable();
+  }
+
+
+  class TimelineSlider extends Slider {
     public TimelineSlider(ControlP5 theControlP5, String theName) {
       super(theControlP5, theName);
       setSliderMode(Slider.FLEXIBLE);

@@ -17,7 +17,7 @@ void fileSelected(File selection) throws IOException {
       selected_idx = 0;
       selected = null;
       // Go down the complexShape tree if the root is empty
-      while (shape.getShapes().size() == 1)
+      while (shape.getShapes().size() == 1 && shape.getChildren().size() == 1)
         shape = (ComplexShape) shape.getShapes().get(0);
       
       animationCollection = new AnimationCollection();

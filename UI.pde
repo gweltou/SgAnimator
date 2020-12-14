@@ -336,7 +336,7 @@ void drawParams(Group g, int animNum, PVector pos) {
         .setItemHeight(barHeight)
         .onEnter(toFront)
         .onLeave(close)
-        .addItems(Animation.interpolationNames)
+        .addItems(Animation.interpolationNamesSimp)
         .setValue((int) param.getValue())
         .setGroup(g)
         .close()

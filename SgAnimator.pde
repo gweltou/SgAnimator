@@ -1,18 +1,15 @@
 // TODO:
-// EndStep switch for TFTimetable
-// Shift buttons for TFTimetable
 // Animation.fromJSON et Animation.toJSON
-// Hard translate functions on Drawable class and ComplexShape (to set Avatar's origin)
 // Draw Coordinate's lines on editor
 // Ability to scale Avatar to normalise objects sizes according to a standard ref (1m)
 // Prompt to load Geometry and/or Animations when loading a file
 // Elastic function
-// Simplify interpolation list
 // Negate toggle in Animations
 // Generalize stop status on TimeFunctions
 // Arrondir à 2 décimales les floats à sauvegarder dans les json
 // Option to duplicate previous AnimationCollection when new animCollection
 // Record images key ('r')
+// Help screens
 
 // UV coords in polygon class
 
@@ -48,6 +45,7 @@ Renderer renderer;
 Avatar avatar;
 String baseFilename;
 Affine2 transform;
+Affine2 hardTransform;
 ComplexShape selected = null;
 int selected_idx = 0;
 String[] partsName;
@@ -66,8 +64,8 @@ boolean mustUpdateUI = false;
 
 
 void settings() {
-  //size(1366, 704);
-  fullScreen();
+  size(1366, 704);
+  //fullScreen();
 }
 
 
@@ -77,6 +75,7 @@ void setup() {
 
   renderer = new Renderer(this);
   transform = new Affine2();
+  hardTransform = new Affine2 ();
 
   //rootShape = buildBlob();
 
@@ -172,15 +171,23 @@ void draw() {
       avatar.updateAnimation(time-lastTime);
     avatar.draw(renderer);
     avatar.drawSelectedOnly(renderer);
+    
     if (showUI) {
       renderer.drawPivot();
       renderer.drawMarker(0, 0);
+      if (!hardTransform.isIdt() && selected != null) {
+        renderer.pushMatrix(hardTransform);
+        selected.setColorMod(1f, 1f, 1f, 0.4f);
+        selected.draw(renderer);
+        selected.setColorMod(1f, 1f, 1f, 1f);
+        renderer.popMatrix();
+      }
     }
     renderer.popMatrix();
     if (playAnim == false && (frameCount>>5)%2 == 0) {
       fill(255, 0, 0, 127);
       textSize(32);
-      text("PAUSED", -58+width/2, height-40);
+      text("PAUSED", -60+width/2, height-80);
     }
     if (timeline != null) {
       timeline.highlightSliders();
@@ -194,14 +201,16 @@ void draw() {
       "p\n"+
       "r\n"+
       "d\n"+
-      "right click\n", width/4, height/4);
+      "right click\n"+
+      "MAJ + right drag\n", width/4, height/4);
     text("Open file (svg or json)\n"+
       "Save json file\n"+
       "Select next/previous shape group\n"+
       "play/pause animation\n"+
       "reset animation\n"+
       "show/hide UI\n"+
-      "place pivot\n", width/2, height/4);
+      "place pivot\n"+
+      "translate shape\n", width/2, height/4);
     text("Ver. "+version, width-110, height-20);
   }
 
