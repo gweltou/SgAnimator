@@ -155,17 +155,18 @@ AnimationCollection loadAnimation(JSONArray jsonFullAnimationArray) {
           TimeFunction fn = (TimeFunction) c.newInstance();
           if (fn instanceof TFTimetable) {
             float[] table = jsonFuncAxe.getJSONArray("table").getFloatArray();
-            ((TFTimetable) fn).setTable(FloatArray.with(table));
+            ((TFTimetable) fn).setTable(table);
           }
           for (TFParam param : fn.getParams()) {
-            if (param.value instanceof Float) {
-              param.value = jsonFuncAxe.getFloat(param.name);
+            if (param.getValue() instanceof Float) {
+              param.setValue(jsonFuncAxe.getFloat(param.name));
             } else if (param.getValue() instanceof Boolean) {
-              param.value = jsonFuncAxe.getBoolean(param.name);
+              param.setValue(jsonFuncAxe.getBoolean(param.name));
             } else if (param.getValue() instanceof Integer) {
-              param.value = jsonFuncAxe.getFloat(param.name);
+              param.setValue(jsonFuncAxe.getInt(param.name));
             }
           }
+          fn.reset();
           animationList.add(new Animation(fn, axe));
         } catch (Exception e) {
           e.printStackTrace();

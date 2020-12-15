@@ -147,9 +147,9 @@ class Timeline {
 
   public void updateTable() {
     int size = (int) numSteps.getValue();
-    FloatArray array = new FloatArray(size);
+    float[] array = new float[size];
     for (int i=0; i<size; i++) {
-      array.add(sliders[i].getValue());
+      array[i] = sliders[i].getValue();
     }
     fn.setTable(array);
     update();

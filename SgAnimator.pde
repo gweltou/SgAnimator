@@ -1,15 +1,16 @@
 // TODO:
 // Animation.fromJSON et Animation.toJSON
+// All time params to duration (no freq)
 // Draw Coordinate's lines on editor
 // Ability to scale Avatar to normalise objects sizes according to a standard ref (1m)
 // Prompt to load Geometry and/or Animations when loading a file
 // Elastic function
 // Negate toggle in Animations
-// Generalize stop status on TimeFunctions
 // Arrondir à 2 décimales les floats à sauvegarder dans les json
 // Option to duplicate previous AnimationCollection when new animCollection
 // Record images key ('r')
 // Help screens
+// Generalize stop status on TimeFunctions
 
 // UV coords in polygon class
 
@@ -17,9 +18,9 @@
 
 /*
   BUGS:
- * Copy/paste for TFimetable
  * can't load json when animation array is empty
  * ordre de la pile d'animation de réordonne bizarrement (après avoir ouvert un scrollablelist)
+ * Décalage du curseur sur le partsList (MyScrollableList)
  
  */
 
@@ -113,9 +114,9 @@ ComplexShape buildBlob() {
   float x = 0;
   for (int i=0; i<n; i++) {
     ComplexShape segment = new ComplexShape();
-    segment.addShape(new Circle(x, 0, 20));
+    segment.addShape(new DrawableCircle(x, 0, 20));
     float[] verts = {x, 10, x+50, 6, x+50, -6, x, -10};
-    segment.addShape(new Polygon(verts, null));
+    segment.addShape(new DrawablePolygon(verts, null));
     segment.setLocalOrigin(x, 0);
     ArrayList<Animation> anims = new ArrayList();
     anims.add(new Animation(new TFSin(0.2f, 0.3f, 0f, x*0.012f), Animation.AXE_ROT));
@@ -175,6 +176,7 @@ void draw() {
     if (showUI) {
       renderer.drawPivot();
       renderer.drawMarker(0, 0);
+      renderer.drawAxes();
       if (!hardTransform.isIdt() && selected != null) {
         renderer.pushMatrix(hardTransform);
         selected.setColorMod(1f, 1f, 1f, 0.4f);
