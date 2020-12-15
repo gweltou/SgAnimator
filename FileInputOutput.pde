@@ -2,6 +2,8 @@
 // File INPUT/OUTPUT
 //
 
+import java.io.FileInputStream;
+
 
 void fileSelected(File selection) throws IOException { 
   if (selection == null) {
@@ -58,17 +60,28 @@ void fileSelected(File selection) throws IOException {
 
 Avatar loadAvatarFile(File file) {
   Avatar avatar = new Avatar();
-  JSONObject rootElement = loadJSONObject(file);
+  
+  JsonValue fromJson = null;
+  try {
+    InputStream in = new FileInputStream(file);
+    fromJson = new JsonReader().parse(in);
+  }
+  catch (IOException e) {
+    e.printStackTrace();
+  }
   
   // Load shape first
-  if (rootElement.hasKey("geometry"))
-    avatar.setShape(ComplexShape.fromJSON(rootElement.getJSONObject("geometry")));
+  if (fromJson != null && fromJson.has("geometry")) {
+    JsonValue jsonGeometry = fromJson.get("geometry");
+    avatar.setShape(ComplexShape.fromJson(jsonGeometry));
+  }
   
   // AnimationCollection is kept separated for simplicity
   // rather than storing and retrieving it from the Avatar class
   fullAnimationIndex = 0;
-  if (rootElement.hasKey("animation")) {
-    animationCollection = loadAnimation(rootElement.getJSONArray("animation"));
+  if (fromJson != null && fromJson.has("animation")) {
+    JsonValue jsonAnimation = fromJson.get("animation");
+    animationCollection = AnimationCollection.fromJson(jsonAnimation);
     //avatar.setAnimationCollection(animationCollection));
     avatar.setFullAnimation(animationCollection.getFullAnimation(fullAnimationIndex));
   } else {
@@ -131,52 +144,4 @@ void saveAvatarFile(Avatar avatar) {
   //saveJSONObject(root, filename, "compact");
   saveJSONObject(root, filename);
   println("File saved to " + filename);
-}
-
-
-AnimationCollection loadAnimation(JSONArray jsonFullAnimationArray) {
-  AnimationCollection animCollection = new AnimationCollection();
-  
-  for (int k=0; k<jsonFullAnimationArray.size(); k++) {
-    HashMap<String, Animation[]> fullAnimation = new HashMap();
-    JSONObject jsonFullAnimation = jsonFullAnimationArray.getJSONObject(k);
-    String animName = jsonFullAnimation.getString("name");
-    JSONArray groups = jsonFullAnimation.getJSONArray("groups");
-    for (int i=0; i<groups.size(); i++) {
-      JSONObject group = groups.getJSONObject(i);
-      String id = group.getString("id");
-      JSONArray functions = group.getJSONArray("functions");
-      ArrayList<Animation> animationList = new ArrayList();
-      for (int j=0; j<functions.size(); j++) {
-        JSONObject jsonFuncAxe = functions.getJSONObject(j);
-        int axe = Arrays.asList(Animation.axeNames).indexOf(jsonFuncAxe.getString("axe"));
-        try {
-          Class c = Class.forName(jsonFuncAxe.getString("function"));
-          TimeFunction fn = (TimeFunction) c.newInstance();
-          if (fn instanceof TFTimetable) {
-            float[] table = jsonFuncAxe.getJSONArray("table").getFloatArray();
-            ((TFTimetable) fn).setTable(table);
-          }
-          for (TFParam param : fn.getParams()) {
-            if (param.getValue() instanceof Float) {
-              param.setValue(jsonFuncAxe.getFloat(param.name));
-            } else if (param.getValue() instanceof Boolean) {
-              param.setValue(jsonFuncAxe.getBoolean(param.name));
-            } else if (param.getValue() instanceof Integer) {
-              param.setValue(jsonFuncAxe.getInt(param.name));
-            }
-          }
-          fn.reset();
-          animationList.add(new Animation(fn, axe));
-        } catch (Exception e) {
-          e.printStackTrace();
-          println("Could not recreate animation function from json file");
-          println(jsonFuncAxe);
-        }
-      }
-      fullAnimation.put(id, animationList.toArray(new Animation[0]));
-    }
-    animCollection.addFullAnimation(animName, fullAnimation);
-  }
-  return animCollection;
 }
