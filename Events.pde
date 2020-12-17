@@ -54,12 +54,10 @@ void keyPressed(KeyEvent event) {
 
 
 void keyReleased() {
-  if (key == CODED && keyCode == SHIFT) {
-    if (selected != null) {
-      selected.hardTransform(hardTransform);
-      hardTransform.idt();
-      playAnim = true;
-    }
+  if (key == CODED && keyCode == SHIFT && selected != null) {
+    selected.hardTransform(hardTransform);
+    hardTransform.idt();
+    playAnim = true;
   }
 }
 
@@ -103,7 +101,7 @@ void mouseDragged(MouseEvent event) {
   if (event.getButton() == RIGHT) {
     int dx = mouseX-pmouseX;
     int dy = mouseY-pmouseY;
-    if (keyPressed && keyCode == SHIFT) {
+    if (keyPressed && keyCode == SHIFT && selected != null) {
       // scale translation by the zoom factor
       hardTransform.translate(dx/transform.m00, dy/transform.m11);
     } else {

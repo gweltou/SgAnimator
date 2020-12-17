@@ -1,19 +1,16 @@
 // TODO:
-// Animation.fromJSON et Animation.toJSON
-// All time params to duration (no freq)
+
+// Record images key ('r')
 // Draw Coordinate's lines on editor
 // Ability to scale Avatar to normalise objects sizes according to a standard ref (1m)
 // Prompt to load Geometry and/or Animations when loading a file
 // Elastic function
 // Negate toggle in Animations
+// Animation.toJSON
 // Arrondir à 2 décimales les floats à sauvegarder dans les json
 // Option to duplicate previous AnimationCollection when new animCollection
-// Record images key ('r')
 // Help screens
-// Generalize stop status on TimeFunctions
-
 // UV coords in polygon class
-
 // Add a chart for every Animation to show function progression over time
 
 /*
@@ -21,6 +18,7 @@
  * can't load json when animation array is empty
  * ordre de la pile d'animation de réordonne bizarrement (après avoir ouvert un scrollablelist)
  * Décalage du curseur sur le partsList (MyScrollableList)
+ * Animations don't scale when hardTransforming geometry
  
  */
 
