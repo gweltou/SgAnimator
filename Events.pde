@@ -4,13 +4,13 @@
 void keyPressed(KeyEvent event) {
   if (avatar != null && key == CODED) {
     if (keyCode == UP) {
-      selected_idx = (selected_idx-1);
-      if (selected_idx < 0)
-        selected_idx += avatar.getPartsList().length;
-      partsList.setValue(selected_idx);
+      selectedIndex = (selectedIndex-1);
+      if (selectedIndex < 0)
+        selectedIndex += avatar.getPartsList().length;
+      partsList.setValue(selectedIndex);
     } else if (keyCode == DOWN) {
-      selected_idx = (selected_idx+1) % avatar.getPartsList().length;
-      partsList.setValue(selected_idx);
+      selectedIndex = (selectedIndex+1) % avatar.getPartsList().length;
+      partsList.setValue(selectedIndex);
     } else if (keyCode == SHIFT && selected != null) {
       playAnim = false;
       avatar.resetAnimation();
@@ -24,6 +24,7 @@ void keyPressed(KeyEvent event) {
       case 'r':  // Reset animation
         if (avatar != null)
           avatar.resetAnimation();
+        if (selected != null) mustUpdateUI = true;
         break;
       case 'd':  // Edit animation mode
         if (avatar != null) {
@@ -35,6 +36,12 @@ void keyPressed(KeyEvent event) {
             showUI();
           }
         }
+        break;
+      case 'h':  // Help screens
+        screenIndex = (screenIndex+1) % screens.length;
+        currentScreen = screens[screenIndex];
+        if (screenIndex == 0 && avatar != null)
+          showUI();
         break;
       case 15:  // CTRL+o, load a new file
         selectInput("Select a file", "fileSelected");
@@ -127,7 +134,7 @@ void controlEvent(ControlEvent event) throws InstantiationException, IllegalAcce
     
     if (name.equals("partslist")) {
       select(avatar.getPartsList()[int(value)]);
-      selected_idx = int(partsList.getValue());
+      selectedIndex = int(partsList.getValue());
     }
     
     else if (name.equals("animname")) {
@@ -161,6 +168,7 @@ void controlEvent(ControlEvent event) throws InstantiationException, IllegalAcce
         animName.setText("anim"+fullAnimationIndex);
       } else {
         avatar.setFullAnimation(animationCollection.getFullAnimation(fullAnimationIndex));
+        animName.setText(animationCollection.getFullAnimationName(fullAnimationIndex));
       }
       mustUpdateUI = true;
     }
@@ -295,8 +303,13 @@ void controlEvent(ControlEvent event) throws InstantiationException, IllegalAcce
         String paramName = m[1];
         int animNum = parseInt(m[2]);
         TimeFunction fn = selected.getAnimation(animNum).getFunction();
-        fn.setParam(paramName, value);
-        fn.reset();
+        if (paramName.equals("easing")) {
+          // Send value as a string (name of the easing function)
+          int idx = floor(value);
+          fn.setParam(paramName, Animation.interpolationNamesSimp[idx]);
+        } else {
+          fn.setParam(paramName, value);
+        }
         playAnim = true;
         fullAnimationDirty = true;
         if (timeline != null && timeline.getFunction() == fn)

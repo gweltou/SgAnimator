@@ -16,7 +16,7 @@ void fileSelected(File selection) throws IOException {
       if (shape == null)
         return;
       
-      selected_idx = 0;
+      selectedIndex = 0;
       selected = null;
       // Go down the complexShape tree if the root is empty
       while (shape.getShapes().size() == 1 && shape.getChildren().size() == 1)
@@ -31,7 +31,14 @@ void fileSelected(File selection) throws IOException {
       }
       partsList.setItems(partsName);
       baseFilename = filename.substring(0, filename.length()-4);
+      // Reset coordinates transformation matrix
+      transform.setToTranslation(width/2, height/2);
+      animName.setText("anim0");
+      screenIndex = 0;
+      currentScreen = screens[screenIndex];
       showUI();
+      accordion.hide();
+      
     /*} else if (filename.endsWith("tdat")) {
       rootShape = loadGeometry(selection);
       File animFile = new File(filename.replace(".tdat", ".json"));
@@ -40,56 +47,13 @@ void fileSelected(File selection) throws IOException {
         loadAnimation(rootElement.getJSONArray("animation"));
       }*/
     } else if (filename.endsWith("json")) {
-      selected_idx = 0;
-      selected = null;
-      avatar = loadAvatarFile(selection);
-      partsName = new String[avatar.getPartsList().length];
-      for (int i=0; i<partsName.length; i++) {
-        partsName[i] = avatar.getPartsList()[i].getId();
-      }
-      partsList.setItems(partsName);
-      animName.setText(animationCollection.getFullAnimationName(fullAnimationIndex));
-      baseFilename = filename.substring(0, filename.length()-5);
-      showUI();
+      mustLoad = selection;
     } else {
       println("Bad filename");
     }
   }
 }
 
-
-Avatar loadAvatarFile(File file) {
-  Avatar avatar = new Avatar();
-  
-  JsonValue fromJson = null;
-  try {
-    InputStream in = new FileInputStream(file);
-    fromJson = new JsonReader().parse(in);
-  }
-  catch (IOException e) {
-    e.printStackTrace();
-  }
-  
-  // Load shape first
-  if (fromJson != null && fromJson.has("geometry")) {
-    JsonValue jsonGeometry = fromJson.get("geometry");
-    avatar.setShape(ComplexShape.fromJson(jsonGeometry));
-  }
-  
-  // AnimationCollection is kept separated for simplicity
-  // rather than storing and retrieving it from the Avatar class
-  fullAnimationIndex = 0;
-  if (fromJson != null && fromJson.has("animation")) {
-    JsonValue jsonAnimation = fromJson.get("animation");
-    animationCollection = AnimationCollection.fromJson(jsonAnimation);
-    //avatar.setAnimationCollection(animationCollection));
-    avatar.setFullAnimation(animationCollection.getFullAnimation(fullAnimationIndex));
-  } else {
-    animationCollection = new AnimationCollection();
-  }
-  
-  return avatar;
-}
 
 
 void saveAvatarFile(Avatar avatar) {
@@ -126,6 +90,8 @@ void saveAvatarFile(Avatar avatar) {
             jsonFuncAxe.setBoolean(param.name, (boolean) param.getValue());
           } else if (param.getValue() instanceof Integer) {
             jsonFuncAxe.setFloat(param.name, (int) param.getValue());
+          } else if (param.getValue() instanceof String) {
+            jsonFuncAxe.setString(param.name, (String) param.getValue());
           }
         }
         animationArray.append(jsonFuncAxe);

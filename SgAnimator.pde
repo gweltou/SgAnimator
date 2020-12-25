@@ -15,10 +15,9 @@
 
 /*
   BUGS:
- * can't load json when animation array is empty
- * ordre de la pile d'animation de réordonne bizarrement (après avoir ouvert un scrollablelist)
  * Décalage du curseur sur le partsList (MyScrollableList)
  * Animations don't scale when hardTransforming geometry
+ * Seule la première animation est sauvegardée
  
  */
 
@@ -39,6 +38,10 @@ import java.lang.reflect.Field;
 
 String version = "0.4";
 
+PImage selectpart;
+Screen[] screens = new Screen[] {new MainScreen(), new HelpScreen1()};
+Screen currentScreen;
+int screenIndex = 0;
 
 Renderer renderer;
 Avatar avatar;
@@ -46,7 +49,7 @@ String baseFilename;
 Affine2 transform;
 Affine2 hardTransform;
 ComplexShape selected = null;
-int selected_idx = 0;
+int selectedIndex = 0;
 String[] partsName;
 String[] functionsName;
 AnimationCollection animationCollection;
@@ -60,6 +63,7 @@ boolean paramLocked = false;
 boolean setPivot = false;
 boolean playAnim = true;
 boolean mustUpdateUI = false;
+File mustLoad = null; // Change current screen to loading screen
 
 
 void settings() {
@@ -71,10 +75,12 @@ void settings() {
 void setup() {
   surface.setResizable(true);
   surface.setTitle("Avatar5");
-
+  
+  selectpart = loadImage("selectpart.png");
   renderer = new Renderer(this);
-  transform = new Affine2();
+  transform = new Affine2().setToTranslation(width/2, height/2);;
   hardTransform = new Affine2 ();
+  currentScreen = screens[0];
 
   //rootShape = buildBlob();
 
@@ -90,6 +96,7 @@ void setup() {
   lastTime = (float) millis() / 1000.0f;
 
   // Load a default file
+  /*
   File f = new File("/home/gweltaz/Bureau/ruz.json");
   avatar = loadAvatarFile(f);
   partsName = new String[avatar.getPartsList().length];
@@ -100,6 +107,7 @@ void setup() {
   animName.setText(animationCollection.getFullAnimationName(fullAnimationIndex));
   baseFilename = "/home/gweltaz/Bureau/ruz";
   showUI();
+  */
 }
 
 
@@ -159,71 +167,11 @@ void saveFullAnimation(String animName, int animIndex) {
 }
 
 
-
 void draw() {
-  float time = (float) millis() / 1000.0f;
-  background(255);
-
-  if (avatar != null) {
-    renderer.pushMatrix(transform);
-    if (playAnim)
-      avatar.updateAnimation(time-lastTime);
-    avatar.draw(renderer);
-    avatar.drawSelectedOnly(renderer);
-    
-    if (showUI) {
-      renderer.drawPivot();
-      renderer.drawMarker(0, 0);
-      renderer.drawAxes();
-      if (!hardTransform.isIdt() && selected != null) {
-        renderer.pushMatrix(hardTransform);
-        selected.setColorMod(1f, 1f, 1f, 0.4f);
-        selected.draw(renderer);
-        selected.setColorMod(1f, 1f, 1f, 1f);
-        renderer.popMatrix();
-      }
-    }
-    renderer.popMatrix();
-    if (playAnim == false && (frameCount>>5)%2 == 0) {
-      fill(255, 0, 0, 127);
-      textSize(32);
-      text("PAUSED", -60+width/2, height-80);
-    }
-    if (timeline != null) {
-      timeline.highlightSliders();
-    }
-  } else {
-    fill(0);
-    textSize(20);
-    text("CTRL+o\n"+
-      "CTRL+s\n"+
-      "Up/Down\n"+
-      "p\n"+
-      "r\n"+
-      "d\n"+
-      "right click\n"+
-      "MAJ + right drag\n", width/4, height/4);
-    text("Open file (svg or json)\n"+
-      "Save json file\n"+
-      "Select next/previous shape group\n"+
-      "play/pause animation\n"+
-      "reset animation\n"+
-      "show/hide UI\n"+
-      "place pivot\n"+
-      "translate shape\n", width/2, height/4);
-    text("Ver. "+version, width-110, height-20);
+  if (mustLoad != null) {
+    currentScreen = new LoadScreen(mustLoad);
+    mustLoad = null;
   }
-
-  if (setPivot) {
-    fill(255, 0, 0);
-    noStroke();
-    ellipse(mouseX, mouseY, 8, 8);
-  }
-
-  if (mustUpdateUI == true && selected != null) {
-    updateUI();
-    mustUpdateUI = false;
-  }
-
-  lastTime = time;
+  
+  currentScreen.draw();
 }

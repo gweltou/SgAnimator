@@ -61,6 +61,7 @@ void setupUI() {
     .setBarVisible(false)
     .hide();
   ;
+  
 
   pivotButton = cp5.addButton("pivotbutton")
     .setPosition(300, 10)
@@ -250,7 +251,7 @@ void updateUI() {
   g.setBackgroundHeight((int) pos.y);
   accordion.addItem(g);
   
-  if (keepsOpenAnimNum >= 0 && keepsOpenAnimNum<animationList.size()) {
+  if (keepsOpenAnimNum >= 0 && keepsOpenAnimNum <= animationList.size()) {
     accordion.open(keepsOpenAnimNum);
   } else {
     accordion.open(0);
@@ -329,6 +330,13 @@ void drawParams(Group g, int animNum, PVector pos) {
       break;
       
     case TFParam.EASING:
+      int easingNum = 0;
+      for (int i=0; i<Animation.interpolationNamesSimp.length; i++) {
+        if (Animation.interpolationNamesSimp[i].equals((String) param.getValue())) {
+          easingNum = i;
+          break;
+        }
+      }
       cp5.addScrollableList(param.name+animNum)
         .setLabel("easing function")
         .setPosition(pos.x, pos.y)
@@ -337,7 +345,7 @@ void drawParams(Group g, int animNum, PVector pos) {
         .onEnter(toFront)
         .onLeave(close)
         .addItems(Animation.interpolationNamesSimp)
-        .setValue((int) param.getValue())
+        .setValue(easingNum)
         .setGroup(g)
         .close()
         ;
