@@ -34,7 +34,7 @@ import java.util.*;
 import java.lang.reflect.Field;
 
 
-String version = "0.4";
+String version = "0.5";
 
 
 MainScreen mainScreen;
