@@ -18,7 +18,7 @@ Chaque partie selectionnable peut-être animée par une ou plusieurs fonctions d
 
 ## Constant
 Transformation statique (ne varie pas avec le temps).
-Pratique pour redimensionner certaines partie (avec les axes "scale") à l'avant d'autres fonctions d'animation.
+Pratique pour redimensionner certaines parties (avec les axes "scale") à l'avant d'autres fonctions d'animation.
 ## EasingFromTo
 ## Timetable
 ## Sin
