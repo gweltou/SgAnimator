@@ -1,6 +1,7 @@
 ////
 ////    EVENTS
 ////
+/*
 void keyPressed(KeyEvent event) {
   if (avatar != null && key == CODED) {
     if (keyCode == UP) {
@@ -117,7 +118,7 @@ void mouseDragged(MouseEvent event) {
     }
   }
 }
-
+*/
 
 
 import java.lang.reflect.Constructor;

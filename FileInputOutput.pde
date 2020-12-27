@@ -31,11 +31,11 @@ void fileSelected(File selection) throws IOException {
       }
       partsList.setItems(partsName);
       baseFilename = filename.substring(0, filename.length()-4);
-      // Reset coordinates transformation matrix
-      transform.setToTranslation(width/2, height/2);
+      
+      
+      currentScreen = mainScreen;
       animName.setText("anim0");
-      screenIndex = 0;
-      currentScreen = screens[screenIndex];
+      mainScreen.resetView();
       showUI();
       accordion.hide();
       

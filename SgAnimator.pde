@@ -9,13 +9,11 @@
 // Animation.toJSON
 // Arrondir à 2 décimales les floats à sauvegarder dans les json
 // Option to duplicate previous AnimationCollection when new animCollection
-// Help screens
 // UV coords in polygon class
 // Add a chart for every Animation to show function progression over time
 
 /*
   BUGS:
- * Décalage du curseur sur le partsList (MyScrollableList)
  * Animations don't scale when hardTransforming geometry
  * Seule la première animation est sauvegardée
  
@@ -38,16 +36,17 @@ import java.lang.reflect.Field;
 
 String version = "0.4";
 
-PImage selectpart;
-Screen[] screens = new Screen[] {new MainScreen(), new HelpScreen1()};
+
+MainScreen mainScreen;
+Screen welcomeScreen;
+Screen helpScreen1;
+Screen helpScreenEasing;
 Screen currentScreen;
-int screenIndex = 0;
 
 Renderer renderer;
 Avatar avatar;
 String baseFilename;
-Affine2 transform;
-Affine2 hardTransform;
+
 ComplexShape selected = null;
 int selectedIndex = 0;
 String[] partsName;
@@ -75,14 +74,14 @@ void settings() {
 void setup() {
   surface.setResizable(true);
   surface.setTitle("Avatar5");
-  
-  selectpart = loadImage("selectpart.png");
-  renderer = new Renderer(this);
-  transform = new Affine2().setToTranslation(width/2, height/2);;
-  hardTransform = new Affine2 ();
-  currentScreen = screens[0];
 
-  //rootShape = buildBlob();
+  mainScreen = new MainScreen();
+  welcomeScreen = new WelcomeScreen();
+  helpScreen1 = new HelpScreen1();
+  helpScreenEasing = new HelpScreenEasing();
+  currentScreen = welcomeScreen;
+  
+  renderer = new Renderer(this);
 
   int numFn = Animation.timeFunctions.length;
   functionsName = new String[numFn];
@@ -98,16 +97,16 @@ void setup() {
   // Load a default file
   /*
   File f = new File("/home/gweltaz/Bureau/ruz.json");
-  avatar = loadAvatarFile(f);
-  partsName = new String[avatar.getPartsList().length];
-  for (int i=0; i<partsName.length; i++) {
-    partsName[i] = avatar.getPartsList()[i].getId();
-  }
-  partsList.setItems(partsName);
-  animName.setText(animationCollection.getFullAnimationName(fullAnimationIndex));
-  baseFilename = "/home/gweltaz/Bureau/ruz";
-  showUI();
-  */
+   avatar = loadAvatarFile(f);
+   partsName = new String[avatar.getPartsList().length];
+   for (int i=0; i<partsName.length; i++) {
+   partsName[i] = avatar.getPartsList()[i].getId();
+   }
+   partsList.setItems(partsName);
+   animName.setText(animationCollection.getFullAnimationName(fullAnimationIndex));
+   baseFilename = "/home/gweltaz/Bureau/ruz";
+   showUI();
+   */
 }
 
 
@@ -172,6 +171,24 @@ void draw() {
     currentScreen = new LoadScreen(mustLoad);
     mustLoad = null;
   }
-  
+
   currentScreen.draw();
+}
+
+
+public void keyPressed(KeyEvent event) { currentScreen.keyPressed(event); }
+public void keyReleased(KeyEvent event) { currentScreen.keyReleased(event); }
+public void mouseClicked(MouseEvent event) {currentScreen.mouseClicked(event); }
+public void mouseWheel(MouseEvent event) { currentScreen.mouseWheel(event); }
+public void mouseDragged(MouseEvent event) { currentScreen.mouseDragged(event); }
+
+
+public abstract class Screen {
+  public void draw() { }
+  
+  public void keyPressed(KeyEvent event) { }
+  public void keyReleased(KeyEvent event) { }
+  public void mouseClicked(MouseEvent event) { }
+  public void mouseWheel(MouseEvent event) { }
+  public void mouseDragged(MouseEvent event) { }
 }
