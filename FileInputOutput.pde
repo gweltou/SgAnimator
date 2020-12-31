@@ -2,7 +2,6 @@
 // File INPUT/OUTPUT
 //
 
-import java.io.FileInputStream;
 
 
 void fileSelected(File selection) throws IOException { 

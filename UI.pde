@@ -146,7 +146,7 @@ void updateUI() {
   accordion.setPosition(width-accordion.getWidth()-margin, 1);
 
   PVector pos = new PVector();
-  ArrayList<Animation> animationList = selected.getAnimationList();
+  Animation[] animationList = selected.getAnimationList();
   int animNum = 0;
   Group g;
 
@@ -276,7 +276,7 @@ void updateUI() {
   g.setBackgroundHeight((int) pos.y);
   accordion.addItem(g);
   
-  if (keepsOpenAnimNum >= 0 && keepsOpenAnimNum <= animationList.size()) {
+  if (keepsOpenAnimNum >= 0 && keepsOpenAnimNum <= animationList.length) {
     accordion.open(keepsOpenAnimNum);
   } else {
     accordion.open(0);
@@ -288,7 +288,7 @@ void updateUI() {
 
 
 void drawParams(Group g, int animNum, PVector pos) {
-  Animation anim = selected.getAnimationList().get(animNum);
+  Animation anim = selected.getAnimationList()[animNum];
   
   for (TFParam param : anim.getFunction().getParams()) {
     switch (param.type) {
@@ -385,7 +385,7 @@ void drawParams(Group g, int animNum, PVector pos) {
 void drawBottomButtons(Group g, int animNum, PVector pos) {
   boolean bottomButtons = false;
 
-  if (animNum < selected.getAnimationList().size()) {
+  if (animNum < selected.getAnimationList().length) {
     // Copy animation
     cp5.addButton("copybutton"+animNum)
       .setLabel("copy")
@@ -414,7 +414,7 @@ void drawBottomButtons(Group g, int animNum, PVector pos) {
       .activateBy(ControlP5.PRESS)
       .setGroup(g)
       ;
-    if (animNum == selected.getAnimationList().size()-1)
+    if (animNum == selected.getAnimationList().length-1)
       cp5.getController("swapdown"+animNum).hide();
     
     bottomButtons = true;

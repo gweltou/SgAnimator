@@ -34,7 +34,7 @@ import java.util.*;
 import java.lang.reflect.Field;
 
 
-String version = "0.5";
+String version = "0.5.1";
 
 
 MainScreen mainScreen;
@@ -123,8 +123,8 @@ ComplexShape buildBlob() {
     float[] verts = {x, 10, x+50, 6, x+50, -6, x, -10};
     segment.addShape(new DrawablePolygon(verts, null));
     segment.setLocalOrigin(x, 0);
-    ArrayList<Animation> anims = new ArrayList();
-    anims.add(new Animation(new TFSin(0.2f, 0.3f, 0f, x*0.012f), Animation.AXE_ROT));
+    Animation[] anims = new Animation[1];
+    anims[0] = new Animation(new TFSin(0.2f, 0.3f, 0f, x*0.012f), Animation.AXE_ROT);
     segment.setAnimationList(anims);
     parent.addShape(segment);
     parent = segment;
@@ -152,8 +152,8 @@ void saveFullAnimation(String animName, int animIndex) {
     animName = "anim"+animIndex;
 
   for (ComplexShape part : avatar.getPartsList()) {
-    if (!part.getAnimationList().isEmpty())
-      fullAnimation.put(part.getId(), part.getAnimationList().toArray(new Animation[0]));
+    if (part.getAnimationList().length > 0)
+      fullAnimation.put(part.getId(), part.getAnimationList());
   }
 
   if (animIndex >= animationCollection.size()) {

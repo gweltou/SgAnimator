@@ -128,8 +128,9 @@ public class MainScreen extends Screen {
   }
 
 
-  void keyReleased() {
+  void keyReleased(KeyEvent event) {
     if (key == CODED && keyCode == SHIFT && selected != null) {
+      println("hardtransform");
       selected.hardTransform(hardTransform);
       hardTransform.idt();
       playAnim = true;

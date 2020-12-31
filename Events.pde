@@ -180,7 +180,7 @@ void controlEvent(ControlEvent event) throws InstantiationException, IllegalAcce
       Class<TimeFunction> tfclass = Animation.timeFunctions[(int) event.getValue()];
       Constructor<TimeFunction> ctor = tfclass.getConstructor();
       TimeFunction tf = ctor.newInstance();
-      int numberOfAnimations = selected.getAnimationList().size();
+      int numberOfAnimations = selected.getAnimationList().length;
       if (animNum < numberOfAnimations) {
         // Transfer compatible parameters to new TimeFunction
         //for (TFParam param : selected.getAnimation(animNum).getFunction().getParams()) {
@@ -229,7 +229,7 @@ void controlEvent(ControlEvent event) throws InstantiationException, IllegalAcce
       int animNum = parseInt(m[1]);
       if (animationClipboard != null) {
         selected.resetAnimation();
-        if (animNum < selected.getAnimationList().size()) {
+        if (animNum < selected.getAnimationList().length) {
           selected.setAnimation(animNum, animationClipboard);
         } else {
           selected.addAnimation(animationClipboard);

@@ -1,3 +1,6 @@
+import java.io.FileInputStream;
+
+
 public class LoadScreen extends Screen {
   private PImage backgroundImage;
   Group loadGroup;
@@ -103,21 +106,20 @@ public class LoadScreen extends Screen {
 
 
   private void loadAvatarFile(File file) {
-    println("load avatar");
-    JsonValue fromJson = null;
+    JsonValue json = null;
     try {
       InputStream in = new FileInputStream(file);
-      fromJson = new JsonReader().parse(in);
+      json = new JsonReader().parse(in);
     }
     catch (IOException e) {
       e.printStackTrace();
     }
-    if (fromJson == null)
+    if (json == null)
       return;
 
     // Load shape first
-    if (fromJson.has("geometry") && geomToggle.getValue() == 1.0f) {
-      JsonValue jsonGeometry = fromJson.get("geometry");
+    if (json.has("geometry") && geomToggle.getValue() == 1.0f) {
+      JsonValue jsonGeometry = json.get("geometry");
       avatar = new Avatar();
       avatar.setShape(ComplexShape.fromJson(jsonGeometry));
       mainScreen.resetView();
@@ -126,9 +128,8 @@ public class LoadScreen extends Screen {
     // AnimationCollection is kept separated for simplicity
     // rather than storing and retrieving it from the Avatar class
     fullAnimationIndex = 0;
-    if (fromJson.has("animation") && animToggle.getValue() == 1.0f) {
-      JsonValue jsonAnimation = fromJson.get("animation");
-      animationCollection = AnimationCollection.fromJson(jsonAnimation);
+    if (json.has("animation") && animToggle.getValue() == 1.0f) {
+      animationCollection = AnimationCollection.fromJson(json.get("animation"));
       //avatar.setAnimationCollection(animationCollection));
       if (animationCollection.size() > 0) {
         avatar.setFullAnimation(animationCollection.getFullAnimation(fullAnimationIndex));
