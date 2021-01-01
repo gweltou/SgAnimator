@@ -24,20 +24,20 @@ C'est donc l'organisation des groupes qui définit le "rigging" (squelettage) le
 Chaque partie selectionnable dans la liste de gauche peut-être animée par une ou plusieurs fonctions d'animation.<br>
 Une fonction renvoie une valeur simple qui peut varier en fonction de temps. Pour qu'une fonction anime un objet, il faut également choisir un axe sur lequel s'appliquera la valeur de la fonction.<br>
 Les différents axes sur lesquels s'appliquent les fonctions d'animation sont :
-* X (l'axe horizontal)
-* Y (l'axe vertical)
-* Rotation (rotation en degrées autour d'un point de pivot)
-* Scale X (étirement horizontal avec le point de pivot comme origine)
-* Scale Y (étirement vertical avec le point de pivot comme origine)
-* Zoom (étirement dans les deux dimensions avec le point de pivot comme origine)
+* **X** (l'axe horizontal)
+* **Y** (l'axe vertical)
+* **Rotation** (rotation en degrées autour d'un point de pivot)
+* **Scale X** (étirement horizontal avec le point de pivot pour origine)
+* **Scale Y** (étirement vertical avec le point de pivot pour origine)
+* **Zoom** (étirement dans les deux dimensions avec le point de pivot pour origine)
 
-## Constant
+### Constant
 Transformation statique (ne varie pas avec le temps).
 Pratique pour redimensionner certaines parties (avec les axes "scale") à l'avant d'autres fonctions d'animation.
-## EasingFromTo
-## Timetable
-## Sin
-## Spin
+### EasingFromTo
+### Timetable
+### Sin
+### Spin
 Fonction pour créer une rotation permanente (avec l'axe "rotation"). Permet d'animer les pales d'un moulin à vent par exemple.
-## RandomEase
-## RandomBlink
+### RandomEase
+### RandomBlink
