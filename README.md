@@ -12,15 +12,17 @@ Pour convertir un objet en chemin dans Inkscape : <kbd>Maj</kbd>+<kbd>Ctrl</kbd>
 
 Seul les **groupes** d'objets apparaissent comme des parties indépendantes et animables dans le logiciel d'animation (liste de gauche). Si aucun groupe n'a été définit dans l'illustration vectorielle, vous ne pourrez animer l'illustration que comme un objet monolithique et n'aurez pas accès à ses sous-parties.<br>
 
+<img align="right" alt="inkscape group id" src="res/inkscape_groupid.png">
+
 Dans le logiciel Inkscape, La création de groupes d'objets se fait par la combinaison des touches <kbd>Ctrl</kbd>+<kbd>G</kbd> ou bien par le menu `Objet > Grouper`, après avoir sélectionné les différents objets à regrouper ensemble.<br>
 Il peut être pratique de nommer les groupes créés afin de faciliter leur sélection dans la liste des parties animables. Dans Inkscape, sélectionnez le groupe puis accédez à ses propriétés avec la combinaison de touches <kbd>Maj</kbd>+<kbd>Ctrl</kbd>+<kbd>O</kbd> bien par le menu `Objet > Propriétés de l'objet...`. Modifiez l'attribut "ID" pour renommer le groupe.<br>
-![inkscape group id](res/inkscape_groupid.png)
 
 Un groupe peut contenir, en plus d'objets simples, d'autres sous-groupes. Vous pourrez ainsi animer chaque sous-groupe d'une façon indépendante (Ex : les doigts d'une main) et chaque sous-groupe sera affecté de la même manière par l'animation du groupe parent (lorsque la main bouge, les doigts se déplacent avec la main).<br>
 C'est donc l'organisation des groupes qui définit le "rigging" (squelettage) le l'illustration. On organise les groupes de façon hiérarchique en partant des extrémités pour aller vers la raçine. (Pour reprendre notre exemple : chaque doigt est un groupe contenu dans le groupe "main", lui-même contenu dans le groupe "avant-bras", lui-même contenu dans le groupe "bras"...)
 
 ## Repositionnement du modèle ou de ses parties
 <img align="right" alt="origin marker" src="res/origin.png">
+
 Vous pouvez déplacer chaque partie relativement aux autres en maintenant la touche <kbd>Maj</kbd> et le bouton gauche de la souris enfoncée. Relachez le bouton <kbd>Maj</kbd> à l'emplacement voulu.<br>
 Il est important de centrer le modèle entier (en sélectionnant le premier groupe dans le menu de gauche) par rapport à l'origine afin de faciliter le placement du modèle dans le monde virtuel de votre jeu.<br>
 
@@ -58,13 +60,16 @@ Pratique pour redimensionner certaines parties (avec les axes "scale") à l'avan
 ### EasingFromTo
 Interpolation entre deux valeurs avec différentes fonctions de transition (*easing*).
 #### Paramètres
- *From* | valeur de départ
- *To* | valeur d'arrivée
- *Delay* | intervale de temps à attendre avant le début de l'animation
- *EaseDuration* | intervale de temps pour effectuer la transition
- *Easing* | fonction de transition à utiliser (appuyer 2 fois sur la touche <kbd>h</kbd> pour avoir un apperçu des fonctions de transition)
- *BackForth* | effectue un va-et-vient
- *Loop* | joue l'animation en boucle
+
+| ----- | ----- |
+| *From* | valeur de départ |
+| *To* | valeur d'arrivée |
+| *Delay* | intervale de temps à attendre avant le début de l'animation |
+| *EaseDuration* | intervale de temps pour effectuer la transition |
+| *Easing* | fonction de transition à utiliser (appuyer 2 fois sur la touche <kbd>h</kbd> pour avoir un apperçu des fonctions de transition) |
+| *BackForth* | effectue un va-et-vient |
+| *Loop* | joue l'animation en boucle |
+
 ### Timetable
 Permet de créer une suite de déplacement unidimensionelle en plusieurs étapes (entre 4 et 32).<br>
 #### Paramètres
