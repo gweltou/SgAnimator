@@ -8,7 +8,7 @@ Si vous essayez d'ouvrir un fichier SVG avec le logiciel d'animation il est prob
 (Actuellement, seuls les objects de type *path* (chemin) et les objets de type *circle* (cercle) sont reconnus par le logiciel)<br>
 Pour convertir un objet en chemin dans Inkscape : <kbd>Maj</kbd>+<kbd>Ctrl</kbd>+<kbd>C</kbd> ou bien par le menu `Chemin > Objet en chemin`, après avoir selectionné les objets à convertir.
 ### Organisation des objets en groupes
-<img align="right" alt="parts list" src="res/sga_partslist.png">
+<img align="left" alt="parts list" src="res/sga_partslist.png">
 
 Seul les **groupes** d'objets apparaissent comme des parties indépendantes et animables dans le logiciel d'animation (liste de gauche). Si aucun groupe n'a été définit dans l'illustration vectorielle, vous ne pourrez animer l'illustration que comme un objet monolithique et n'aurez pas accès à ses sous-parties.<br>
 
@@ -20,9 +20,9 @@ Un groupe peut contenir, en plus d'objets simples, d'autres sous-groupes. Vous p
 C'est donc l'organisation des groupes qui définit le "rigging" (squelettage) le l'illustration. On organise les groupes de façon hiérarchique en partant des extrémités pour aller vers la raçine. (Pour reprendre notre exemple : chaque doigt est un groupe contenu dans le groupe "main", lui-même contenu dans le groupe "avant-bras", lui-même contenu dans le groupe "bras"...)
 
 ## Repositionnement du modèle ou de ses parties
+<img align="right" alt="origin marker" src="res/origin.png">
 Vous pouvez déplacer chaque partie relativement aux autres en maintenant la touche <kbd>Maj</kbd> et le bouton gauche de la souris enfoncée. Relachez le bouton <kbd>Maj</kbd> à l'emplacement voulu.<br>
 Il est important de centrer le modèle entier (en sélectionnant le premier groupe dans le menu de gauche) par rapport à l'origine afin de faciliter le placement du modèle dans le monde virtuel de votre jeu.<br>
-![origin marker](res/origin.png)
 
 ## Placement des points de pivot
 Chaque partie selectionnable dans le logiciel d'animation possède un point d'origine ou point de pivot (situé aux coordonnées 0,0 par défaut), représenté par un point bleu.<br>
@@ -32,13 +32,13 @@ Pour modifier l'emplacement du point de pivot de la partie active, faites un cli
 ## Fonctions d'animation
 <img align="right" src="res/fonctions.png">
 
-1. Choix de la fonction
-2. Choix de l'axe
-3. Supprimer la fonction
-4. Paramètres de la fonction
-5. Copier l'animation
-6. Coller l'animation précédemment copiée
-7. Monter/Descendre l'animation dans la pile
+> 1. Choix de la fonction
+> 2. Choix de l'axe
+> 3. Supprimer la fonction
+> 4. Paramètres de la fonction
+> 5. Copier l'animation
+> 6. Coller l'animation précédemment copiée
+> 7. Monter/Descendre l'animation dans la pile
 
 Chaque partie selectionnable dans la liste de gauche peut-être animée par une ou plusieurs fonctions d'animation.<br>
 Une fonction renvoie une valeur simple qui peut varier en fonction de temps. Pour qu'une fonction anime un objet, il faut également choisir un axe sur lequel s'appliquera la valeur de la fonction.
