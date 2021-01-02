@@ -30,10 +30,10 @@ Le placement du point de pivot affecte les animations de type rotation et étire
 Pour modifier l'emplacement du point de pivot de la partie active, faites un click droit pour ouvrir le menu contextuel et choisissez `set pivot`. Clickez ensuite à l'endroit où vous voulez placer le pivot.
 
 ## Fonctions d'animation
-<img align="right" src="res/fonctions.png">
-
 Chaque partie selectionnable dans la liste de gauche peut-être animée par une ou plusieurs fonctions d'animation.<br>
 Une fonction renvoie une valeur simple qui peut varier en fonction de temps. Pour qu'une fonction anime un objet, il faut également choisir un axe sur lequel s'appliquera la valeur de la fonction.
+
+<img align="right" src="res/fonctions.png">
 
 > 1. Choix de la fonction
 > 2. Choix de l'axe
@@ -56,12 +56,21 @@ Les différents axes sur lesquels s'appliquent les fonctions d'animation sont :<
 Transformation statique (ne varie pas avec le temps).
 Pratique pour redimensionner certaines parties (avec les axes "scale") à l'avant d'autres fonctions d'animation.
 ### EasingFromTo
+Interpolation entre deux valeurs avec différentes fonctions de transition (*easing*).
+### Paramètres
+ * *From* valeur de départ
+ * *To* valeur d'arrivée
+ * *Delay* intervale de temps à attendre avant le début de l'animation
+ * *EaseDuration* intervale de temps pour effectuer la transition
+ * *Easing* fonction de transition à utiliser (appuyer 2 fois sur la touche <kbd>h</kbd> pour avoir un apperçu des fonctions de transition)
+ * *BackForth* effectue un va-et-vient
+ * *Loop* joue l'animation en boucle
 ### Timetable
 Permet de créer une suite de déplacement unidimensionelle en plusieurs étapes (entre 4 et 32).<br>
 #### Paramètres
 * *Num steps* définit le nombre d'étapes dans l'animation (entre 4 et 32)
 * *Smooth end* transition souple entre la dernière étape et la première étape (rajoute une étape)
-* *Loop* l'animation est jouée en boucle
+* *Loop* joue l'animation en boucle
 ### Sin
 ### Spin
 Fonction pour créer une rotation permanente (avec l'axe "rotation"). Permet d'animer les pales d'un moulin à vent par exemple.
