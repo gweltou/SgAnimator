@@ -32,7 +32,7 @@ public class WelcomeScreen extends Screen {
       mill.addShape(newWing);
     }
 
-    TimeFunction spin = new TFSpin(0f, duration*random(2f, 4f), 1f, 1);
+    TimeFunction spin = new TFSpin(0f, duration*random(2.4f, 4f), 1f, 1);
     mill.addAnimation(new Animation(spin, Animation.AXE_ROT));
   }
 
