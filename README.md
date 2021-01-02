@@ -57,14 +57,14 @@ Transformation statique (ne varie pas avec le temps).
 Pratique pour redimensionner certaines parties (avec les axes "scale") à l'avant d'autres fonctions d'animation.
 ### EasingFromTo
 Interpolation entre deux valeurs avec différentes fonctions de transition (*easing*).
-### Paramètres
- * *From* valeur de départ
- * *To* valeur d'arrivée
- * *Delay* intervale de temps à attendre avant le début de l'animation
- * *EaseDuration* intervale de temps pour effectuer la transition
- * *Easing* fonction de transition à utiliser (appuyer 2 fois sur la touche <kbd>h</kbd> pour avoir un apperçu des fonctions de transition)
- * *BackForth* effectue un va-et-vient
- * *Loop* joue l'animation en boucle
+#### Paramètres
+ *From* | valeur de départ
+ *To* | valeur d'arrivée
+ *Delay* | intervale de temps à attendre avant le début de l'animation
+ *EaseDuration* | intervale de temps pour effectuer la transition
+ *Easing* | fonction de transition à utiliser (appuyer 2 fois sur la touche <kbd>h</kbd> pour avoir un apperçu des fonctions de transition)
+ *BackForth* | effectue un va-et-vient
+ *Loop* | joue l'animation en boucle
 ### Timetable
 Permet de créer une suite de déplacement unidimensionelle en plusieurs étapes (entre 4 et 32).<br>
 #### Paramètres
@@ -72,6 +72,8 @@ Permet de créer une suite de déplacement unidimensionelle en plusieurs étapes
 * *Smooth end* transition souple entre la dernière étape et la première étape (rajoute une étape)
 * *Loop* joue l'animation en boucle
 ### Sin
+Mouvement sinusoïdale (idéale pour les mouvement de respiration par exemple).
+#### Paramètres
 ### Spin
 Fonction pour créer une rotation permanente (avec l'axe "rotation"). Permet d'animer les pales d'un moulin à vent par exemple.
 ### RandomEase
