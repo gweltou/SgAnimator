@@ -12,17 +12,19 @@ public class HelpScreen1 extends Screen {
       "r\n"+
       "d\n"+
       "h\n"+
+      "w\n"+
       "right click\n"+
       "MAJ + right drag\n", width/4, height/4);
     text("Open file (svg or json)\n"+
       "Save json file\n"+
       "Select next/previous shape group\n"+
-      "play/pause animation\n"+
-      "reset animation\n"+
-      "show/hide UI\n"+
-      "help screen\n"+
-      "place pivot\n"+
-      "translate geometry\n", width/2, height/4);
+      "Play/Pause animation\n"+
+      "Reset animation\n"+
+      "Show/Hide UI\n"+
+      "Help screen\n"+
+      "Wireframe\n"+
+      "Place pivot\n"+
+      "Translate geometry\n", width/2, height/4);
     text("Ver. "+version, width-110, height-20);
   }
   
@@ -30,5 +32,10 @@ public class HelpScreen1 extends Screen {
     if (key == 'h') {
       currentScreen = helpScreenEasing;
     }
+  }
+  
+  @Override
+  void mouseClicked(MouseEvent event) {
+    currentScreen = helpScreenEasing;
   }
 }

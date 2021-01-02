@@ -113,6 +113,9 @@ public class MainScreen extends Screen {
         hideUI();
         currentScreen = helpScreen1;
         break;
+      case 'w':  // Wireframe
+        renderer.toggleWireframe();
+        break;
       case 15:  // CTRL+o, load a new file
         selectInput("Select a file", "fileSelected");
         break;
