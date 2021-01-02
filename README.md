@@ -58,7 +58,7 @@ Les différents axes sur lesquels s'appliquent les fonctions d'animation sont :<
 Transformation statique (ne varie pas avec le temps).
 Pratique pour redimensionner certaines parties (avec les axes "scale") à l'avant d'autres fonctions d'animation.
 ### EasingFromTo
-Interpolation entre deux valeurs avec différentes fonctions de transition (*easing*).
+Interpolation entre deux valeurs avec différentes fonctions de transition.
 
 | Paramètre | |
 | ----- | ----- |
@@ -74,16 +74,22 @@ Interpolation entre deux valeurs avec différentes fonctions de transition (*eas
 Permet de créer une suite de déplacement unidimensionelle en plusieurs étapes.<br>
 
 | Paramètre | |
+| ----- | ----- |
 | *Num steps* | définit le nombre d'étapes dans l'animation (entre 4 et 32) |
 | *Smooth end* | transition souple entre la dernière étape et la première étape (rajoute une étape) |
 | *Loop* | joue l'animation en boucle |
 
 ### Sin
 Mouvement sinusoïdale (idéale pour les mouvement de respiration par exemple).
-#### Paramètres
+
+| Paramètre | |
+| ----- | ----- |
 
 ### Spin
 Fonction pour créer une rotation permanente (avec l'axe "rotation"). Permet d'animer les pales d'un moulin à vent par exemple.
+
+| Paramètre | |
+| ----- | ----- |
 
 ### RandomEase
 
