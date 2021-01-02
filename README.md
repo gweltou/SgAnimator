@@ -8,8 +8,7 @@ Si vous essayez d'ouvrir un fichier SVG avec le logiciel d'animation il est prob
 (Actuellement, seuls les objects de type *path* (chemin) et les objets de type *circle* (cercle) sont reconnus par le logiciel)<br>
 Pour convertir un objet en chemin dans Inkscape : <kbd>Maj</kbd>+<kbd>Ctrl</kbd>+<kbd>C</kbd> ou bien par le menu `Chemin > Objet en chemin`, après avoir selectionné les objets à convertir.
 ### Organisation des objets en groupes
-<img align="left" alt="parts list" src="res/sga_partslist.png">
-
+<img align="right" alt="parts list" src="res/sga_partslist.png">
 Seul les **groupes** d'objets apparaissent comme des parties indépendantes et animables dans le logiciel d'animation (liste de gauche). Si aucun groupe n'a été définit dans l'illustration vectorielle, vous ne pourrez animer l'illustration que comme un objet monolithique et n'aurez pas accès à ses sous-parties.<br>
 
 Dans le logiciel Inkscape, La création de groupes d'objets se fait par la combinaison des touches <kbd>Ctrl</kbd>+<kbd>G</kbd> ou bien par le menu "Objet > Grouper", après avoir sélectionné les différents objets à regrouper ensemble.<br>
@@ -30,8 +29,9 @@ Le placement du point de pivot affecte les animations de type rotation et étire
 Pour modifier l'emplacement du point de pivot de la partie active, faites un click droit pour ouvrir le menu contextuel et choisissez `set pivot`. Clickez ensuite à l'endroit où vous voulez placer le pivot.
 
 ## Fonctions d'animation
+Chaque partie selectionnable dans la liste de gauche peut-être animée par une ou plusieurs fonctions d'animation.<br>
+Une fonction renvoie une valeur simple qui peut varier en fonction de temps. Pour qu'une fonction anime un objet, il faut également choisir un axe sur lequel s'appliquera la valeur de la fonction.
 <img align="right" src="res/fonctions.png">
-
 > 1. Choix de la fonction
 > 2. Choix de l'axe
 > 3. Supprimer la fonction
@@ -39,9 +39,6 @@ Pour modifier l'emplacement du point de pivot de la partie active, faites un cli
 > 5. Copier l'animation
 > 6. Coller l'animation précédemment copiée
 > 7. Monter/Descendre l'animation dans la pile
-
-Chaque partie selectionnable dans la liste de gauche peut-être animée par une ou plusieurs fonctions d'animation.<br>
-Une fonction renvoie une valeur simple qui peut varier en fonction de temps. Pour qu'une fonction anime un objet, il faut également choisir un axe sur lequel s'appliquera la valeur de la fonction.
 
 Les différents axes sur lesquels s'appliquent les fonctions d'animation sont :<br>
 
