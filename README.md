@@ -29,9 +29,18 @@ Le placement du point de pivot affecte les animations de type rotation et étire
 Pour modifier l'emplacement du point de pivot de la partie active, faites un click droit pour ouvrir le menu contextuel et choisissez `set pivot`. Clickez ensuite à l'endroit où vous voulez placer le pivot.
 
 ## Fonctions d'animation
+<img align="right" src="res/fonctions.png"></img>
+1. Choix de la fonction
+2. Choix de l'axe
+3. Supprimer la fonction
+4. Paramètres de la fonction
+5. Copier l'animation
+6. Coller l'animation précédemment copiée
+7. Monter/Descendre l'animation dans la pile
+<br>
 Chaque partie selectionnable dans la liste de gauche peut-être animée par une ou plusieurs fonctions d'animation.<br>
 Une fonction renvoie une valeur simple qui peut varier en fonction de temps. Pour qu'une fonction anime un objet, il faut également choisir un axe sur lequel s'appliquera la valeur de la fonction.<br>
-Les différents axes sur lesquels s'appliquent les fonctions d'animation sont :
+Les différents axes sur lesquels s'appliquent les fonctions d'animation sont :<br>
 * **X** (l'axe horizontal)
 * **Y** (l'axe vertical)
 * **Rotation** (rotation en degrées autour d'un point de pivot)
