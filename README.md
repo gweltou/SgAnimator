@@ -6,7 +6,7 @@ Fonctionne avec les fichiers vectoriels au format **SVG**. Les données créées
 ### Conversion des objets en chemin
 Si vous essayez d'ouvrir un fichier SVG avec le logiciel d'animation il est probable que beaucoup d'objets ne soient pas affichés correctement. Ceci est dû aux limitations inhérentes à la bibliothèque de Processing (le langage dans lequel est programmé le logiciel d'animation). Pour contourner ce problème, il est nécessaire de convertir tous les objets graphiques en chemin (*path*) depuis votre logiciel d'illustration vectorielle.<br>
 (Actuellement, seuls les objects de type *path* (chemin) et les objets de type *circle* (cercle) sont reconnus par le logiciel)<br>
-Pour convertir un objet en chemin dans Inkscape : <kbd>Maj</kbd>+<kbd>Ctrl</kbd>+<kbd>C</kbd> ou bien par le menu `Chemin -> Objet en chemin`, après avoir selectionné les objets à convertir.
+Pour convertir un objet en chemin dans Inkscape : <kbd>Maj</kbd>+<kbd>Ctrl</kbd>+<kbd>C</kbd> ou bien par le menu `Chemin > Objet en chemin`, après avoir selectionné les objets à convertir.
 ### Organisation des objets en groupes
 Seul les **groupes** d'objets apparaissent comme des parties indépendantes et animables dans le logiciel d'animation (liste de gauche). Si aucun groupe n'a été définit dans l'illustration vectorielle, vous ne pourrez animer l'illustration que comme un objet monolithique et n'aurez pas accès à ses sous-parties.<br>
 ![parts list](res/sga_partslist.png)
@@ -19,7 +19,9 @@ Un groupe peut contenir, en plus d'objets simples, d'autres sous-groupes. Vous p
 C'est donc l'organisation des groupes qui définit le "rigging" (squelettage) le l'illustration. On organise les groupes de façon hiérarchique en partant des extrémités pour aller vers la raçine. (Pour reprendre notre exemple : chaque doigt est un groupe contenu dans le groupe "main", lui-même contenu dans le groupe "avant-bras", lui-même contenu dans le groupe "bras"...)
 
 ## Repositionnement du modèle ou de ses parties
-
+Vous pouvez déplacer chaque partie relativement aux autres en maintenant la touche <kbd>Maj</kbd> et le bouton gauche de la souris enfoncée. Relachez le bouton <kbd>Maj</kbd> à l'emplacement voulu.<br>
+Il est important de centrer le modèle entier (en sélectionnant le premier groupe dans le menu de gauche) par rapport à l'origine afin de faciliter le placement du modèle dans le monde virtuel de votre jeu.<br>
+![origin marker](res/origin.png)
 
 ## Placement des points de pivot
 Chaque partie selectionnable dans le logiciel d'animation possède un point d'origine ou point de pivot (situé aux coordonnées 0,0 par défaut), représenté par un point bleu.<br>
@@ -42,7 +44,11 @@ Transformation statique (ne varie pas avec le temps).
 Pratique pour redimensionner certaines parties (avec les axes "scale") à l'avant d'autres fonctions d'animation.
 ### EasingFromTo
 ### Timetable
-Permet de créer une suite de déplacement de plusieurs étapes (entre 4 et 32) sur un seul axe.
+Permet de créer une suite de déplacement unidimensionelle en plusieurs étapes (entre 4 et 32).<br>
+#### Paramètres
+* *Num steps* définit le nombre d'étapes dans l'animation (entre 4 et 32)
+* *Smooth end* transition souple entre la dernière étape et la première étape (rajoute une étape)
+* *Loop* l'animation est jouée en boucle
 ### Sin
 ### Spin
 Fonction pour créer une rotation permanente (avec l'axe "rotation"). Permet d'animer les pales d'un moulin à vent par exemple.
