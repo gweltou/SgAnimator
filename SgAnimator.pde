@@ -16,7 +16,7 @@
   BUGS:
  * Animations don't scale when hardTransforming geometry
  * Seule la première animation est sauvegardée
- 
+ * Can't select axe before function
  */
 
 import com.badlogic.gdx.graphics.*;
@@ -34,7 +34,7 @@ import java.util.*;
 import java.lang.reflect.Field;
 
 
-String version = "0.5.1";
+String version = "0.5.2";
 
 
 MainScreen mainScreen;

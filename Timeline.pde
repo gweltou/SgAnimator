@@ -30,9 +30,10 @@ class Timeline {
     this.animNum = animNum;
 
     group = cp5.addGroup("timeline")
-      .setPosition(width-accordion.getWidth()-groupWidth-2*margin, margin+10)
+      .setPosition(width-accordion.getWidth()-groupWidth-2*margin, margin+groupBarHeight+1)
       .setWidth(groupWidth)
       //.hideBar()
+      .setBarHeight(groupBarHeight)
       .setBackgroundHeight(groupHeight)
       .setBackgroundColor(color(0, 100))
       ;
@@ -120,7 +121,6 @@ class Timeline {
     sliders = new Slider[32];
     for (int i=0; i<32; i++) {
       sliders[i] = new TimelineSlider(cp5, "tlslider"+i)
-        .setRange(-180, 180)
         .setGroup(group)
         .setVisible(false)
         ;
@@ -239,8 +239,11 @@ class Timeline {
   class TimelineSlider extends Slider {
     public TimelineSlider(ControlP5 theControlP5, String theName) {
       super(theControlP5, theName);
+      setRange(-180, 180);
       setSliderMode(Slider.FLEXIBLE);
-      setHandleSize(3);
+      setHandleSize(5);
+      setNumberOfTickMarks(3);
+      snapToTickMarks(false);
       setLabelVisible(false);
     }
 

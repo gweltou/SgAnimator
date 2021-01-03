@@ -8,7 +8,8 @@ Timeline timeline;
 PFont defaultFont;
 int spacing = 4;
 int margin = spacing;
-int barHeight = 18;
+int menuBarHeight = 18;
+int groupBarHeight = 16;
 int keepsOpenAnimNum = -1;
 int axeWidth = 72;
 
@@ -83,7 +84,7 @@ void setupUI() {
     .setLabel("parts list")
     .setPosition(margin, margin)
     .setHeight(height-2*margin)
-    .setItemHeight(barHeight)
+    .setItemHeight(menuBarHeight)
     .hide();
   ;
   
@@ -156,7 +157,7 @@ void updateUI() {
     g = cp5.addGroup("animation"+animNum)
       .setLabel("animation "+animNum)
       //.setFont(defaultFont)
-      .setBarHeight(barHeight)
+      .setBarHeight(groupBarHeight)
       .setBackgroundColor(color(0, 100))
       ;
 
@@ -164,8 +165,8 @@ void updateUI() {
       .setLabel("function")
       .setFont(defaultFont)
       .setPosition(pos.x, pos.y)
-      .setBarHeight(barHeight)
-      .setItemHeight(barHeight)
+      .setBarHeight(menuBarHeight)
+      .setItemHeight(menuBarHeight)
       .onEnter(toFront)
       .onLeave(close)
       .addItems(functionsName)
@@ -180,8 +181,8 @@ void updateUI() {
       .setFont(defaultFont)
       .setPosition(pos.x, pos.y)
       .setWidth(axeWidth)
-      .setBarHeight(barHeight)
-      .setItemHeight(barHeight)
+      .setBarHeight(menuBarHeight)
+      .setItemHeight(menuBarHeight)
       .onEnter(toFront)
       .onLeave(close)
       .addItems(Animation.axeNames)
@@ -196,7 +197,7 @@ void updateUI() {
       .setLabel("x")
       .setColorBackground(0xffff0000)
       .setPosition(pos.x, pos.y)
-      .setSize(barHeight, barHeight)
+      .setSize(menuBarHeight, menuBarHeight)
       .activateBy(ControlP5.PRESS)
       .setGroup(g)
       ;
@@ -237,7 +238,7 @@ void updateUI() {
   g = cp5.addGroup("animation"+animNum)
     .setLabel("animation "+animNum)
     //.setFont(defaultFont)
-    .setBarHeight(barHeight)
+    .setBarHeight(groupBarHeight)
     .setBackgroundColor(color(0, 100))
     ;
 
@@ -245,8 +246,8 @@ void updateUI() {
     .setLabel("function")
     .setFont(defaultFont)
     .setPosition(pos.x, pos.y)
-    .setBarHeight(barHeight)
-    .setItemHeight(barHeight)
+    .setBarHeight(menuBarHeight)
+    .setItemHeight(menuBarHeight)
     .onEnter(toFront)
     .onLeave(close)
     .addItems(functionsName)
@@ -260,8 +261,8 @@ void updateUI() {
     .setFont(defaultFont)
     .setPosition(pos.x, pos.y)
     .setWidth(axeWidth)
-    .setBarHeight(barHeight)
-    .setItemHeight(barHeight)
+    .setBarHeight(menuBarHeight)
+    .setItemHeight(menuBarHeight)
     .onEnter(toFront)
     .onLeave(close)
     .addItems(Animation.axeNames)
@@ -365,8 +366,8 @@ void drawParams(Group g, int animNum, PVector pos) {
       cp5.addScrollableList(param.name+animNum)
         .setLabel("easing function")
         .setPosition(pos.x, pos.y)
-        .setBarHeight(barHeight)
-        .setItemHeight(barHeight)
+        .setBarHeight(menuBarHeight)
+        .setItemHeight(menuBarHeight)
         .onEnter(toFront)
         .onLeave(close)
         .addItems(Animation.interpolationNamesSimp)
