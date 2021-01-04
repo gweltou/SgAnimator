@@ -53,6 +53,7 @@ class MyScrollableList extends ScrollableList {
 class FunctionAccordion extends Accordion {
   private int accordionWidth = 207;
   
+  
   public FunctionAccordion(ControlP5 theControlP5, String theName) { 
     super(theControlP5, theName);
     setWidth(accordionWidth);
@@ -101,7 +102,6 @@ void setupUI() {
   accordion = new FunctionAccordion(cp5, "accordion");
 
   // Full Animation selector
-  println(width, height);
   PVector pos = new PVector(-60+width/2, height-margin-24-24);
   animName = cp5.addTextfield("animname")
     //.setLabelVisible(false) // Doesn't work
@@ -223,9 +223,44 @@ void updateUI() {
     } else {
       drawParams(g, animNum, pos);
     }
-    pos.add(0.f, spacing);
-
-
+    pos.add(spacing, spacing);
+    
+    // Draw Animation general parameters
+    cp5.addKnob("animamp"+animNum)
+      .setLabel("")
+      //.setLabelVisible(false)
+      .setPosition(pos.x, pos.y)
+      .setRange(0, 500)
+      .setResolution(500f)
+      .setScrollSensitivity(0.0001f)
+      .setValue(anim.getAmp())
+      .setRadius(20)
+      .setDragDirection(Knob.VERTICAL)
+      .setGroup(g)
+      ;
+    cp5.addTextlabel("amp"+animNum+"label")
+        .setPosition(pos.x + 35 + spacing, pos.y + 16)
+        .setText("amp".toUpperCase())
+        .setGroup(g)
+        ;
+    pos.set(accordion.getWidth()-82, pos.y);
+    
+    cp5.addToggle("animinv"+animNum)
+        .setLabelVisible(false)
+        .setPosition(pos.x, pos.y + 10)
+        .setSize(40, 20)
+        .setMode(ControlP5.SWITCH)
+        .setValue(!anim.getInv())
+        .setGroup(g)
+        ;
+      cp5.addTextlabel("inv"+animNum+"label")
+        .setPosition(pos.x + 38 + spacing, pos.y + 15)
+        .setText("invert".toUpperCase())
+        .setGroup(g)
+        ;
+    pos.add(0, cp5.getController("animamp"+animNum).getHeight());
+    
+    pos.set(spacing, pos.y+spacing*2);
     drawBottomButtons(g, animNum, pos);
 
     g.setBackgroundHeight((int) pos.y);
@@ -297,7 +332,7 @@ void drawParams(Group g, int animNum, PVector pos) {
       cp5.addSlider(param.name+animNum)
         .setLabel(param.name)
         .setPosition(pos.x, pos.y)
-        .setWidth(204)
+        .setWidth(accordion.getWidth()-40)
         .setHeight(16)
         .setRange(param.min, param.max)
         .setValue((float) param.getValue())

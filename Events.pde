@@ -79,14 +79,30 @@ void controlEvent(ControlEvent event) throws InstantiationException, IllegalAcce
       playAnim = true;
       fullAnimationDirty = true;
     }
+    
     else if (name.startsWith("axe")) {
       String[] m = match(name, "axe(\\d+)");
       int animNum = parseInt(m[1]);
       selected.getAnimation(animNum).setAxe((int) value);
+      mustUpdateUI = true;
       playAnim = true;
       fullAnimationDirty = true;
       if (timeline != null && animNum == timeline.getAnimNum())
         timeline.show();
+    }
+    
+    else if (name.startsWith("animamp")) {
+      String[] m = match(name, "animamp(\\d+)");
+      int animNum = parseInt(m[1]);
+      selected.getAnimation(animNum).setAmp(value);
+      fullAnimationDirty = true;
+    }
+    
+    else if (name.startsWith("animinv")) {
+      String[] m = match(name, "animinv(\\d+)");
+      int animNum = parseInt(m[1]);
+      selected.getAnimation(animNum).setInv(value == 0 ? true : false);
+      fullAnimationDirty = true;
     }
     
     else if (name.equals("pivotbutton")) {
@@ -101,6 +117,7 @@ void controlEvent(ControlEvent event) throws InstantiationException, IllegalAcce
       animationClipboard = selected.getAnimation(animNum).copy();
       mustUpdateUI = true;
     }
+    
     else if (name.startsWith("pastebutton")) {
       String[] m = match(name, "pastebutton(\\d+)");
       int animNum = parseInt(m[1]);
@@ -136,6 +153,7 @@ void controlEvent(ControlEvent event) throws InstantiationException, IllegalAcce
       mustUpdateUI = true;
       fullAnimationDirty = true;
     }
+    
     else if (name.startsWith("swapdown")) {
       String[] m = match(name, "swapdown(\\d+)");
       int animNum = parseInt(m[1]);
@@ -156,6 +174,7 @@ void controlEvent(ControlEvent event) throws InstantiationException, IllegalAcce
       }
       timeline.show();
     }
+    
     else if (name.startsWith("tl")) {
       // Timeline specific parameters
       String[] m = match(name, "([a-z]+)(\\d+)");
@@ -174,7 +193,9 @@ void controlEvent(ControlEvent event) throws InstantiationException, IllegalAcce
         }
       }
       timeline.show();
+      fullAnimationDirty = true;
     }
+    
     else {
       String[] m = match(name, "([a-z]+)(\\d+)");
       if (m != null) {
@@ -193,6 +214,58 @@ void controlEvent(ControlEvent event) throws InstantiationException, IllegalAcce
         if (timeline != null && timeline.getFunction() == fn)
           timeline.show();
       }
+    }
+  }
+}
+
+
+
+
+void fileSelected(File selection) throws IOException { 
+  if (selection == null) {
+    println("Window was closed or the user hit cancel.");
+  } else {
+    println("User selected " + selection.getAbsolutePath());
+    String filename = selection.getAbsolutePath();
+    if (filename.endsWith("svg")) {
+      ComplexShape shape = ComplexShape.fromPShape(loadShape(filename));
+      if (shape == null)
+        return;
+      
+      selectedIndex = 0;
+      selected = null;
+      // Go down the complexShape tree if the root is empty
+      while (shape.getShapes().size() == 1 && shape.getChildren().size() == 1)
+        shape = (ComplexShape) shape.getShapes().get(0);
+      
+      animationCollection = new AnimationCollection();
+      avatar = new Avatar();
+      avatar.setShape(shape);
+      partsName = new String[avatar.getPartsList().length];
+      for (int i=0; i<partsName.length; i++) {
+        partsName[i] = avatar.getPartsList()[i].getId();
+      }
+      partsList.setItems(partsName);
+      baseFilename = filename.substring(0, filename.length()-4);
+      
+      
+      currentScreen = mainScreen;
+      animName.setText("anim0");
+      mainScreen.resetView();
+      showUI();
+      accordion.hide();
+      
+    /*} else if (filename.endsWith("tdat")) {
+      rootShape = loadGeometry(selection);
+      File animFile = new File(filename.replace(".tdat", ".json"));
+      if (animFile.exists()) {
+        JSONObject rootElement = loadJSONObject(selection);
+        loadAnimation(rootElement.getJSONArray("animation"));
+      }*/
+    } else if (filename.endsWith("json")) {
+      mustLoad = selection;
+    } else {
+      println("Bad filename");
     }
   }
 }

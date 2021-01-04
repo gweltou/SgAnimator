@@ -3,7 +3,7 @@ public final PFont BitFontStandard58 = new BitFont( CP.decodeBase64( BitFont.sta
 
 class Timeline {
   private int spacing = 2;
-  private int sliderSpacing = 2;
+  private int sliderSpacing = 3;
   private int sliderHeight = 120;
   private int groupHeight = sliderHeight+40;
   private int groupWidth = 360;
@@ -239,7 +239,7 @@ class Timeline {
   class TimelineSlider extends Slider {
     public TimelineSlider(ControlP5 theControlP5, String theName) {
       super(theControlP5, theName);
-      setRange(-180, 180);
+      setRange(-1, 1);
       setSliderMode(Slider.FLEXIBLE);
       setHandleSize(5);
       setNumberOfTickMarks(3);

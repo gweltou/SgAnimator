@@ -19,7 +19,7 @@ public class WelcomeScreen extends Screen {
     wing.addShape(shape);
     TimeFunction stretch = new TFSin(duration*random(0.4f, 2f), 0.3f, map(numWings, 8, 32, 1, 1.5), 0f);
     wing.addAnimation(new Animation(stretch, Animation.AXE_SX));
-    TimeFunction translate = new TFConstant(innerRadius, 1f);
+    TimeFunction translate = new TFConstant(innerRadius);
     wing.addAnimation(new Animation(translate, Animation.AXE_X));
 
     mill = new ComplexShape();
@@ -27,7 +27,7 @@ public class WelcomeScreen extends Screen {
       ComplexShape newWing = wing.copy();
       newWing.setColorMod(random(0.9, 1.1), random(0.9, 1.1), random(0.9, 1.1), 1f);
       newWing.getAnimation(0).setParam("phase", r1*i*360/numWings);
-      TimeFunction rotate = new TFConstant(i*360/numWings, 1f);
+      TimeFunction rotate = new TFConstant((float) i*2/numWings);
       newWing.addAnimation(new Animation(rotate, Animation.AXE_ROT));
       mill.addShape(newWing);
     }
@@ -66,6 +66,7 @@ public class WelcomeScreen extends Screen {
   @Override
     void mouseClicked(MouseEvent event) {
     selectInput("Select a file", "fileSelected");
+    loadScreen = new LoadScreen();
   }
 
   @Override
@@ -76,6 +77,7 @@ public class WelcomeScreen extends Screen {
       break;
     case 15:  // CTRL+o, load a new file
       selectInput("Select a file", "fileSelected");
+      loadScreen = new LoadScreen();
       break;
     }
   }

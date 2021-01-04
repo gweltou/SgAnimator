@@ -2,17 +2,22 @@ public class MainScreen extends Screen {
   PImage selectpart;
   Affine2 transform;
   Affine2 hardTransform;
+  TimeFunction selectpartAnim;
+  
   
   public MainScreen() {
     selectpart = loadImage("selectpart.png");
     
     transform = new Affine2().setToTranslation(width/2, height/2);
     hardTransform = new Affine2 ();
+    
+    selectpartAnim = new TFEaseFromTo(60, 0, 0.66f, 0.66f, "bounceOut", false, true);
   }
   
   public void resetView() {
     transform.setToTranslation(width/2, height/2);
   }
+
 
   public void draw() {
     if (avatar == null) {
@@ -44,7 +49,8 @@ public class MainScreen extends Screen {
             renderer.popMatrix();
           }
         } else {
-          image(selectpart, partsList.getPosition()[0] + partsList.getWidth() + 4, partsList.getPosition()[1]);
+          selectpartAnim.update(1/frameRate);
+          image(selectpart, partsList.getPosition()[0] + partsList.getWidth() + 4 + selectpartAnim.getValue(), partsList.getPosition()[1] + selectpartAnim.getValue()/3);
         }
       }
       renderer.popMatrix();
@@ -118,12 +124,13 @@ public class MainScreen extends Screen {
         break;
       case 15:  // CTRL+o, load a new file
         selectInput("Select a file", "fileSelected");
+        loadScreen = new LoadScreen();
         break;
       case 19: // CTRL+s, save
         if (avatar != null) {
           if (fullAnimationDirty)
             saveFullAnimation(animName.getText(), fullAnimationIndex);
-          saveAvatarFile(avatar);
+          avatar.saveFile(baseFilename.concat(".json"), animationCollection);
         }
         break;
       }
@@ -133,7 +140,6 @@ public class MainScreen extends Screen {
 
   void keyReleased(KeyEvent event) {
     if (key == CODED && keyCode == SHIFT && selected != null) {
-      println("hardtransform");
       selected.hardTransform(hardTransform);
       hardTransform.idt();
       playAnim = true;

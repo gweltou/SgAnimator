@@ -10,12 +10,15 @@ public class LoadScreen extends Screen {
   String filename;
   File selection;
   boolean mustDestroy = false;
+  
+  public LoadScreen() {
+    doBackground();
+  }
 
-  public LoadScreen(File selection) {
+  public void setupUI(File selection) {
     this.selection = selection;
     filename = selection.getAbsolutePath();
 
-    doBackground();
     hideUI();
 
     paramLocked = true;
