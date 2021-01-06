@@ -3,14 +3,12 @@
 // Record images key ('r')
 // Draw Coordinate's lines on editor
 // Ability to scale Avatar to normalise objects sizes according to a standard ref (1m)
-// Prompt to load Geometry and/or Animations when loading a file
 // Elastic function
-// Negate toggle in Animations
-// Animation.toJSON
 // Arrondir à 2 décimales les floats à sauvegarder dans les json
 // Option to duplicate previous AnimationCollection when new animCollection
 // UV coords in polygon class
 // Add a chart for every Animation to show function progression over time
+// Lib : avatar.playSequencialy()
 
 /*
   BUGS:
@@ -34,10 +32,11 @@ import java.util.*;
 import java.lang.reflect.Field;
 
 
-String version = "0.5.2";
+String version = "0.6";
 
 
 MainScreen mainScreen;
+LoadScreen loadScreen;
 Screen welcomeScreen;
 Screen helpScreen1;
 Screen helpScreenEasing;
@@ -66,7 +65,7 @@ File mustLoad = null; // Change current screen to loading screen
 
 
 void settings() {
-  size(1366, 704);
+  size(1200, 700);
   //fullScreen();
 }
 
@@ -136,7 +135,6 @@ ComplexShape buildBlob() {
 
 
 void select(ComplexShape part) {
-  println(part);
   showUI = true;
   selected = part;
   updateUI();
@@ -168,7 +166,8 @@ void saveFullAnimation(String animName, int animIndex) {
 
 void draw() {
   if (mustLoad != null) {
-    currentScreen = new LoadScreen(mustLoad);
+    loadScreen.setupUI(mustLoad);
+    currentScreen = loadScreen;
     mustLoad = null;
   }
 
