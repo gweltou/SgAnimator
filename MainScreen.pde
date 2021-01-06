@@ -50,7 +50,8 @@ public class MainScreen extends Screen {
           }
         } else {
           selectpartAnim.update(1/frameRate);
-          image(selectpart, partsList.getPosition()[0] + partsList.getWidth() + 4 + selectpartAnim.getValue(), partsList.getPosition()[1] + selectpartAnim.getValue()/3);
+          if (selectpart != null)
+            image(selectpart, partsList.getPosition()[0] + partsList.getWidth() + 4 + selectpartAnim.getValue(), partsList.getPosition()[1] + selectpartAnim.getValue()/3);
         }
       }
       renderer.popMatrix();
