@@ -67,26 +67,26 @@ Interpolation entre deux valeurs avec différentes fonctions de transition.
 
 | Paramètre | |
 | ----- | ----- |
-| *From* | valeur de départ |
-| *To* | valeur d'arrivée |
-| *Delay* | intervale de temps entre chaque boucle de l'animation (si *loop* est actif) |
-| *EaseDuration* | intervale de temps pour effectuer la transition |
-| *Easing* | fonction de transition à utiliser (appuyer 2 fois sur la touche <kbd>h</kbd> pour avoir un apperçu des fonctions de transition) |
-| *BackForth* | effectue un va-et-vient |
-| *Loop* | joue l'animation en boucle |
+| *From* | Valeur de départ |
+| *To* | Valeur d'arrivée |
+| *Delay* | Intervale de temps entre chaque boucle de l'animation (si *loop* est actif) |
+| *EaseDuration* | Intervale de temps pour effectuer la transition |
+| *Easing* | Fonction de transition à utiliser (appuyer 2 fois sur la touche <kbd>h</kbd> pour avoir un apperçu des fonctions de transition) |
+| *BackForth* | Effectue un va-et-vient |
+| *Loop* | Joue l'animation en boucle |
 
 ### Timetable
 Permet de créer une suite de déplacement unidimensionelle en plusieurs étapes.<br>
 
 | Paramètre | |
 | ----- | ----- |
-| *Num steps* | définit le nombre d'étapes dans l'animation (entre 4 et 32) |
-| *Smooth end* | transition souple entre la dernière étape et la première étape (rajoute une étape) |
-| *Loop* | joue l'animation en boucle |
+| *Num steps* | Définit le nombre d'étapes dans l'animation (entre 4 et 32) |
+| *Smooth end* | Transition douce entre la dernière étape et la première étape (rajoute une étape) |
+| *Loop* | Joue l'animation en boucle |
 
 ### Sin
-Mouvement sinusoïdale (idéale pour les mouvement de respiration par exemple).
-Valeur = *offset* + *mult* × sin(2×PI × t/*duration* + *phase*)
+Mouvement sinusoïdale (idéale pour les mouvement de respiration par exemple).<br>
+`valeur = offset + mult × sin(2×PI × t/duration + phase)`
 
 | Paramètre | |
 | ----- | ----- |
