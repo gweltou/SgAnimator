@@ -2,8 +2,8 @@ ControlP5 cp5; //<>//
 FunctionAccordion accordion;
 MyScrollableList partsList;
 Button pivotButton;
-Textfield animName;
-Button prevAnimButton, nextAnimButton;
+Textfield postureName;
+Button prevPostureButton, nextPostureButton;
 Timeline timeline;
 PFont defaultFont;
 int spacing = 4;
@@ -101,9 +101,9 @@ void setupUI() {
 
   accordion = new FunctionAccordion(cp5, "accordion");
 
-  // Full Animation selector
-  PVector pos = new PVector(-60+width/2, height-margin-24-24);
-  animName = cp5.addTextfield("animname")
+  // Posture selector
+  PVector pos = new PVector(-130 + width/2, margin);
+  postureName = cp5.addTextfield("posturename")
     //.setLabelVisible(false) // Doesn't work
     .setLabel("")
     .setText("anim0")
@@ -116,14 +116,14 @@ void setupUI() {
     .hide()
     ;
     
-  prevAnimButton = cp5.addButton("prevanim")
+  prevPostureButton = cp5.addButton("prevposture")
     .setLabel("<<")
     .setPosition(pos.x-24-3, pos.y)
     .setSize(24, 24)
     .hide()
     ;
 
-  nextAnimButton = cp5.addButton("nextanim")
+  nextPostureButton = cp5.addButton("nextposture")
     .setLabel(">>")
     .setPosition(pos.x+120+3, pos.y)
     .setSize(24, 24)
@@ -478,9 +478,9 @@ void showUI() {
   showUI = true;
   accordion.show();
   partsList.open().show();
-  animName.show();
-  prevAnimButton.show();
-  nextAnimButton.show();
+  postureName.show();
+  prevPostureButton.show();
+  nextPostureButton.show();
   renderer.setSelected(selected);
 }
 
@@ -489,9 +489,9 @@ void hideUI() {
   accordion.hide();
   partsList.hide();
   pivotButton.hide();
-  animName.hide();
-  prevAnimButton.hide();
-  nextAnimButton.hide();
+  postureName.hide();
+  prevPostureButton.hide();
+  nextPostureButton.hide();
   renderer.setSelected(null);
 }
 

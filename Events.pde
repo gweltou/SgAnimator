@@ -2,9 +2,13 @@ import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationTargetException;
 
 void controlEvent(ControlEvent event) throws InstantiationException, IllegalAccessException, NoSuchMethodException, InvocationTargetException  {
-  if (event.isController() && !paramLocked) {
-    if (timeline != null)
+  if (paramLocked)
+    return;
+  
+  if (timeline != null)
       timeline.hide();
+  if (event.isController()) {
+    
     
     String name = event.getName();
     float value = event.getValue();
@@ -15,38 +19,37 @@ void controlEvent(ControlEvent event) throws InstantiationException, IllegalAcce
       selectedIndex = int(partsList.getValue());
     }
     
-    else if (name.equals("animname")) {
+    else if (name.equals("posturename")) {
       // Change fullAnim name
-      println(animName.getText());
       fullAnimationDirty = true;
     }
-    else if (name.equals("prevanim")) {
+    else if (name.equals("prevposture")) {
       if (fullAnimationIndex <= 0)
         return;
       
       if (fullAnimationDirty) {
         // Save fullAnimation to animationCollection
-        saveFullAnimation(animName.getText(), fullAnimationIndex);
+        saveFullAnimation(postureName.getText(), fullAnimationIndex);
       }
       fullAnimationIndex--;
       avatar.setFullAnimation(animationCollection.getFullAnimation(fullAnimationIndex));
-      animName.setText(animationCollection.getFullAnimationName(fullAnimationIndex));
+      postureName.setText(animationCollection.getFullAnimationName(fullAnimationIndex));
       mustUpdateUI = true;
     }
-    else if (name.equals("nextanim")) {
+    else if (name.equals("nextposture")) {
       if (fullAnimationDirty) {
         // Save fullAnimation to animationCollection
-        saveFullAnimation(animName.getText(), fullAnimationIndex);
+        saveFullAnimation(postureName.getText(), fullAnimationIndex);
       }
       
       fullAnimationIndex++;
       if (fullAnimationIndex >= animationCollection.size()) {
         fullAnimationIndex = animationCollection.size();
         avatar.clearAnimation();
-        animName.setText("anim"+fullAnimationIndex);
+        postureName.setText("anim"+fullAnimationIndex);
       } else {
         avatar.setFullAnimation(animationCollection.getFullAnimation(fullAnimationIndex));
-        animName.setText(animationCollection.getFullAnimationName(fullAnimationIndex));
+        postureName.setText(animationCollection.getFullAnimationName(fullAnimationIndex));
       }
       mustUpdateUI = true;
     }
@@ -96,6 +99,8 @@ void controlEvent(ControlEvent event) throws InstantiationException, IllegalAcce
       int animNum = parseInt(m[1]);
       selected.getAnimation(animNum).setAmp(value);
       fullAnimationDirty = true;
+      if (timeline != null && timeline.getAnimNum() == animNum)
+          timeline.show();
     }
     
     else if (name.startsWith("animinv")) {
@@ -103,6 +108,8 @@ void controlEvent(ControlEvent event) throws InstantiationException, IllegalAcce
       int animNum = parseInt(m[1]);
       selected.getAnimation(animNum).setInv(value == 0 ? true : false);
       fullAnimationDirty = true;
+      if (timeline != null && timeline.getAnimNum() == animNum)
+          timeline.show();
     }
     
     else if (name.equals("pivotbutton")) {
@@ -250,7 +257,7 @@ void fileSelected(File selection) throws IOException {
       
       
       currentScreen = mainScreen;
-      animName.setText("anim0");
+      postureName.setText("anim0");
       mainScreen.resetView();
       showUI();
       accordion.hide();

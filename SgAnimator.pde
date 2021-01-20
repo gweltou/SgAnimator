@@ -15,7 +15,13 @@
  * Animations don't scale when hardTransforming geometry
  * Seule la première animation est sauvegardée
  * Can't select axe before function
+ 
+ Done:
+ * Selecteur de Posture placé en haut
+ * Opération de mise à l'échelle (changement de taille) de chaque partie relatif à son point de pivot
+ * Bugfix: apparition/disparition de la timeline
  */
+
 
 import com.badlogic.gdx.graphics.*;
 import com.badlogic.gdx.math.*;
@@ -32,7 +38,7 @@ import java.util.*;
 import java.lang.reflect.Field;
 
 
-String version = "0.6";
+String version = "0.6.1";
 
 
 MainScreen mainScreen;
@@ -42,7 +48,7 @@ Screen helpScreen1;
 Screen helpScreenEasing;
 Screen currentScreen;
 
-Renderer renderer;
+MyRenderer renderer;
 Avatar avatar;
 String baseFilename;
 
@@ -80,7 +86,7 @@ void setup() {
   helpScreenEasing = new HelpScreenEasing();
   currentScreen = welcomeScreen;
   
-  renderer = new Renderer(this);
+  renderer = new MyRenderer(this);
 
   int numFn = Animation.timeFunctions.length;
   functionsName = new String[numFn];
@@ -102,7 +108,7 @@ void setup() {
    partsName[i] = avatar.getPartsList()[i].getId();
    }
    partsList.setItems(partsName);
-   animName.setText(animationCollection.getFullAnimationName(fullAnimationIndex));
+   postureName.setText(animationCollection.getFullAnimationName(fullAnimationIndex));
    baseFilename = "/home/gweltaz/Bureau/ruz";
    showUI();
    */
@@ -143,11 +149,11 @@ void select(ComplexShape part) {
 
 
 
-void saveFullAnimation(String animName, int animIndex) {
+void saveFullAnimation(String postureName, int animIndex) {
   HashMap<String, Animation[]> fullAnimation = new HashMap();
 
-  if (animName == null || animName.trim().isEmpty())
-    animName = "anim"+animIndex;
+  if (postureName == null || postureName.trim().isEmpty())
+    postureName = "anim"+animIndex;
 
   for (ComplexShape part : avatar.getPartsList()) {
     if (part.getAnimationList().length > 0)
@@ -155,9 +161,9 @@ void saveFullAnimation(String animName, int animIndex) {
   }
 
   if (animIndex >= animationCollection.size()) {
-    animationCollection.addFullAnimation(animName, fullAnimation);
+    animationCollection.addFullAnimation(postureName, fullAnimation);
   } else {
-    animationCollection.updateFullAnimation(animIndex, animName, fullAnimation);
+    animationCollection.updateFullAnimation(animIndex, postureName, fullAnimation);
   }
 
   fullAnimationDirty = false;

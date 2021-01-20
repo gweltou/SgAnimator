@@ -137,7 +137,7 @@ public class LoadScreen extends Screen {
       //avatar.setAnimationCollection(animationCollection));
       if (animationCollection.size() > 0) {
         avatar.setFullAnimation(animationCollection.getFullAnimation(fullAnimationIndex));
-        animName.setText(animationCollection.getFullAnimationName(fullAnimationIndex));
+        postureName.setText(animationCollection.getFullAnimationName(fullAnimationIndex));
       }
     } else {
       animationCollection = new AnimationCollection();

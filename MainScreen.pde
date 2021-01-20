@@ -36,23 +36,25 @@ public class MainScreen extends Screen {
       avatar.draw(renderer);
       avatar.drawSelectedOnly(renderer);
 
-      if (showUI) {
-        renderer.drawPivot();
-        renderer.drawMarker(0, 0);
-        renderer.drawAxes();
+      if (showUI) {        
         if (selected != null) {
           if (!hardTransform.isIdt()) {
             renderer.pushMatrix(hardTransform);
             selected.setColorMod(1f, 1f, 1f, 0.4f);
             selected.draw(renderer);
             selected.setColorMod(1f, 1f, 1f, 1f);
+            renderer.drawPivot();
             renderer.popMatrix();
+          } else {
+            renderer.drawPivot();
           }
         } else {
           selectpartAnim.update(1/frameRate);
           if (selectpart != null)
             image(selectpart, partsList.getPosition()[0] + partsList.getWidth() + 4 + selectpartAnim.getValue(), partsList.getPosition()[1] + selectpartAnim.getValue()/3);
         }
+        renderer.drawMarker(0, 0);
+        renderer.drawAxes();
       }
       renderer.popMatrix();
       if (playAnim == false && (frameCount>>5)%2 == 0) {
@@ -94,7 +96,7 @@ public class MainScreen extends Screen {
         playAnim = false;
         avatar.resetAnimation();
       }
-    } else if (!animName.isFocus()) {
+    } else if (!postureName.isFocus()) {
       switch (key) {
       case 'p':  // Play/Pause animation
         if (avatar != null)
@@ -130,7 +132,7 @@ public class MainScreen extends Screen {
       case 19: // CTRL+s, save
         if (avatar != null) {
           if (fullAnimationDirty)
-            saveFullAnimation(animName.getText(), fullAnimationIndex);
+            saveFullAnimation(postureName.getText(), fullAnimationIndex);
           avatar.saveFile(baseFilename.concat(".json"), animationCollection);
         }
         break;
@@ -149,12 +151,21 @@ public class MainScreen extends Screen {
 
 
   void mouseWheel(MouseEvent event) {
+    pivotButton.hide();
     if (!partsList.isInside()) {
       float z = pow(1.1, -event.getCount());
       Affine2 unproject = new Affine2(transform).inv();
       Vector2 point = new Vector2(mouseX, mouseY);
       unproject.applyTo(point);
-      transform.translate(point.x, point.y).scale(z, z).translate(-point.x, -point.y);
+      //transform.translate(point.x, point.y).scale(z, z).translate(-point.x, -point.y);
+      if (keyPressed && keyCode == SHIFT && selected != null) {
+        // scale translation by the zoom factor
+        point = selected.getLocalOrigin();
+        hardTransform.translate(point.x, point.y).scale(z, z).translate(-point.x, -point.y);
+      } else {
+        // scale translation by the zoom factor
+        transform.translate(point.x, point.y).scale(z, z).translate(-point.x, -point.y);
+      }
     }
   }
 
