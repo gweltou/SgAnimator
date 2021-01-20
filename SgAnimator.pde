@@ -17,7 +17,6 @@
  * Can't select axe before function
  
  Done:
- * Selecteur de Posture placé en haut
  * Opération de mise à l'échelle (changement de taille) de chaque partie relatif à son point de pivot
  * Bugfix: apparition/disparition de la timeline
  */

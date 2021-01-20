@@ -146,6 +146,7 @@ public class MainScreen extends Screen {
       selected.hardTransform(hardTransform);
       hardTransform.idt();
       playAnim = true;
+      mustUpdateUI = true;
     }
   }
 
@@ -157,10 +158,10 @@ public class MainScreen extends Screen {
       Affine2 unproject = new Affine2(transform).inv();
       Vector2 point = new Vector2(mouseX, mouseY);
       unproject.applyTo(point);
-      //transform.translate(point.x, point.y).scale(z, z).translate(-point.x, -point.y);
       if (keyPressed && keyCode == SHIFT && selected != null) {
         // scale translation by the zoom factor
         point = selected.getLocalOrigin();
+        z = 1 + (z-1) * 0.1f;
         hardTransform.translate(point.x, point.y).scale(z, z).translate(-point.x, -point.y);
       } else {
         // scale translation by the zoom factor
