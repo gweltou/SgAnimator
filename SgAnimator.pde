@@ -12,9 +12,9 @@
 
 /*
   BUGS:
- * Animations don't scale when hardTransforming geometry
  * Seule la première animation est sauvegardée
  * Can't select axe before function
+ * Resize window doesn't resize UI immediately
  
  Done:
  * Opération de mise à l'échelle (changement de taille) de chaque partie relatif à son point de pivot
