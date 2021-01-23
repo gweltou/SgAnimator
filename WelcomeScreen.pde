@@ -27,12 +27,12 @@ public class WelcomeScreen extends Screen {
       ComplexShape newWing = wing.copy();
       newWing.setColorMod(random(0.9, 1.1), random(0.9, 1.1), random(0.9, 1.1), 1f);
       newWing.getAnimation(0).setParam("phase", r1*i*360/numWings);
-      TimeFunction rotate = new TFConstant((float) i*2/numWings);
+      TimeFunction rotate = new TFConstant((float) i/numWings);
       newWing.addAnimation(new Animation(rotate, Animation.AXE_ROT));
       mill.addShape(newWing);
     }
 
-    TimeFunction spin = new TFSpin(0f, duration*random(2.4f, 4f), 1f, 1);
+    TimeFunction spin = new TFSpin(0f, duration*random(2.4f, 4f), 1f);
     mill.addAnimation(new Animation(spin, Animation.AXE_ROT));
   }
 

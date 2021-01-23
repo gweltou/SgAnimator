@@ -92,11 +92,11 @@ public class MainScreen extends Screen {
       } else if (keyCode == DOWN) {  // Select previous part
         selectedIndex = (selectedIndex+1) % avatar.getPartsList().length;
         partsList.setValue(selectedIndex);
-      } else if (keyCode == SHIFT && selected != null) {
+      } else if (keyCode == SHIFT && selected != null && !isNumberboxActive) {
         playAnim = false;
         avatar.resetAnimation();
       }
-    } else if (!postureName.isFocus()) {
+    } else if (!postureName.isActive() && !isNumberboxActive) {
       switch (key) {
       case 'p':  // Play/Pause animation
         if (avatar != null)
@@ -142,7 +142,7 @@ public class MainScreen extends Screen {
 
 
   void keyReleased(KeyEvent event) {
-    if (key == CODED && keyCode == SHIFT && selected != null) {
+    if (key == CODED && keyCode == SHIFT && selected != null && !isNumberboxActive) {
       selected.hardTransform(hardTransform);
       hardTransform.idt();
       playAnim = true;

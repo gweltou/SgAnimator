@@ -257,7 +257,7 @@ void fileSelected(File selection) throws IOException {
       
       
       currentScreen = mainScreen;
-      postureName.setText("anim0");
+      postureName.setText("posture0");
       mainScreen.resetView();
       showUI();
       accordion.hide();

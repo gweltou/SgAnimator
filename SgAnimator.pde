@@ -1,4 +1,5 @@
 // TODO:
+// programme python "key-mon" pour afficher les touches du clavier
 
 // Record images key ('r')
 // Draw Coordinate's lines on editor
@@ -18,7 +19,10 @@
  
  Done:
  * Opération de mise à l'échelle (changement de taille) de chaque partie relatif à son point de pivot
+ * Numberboxes editables au clavier (pour changer la durée des fonctions)
+ * L'amplification par défaut est de 360 pour l'axe rotation
  * Bugfix: apparition/disparition de la timeline
+ * Bugfix: paramètre "start" de la fonction spin
  */
 
 
@@ -37,7 +41,7 @@ import java.util.*;
 import java.lang.reflect.Field;
 
 
-String version = "0.6.1";
+String version = "0.6.2";
 
 
 MainScreen mainScreen;
@@ -97,20 +101,6 @@ void setup() {
   setupUI();
 
   lastTime = (float) millis() / 1000.0f;
-
-  // Load a default file
-  /*
-  File f = new File("/home/gweltaz/Bureau/ruz.json");
-   avatar = loadAvatarFile(f);
-   partsName = new String[avatar.getPartsList().length];
-   for (int i=0; i<partsName.length; i++) {
-   partsName[i] = avatar.getPartsList()[i].getId();
-   }
-   partsList.setItems(partsName);
-   postureName.setText(animationCollection.getFullAnimationName(fullAnimationIndex));
-   baseFilename = "/home/gweltaz/Bureau/ruz";
-   showUI();
-   */
 }
 
 
@@ -152,7 +142,7 @@ void saveFullAnimation(String postureName, int animIndex) {
   HashMap<String, Animation[]> fullAnimation = new HashMap();
 
   if (postureName == null || postureName.trim().isEmpty())
-    postureName = "anim"+animIndex;
+    postureName = "posture"+animIndex;
 
   for (ComplexShape part : avatar.getPartsList()) {
     if (part.getAnimationList().length > 0)

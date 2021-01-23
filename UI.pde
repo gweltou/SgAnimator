@@ -12,6 +12,7 @@ int menuBarHeight = 18;
 int groupBarHeight = 16;
 int keepsOpenAnimNum = -1;
 int axeWidth = 72;
+boolean isNumberboxActive = false;
 
 
 class MyScrollableList extends ScrollableList {
@@ -75,6 +76,74 @@ class FunctionAccordion extends Accordion {
 
 
 
+public class NumberboxInput {
+  Numberbox n;
+  String text = "";
+  boolean active;
+  
+  NumberboxInput(Numberbox theNumberbox) {
+    n = theNumberbox;
+    registerMethod("keyEvent", this);
+  }
+
+  public void keyEvent(KeyEvent k) {
+    // only process key event if input is active 
+    if (k.getAction() == KeyEvent.PRESS && active) {
+      if (k.getKey() == '\n') { // confirm input with enter
+        submit();
+        return;
+      } else if (k.getKeyCode() == BACKSPACE) { 
+        text = text.isEmpty() ? "" : text.substring(0, text.length()-1);
+      } else if (k.getKey() < 255) {
+        // check if the input is a valid (decimal) number
+        final String regex = "\\d+([.]\\d{0,2})?";
+        String s = text + k.getKey();
+        if ( java.util.regex.Pattern.matches(regex, s ) ) {
+          text += k.getKey();
+        }
+      }
+      n.getValueLabel().setText(this.text);
+    }
+  }
+
+  public void setActive(boolean b) {
+    active = b;
+    isNumberboxActive = b;
+    if (active) {
+      n.getValueLabel().setText("");
+      text = ""; 
+    }
+  }
+  
+  public void submit() {
+    if (!text.isEmpty()) {
+      n.setValue( float( text ) );
+      text = "";
+    } else {
+      n.getValueLabel().setText("" + n.getValue());
+    }
+  }
+}
+
+void makeEditable( Numberbox n ) {
+  final NumberboxInput nin = new NumberboxInput( n ); // custom input handler for the numberbox
+  
+  // control the active-status of the input handler when releasing the mouse button inside 
+  // the numberbox. deactivate input handler when mouse leaves.
+  n.onClick(new CallbackListener() {
+    public void controlEvent(CallbackEvent theEvent) {
+      nin.setActive( true ); 
+    }
+  }
+  ).onLeave(new CallbackListener() {
+    public void controlEvent(CallbackEvent theEvent) {
+      nin.setActive( false ); nin.submit();
+    }
+  });
+}
+
+
+
 void setupUI() {
   //printArray(PFont.list());
   defaultFont = createFont("DejaVu Sans Mono", 12);
@@ -106,7 +175,7 @@ void setupUI() {
   postureName = cp5.addTextfield("posturename")
     //.setLabelVisible(false) // Doesn't work
     .setLabel("")
-    .setText("anim0")
+    .setText("posture0")
     .setPosition(pos.x, pos.y)
     .setSize(120, 24)
     .setFont(defaultFont)
@@ -231,7 +300,7 @@ void updateUI() {
       //.setLabelVisible(false)
       .setPosition(pos.x, pos.y)
       .setRange(0, 500)
-      .setResolution(500f)
+      .setResolution(-500f)  // A negative resolution inverse the drag direction
       .setScrollSensitivity(0.0001f)
       .setValue(anim.getAmp())
       .setRadius(20)
@@ -372,7 +441,7 @@ void drawParams(Group g, int animNum, PVector pos) {
       break;
       
     case TFParam.NUMBERBOX:
-      cp5.addNumberbox(param.name+animNum)
+      Numberbox nb = cp5.addNumberbox(param.name+animNum)
         .setLabel("")
         //.setLabelVisible(false) // doesn't work
         .setPosition(pos.x, pos.y)
@@ -383,6 +452,7 @@ void drawParams(Group g, int animNum, PVector pos) {
         .setValue((float) param.getValue())
         .setGroup(g)
         ;
+      makeEditable(nb);
       cp5.addTextlabel(param.name+animNum+"label")
         .setPosition(pos.x + 60 + spacing, pos.y + 4)
         .setText(param.name.toUpperCase() + (param.unit.equals("") ? "" : "  ("+param.unit+")"))

@@ -56,6 +56,7 @@ class Timeline {
       .setDirection(Controller.HORIZONTAL)
       .setGroup(group)
       ;
+    makeEditable(duration);
 
     cp5.addScrollableList("tleasing"+animNum)
       .setLabel("easing")
