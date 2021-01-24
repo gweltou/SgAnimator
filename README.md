@@ -30,9 +30,8 @@ Pour modifier l'emplacement du point de pivot de la partie active, faites un cli
 ## Repositionnement/redimensionnement du modèle ou de ses parties
 Vous pouvez déplacer chaque partie relativement aux autres en maintenant la touche <kbd>Maj</kbd> et le bouton gauche de la souris enfoncée. Relachez le bouton <kbd>Maj</kbd> à l'emplacement voulu.<br>
 Il est important de centrer le modèle entier (en sélectionnant le premier groupe dans le menu de gauche) par rapport à l'origine afin de faciliter le placement du modèle dans le monde virtuel de votre jeu.<br>
-
 <img align="center" alt="hard translate" src="res/hard_translate.gif">
-
+On peut, de la même façon, redimensionner chaque partie en maintenant la touche <kbd>Maj</kbd> et en tournant la molette de la souris. La mise à l'échelle d'une partie se fait par rapport à son point de pivot (origin de la transformation).
 <img align="center" alt="hard scale" src="res/hard_scale.gif">
 
 ## Fonctions d'animation
@@ -98,10 +97,15 @@ Mouvement sinusoïdale (idéale pour les mouvement de respiration par exemple).<
 | *Phase* | Applique un déphasage au mouvement sinusoïdale (modifie la valeur de départ) |
 
 ### Spin
-Fonction pour créer une rotation permanente (avec l'axe "rotation"). Permet d'animer les pales d'un moulin à vent par exemple.
+Fonction pour créer une rotation permanente (avec l'axe "rotation"). Permet d'animer les pales d'un moulin à vent par exemple.<br>
+Elle est équivalent à une fonction en dents de scie.
+<img alt="dents de scie" src="https://learnabout-electronics.org/ac_theory/images/wave-sawtooth.jpg">
 
 | Paramètre | |
 | ----- | ----- |
+| *Start* | Angle initial |
+| *Duration* | Temps nécessaire pour effectuer un cycle |
+| *Mult* | Multiplicateur de durée |
 
 ### RandomEase
 Change de valeur aléatoirement et applique une transition douce entre les valeurs.
