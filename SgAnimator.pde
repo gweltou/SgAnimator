@@ -16,11 +16,10 @@
  * Seule la première animation est sauvegardée
  * Can't select axe before function
  * Resize window doesn't resize UI immediately
- * ScaleX et ScaleY ne fonctionne pas sur les cercles
- * Impossible d'entrer des nombres négatifs dans les numberboxes
  
  Done:
  * Bugfix: fonction "easeFromTo" retour à la position initiale après un backforth
+ * Bugfix: fonction "easeFromTo" valeur par défaut corrigée
  */
 
 

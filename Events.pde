@@ -90,8 +90,6 @@ void controlEvent(ControlEvent event) throws InstantiationException, IllegalAcce
       mustUpdateUI = true;
       playAnim = true;
       fullAnimationDirty = true;
-      if (timeline != null && animNum == timeline.getAnimNum())
-        timeline.show();
     }
     
     else if (name.startsWith("animamp")) {
@@ -99,8 +97,6 @@ void controlEvent(ControlEvent event) throws InstantiationException, IllegalAcce
       int animNum = parseInt(m[1]);
       selected.getAnimation(animNum).setAmp(value);
       fullAnimationDirty = true;
-      if (timeline != null && timeline.getAnimNum() == animNum)
-          timeline.show();
     }
     
     else if (name.startsWith("animinv")) {
@@ -108,8 +104,6 @@ void controlEvent(ControlEvent event) throws InstantiationException, IllegalAcce
       int animNum = parseInt(m[1]);
       selected.getAnimation(animNum).setInv(value == 0 ? true : false);
       fullAnimationDirty = true;
-      if (timeline != null && timeline.getAnimNum() == animNum)
-          timeline.show();
     }
     
     else if (name.equals("pivotbutton")) {

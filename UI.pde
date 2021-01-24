@@ -89,6 +89,7 @@ public class NumberboxInput {
   public void keyEvent(KeyEvent k) {
     // only process key event if input is active 
     if (k.getAction() == KeyEvent.PRESS && active) {
+      println(k.getKey(), int(k.getKey()));
       if (k.getKey() == '\n') { // confirm input with enter
         submit();
         return;
@@ -96,7 +97,7 @@ public class NumberboxInput {
         text = text.isEmpty() ? "" : text.substring(0, text.length()-1);
       } else if (k.getKey() < 255) {
         // check if the input is a valid (decimal) number
-        final String regex = "\\d+([.]\\d{0,2})?";
+        final String regex = "-?(\\d+(.\\d{0,3})?)?";
         String s = text + k.getKey();
         if ( java.util.regex.Pattern.matches(regex, s ) ) {
           text += k.getKey();
@@ -117,7 +118,12 @@ public class NumberboxInput {
   
   public void submit() {
     if (!text.isEmpty()) {
-      n.setValue( float( text ) );
+      final String regex = "-?\\d+(.\\d{0,3})?";
+      if (java.util.regex.Pattern.matches(regex, text)) {
+        n.setValue( float( text ) );
+      } else {
+        n.setValue(0f);
+      }
       text = "";
     } else {
       n.getValueLabel().setText("" + n.getValue());
