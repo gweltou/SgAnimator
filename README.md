@@ -98,17 +98,33 @@ Mouvement sinusoïdale (idéale pour les mouvement de respiration par exemple).<
 
 ### Spin
 Fonction pour créer une rotation permanente (avec l'axe "rotation"). Permet d'animer les pales d'un moulin à vent par exemple.<br>
-Elle est équivalent à une fonction en dents de scie.
+Elle est équivalent à une fonction en dents de scie.<br>
 <img alt="dents de scie" src="https://learnabout-electronics.org/ac_theory/images/wave-sawtooth.jpg">
 
 | Paramètre | |
 | ----- | ----- |
 | *Start* | Angle initial |
-| *Duration* | Temps nécessaire pour effectuer un cycle |
+| *Duration* | Durée d'un cycle |
 | *Mult* | Multiplicateur de durée |
 
 ### RandomEase
 Change de valeur aléatoirement et applique une transition douce entre les valeurs.
 
+| Paramètre | |
+| ----- | ----- |
+| *Duration* | Durée d'un cycle |
+| *Prob* | Probabilité qu'un cycle produise une nouvelle valeur aléatoire |
+| *Mult* | Amplitude du mouvemnet |
+| *Offset* | Décalage du mouvement |
+| *Easing* | Fonction de transition à utiliser (appuyer 2 fois sur la touche <kbd>h</kbd> pour avoir un apperçu des fonctions de transition) |
+| *EaseDuration* | Durée de transition entre deux valeurs |
+
 ### RandomBlink
 Fonction crée pour animer le clignement des yeux. A appliquer sur l'axe Y.
+
+| Paramètre | |
+| ----- | ----- |
+| *Duration* | Durée d'un cycle |
+| *Prob* | Probabilité qu'un cycle produise un clignement |
+| *Mult* | Amplitude du mouvemnet |
+| *Offset* | Décalage du mouvement |
