@@ -97,9 +97,9 @@ Mouvement sinusoïdale (idéale pour les mouvement de respiration par exemple).<
 | *Phase* | Applique un déphasage au mouvement sinusoïdale (modifie la valeur de départ) |
 
 ### Spin
-<img alt="dents de scie" src="https://learnabout-electronics.org/ac_theory/images/wave-sawtooth.jpg">
 Fonction pour créer une rotation permanente (avec l'axe "rotation"). Permet d'animer les pales d'un moulin à vent par exemple.<br>
-Elle est équivalent à une fonction en dents de scie.
+Elle est équivalent à une fonction en dents de scie.<br>
+<img alt="dents de scie" src="https://learnabout-electronics.org/ac_theory/images/wave-sawtooth.jpg">
 
 | Paramètre | |
 | ----- | ----- |
