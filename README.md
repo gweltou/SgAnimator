@@ -97,9 +97,9 @@ Mouvement sinusoïdale (idéale pour les mouvement de respiration par exemple).<
 | *Phase* | Applique un déphasage au mouvement sinusoïdale (modifie la valeur de départ) |
 
 ### Spin
-Fonction pour créer une rotation permanente (avec l'axe "rotation"). Permet d'animer les pales d'un moulin à vent par exemple.<br>
-Elle est équivalent à une fonction en dents de scie.<br>
 <img alt="dents de scie" src="https://learnabout-electronics.org/ac_theory/images/wave-sawtooth.jpg">
+Fonction pour créer une rotation permanente (avec l'axe "rotation"). Permet d'animer les pales d'un moulin à vent par exemple.<br>
+Elle est équivalent à une fonction en dents de scie.
 
 | Paramètre | |
 | ----- | ----- |
@@ -120,7 +120,7 @@ Change de valeur aléatoirement et applique une transition douce entre les valeu
 | *EaseDuration* | Durée de transition entre deux valeurs |
 
 ### RandomBlink
-Fonction crée pour animer le clignement des yeux. A appliquer sur l'axe Y.
+Fonction idéale pour animer le clignement des yeux. A appliquer sur l'axe Y.
 
 | Paramètre | |
 | ----- | ----- |
