@@ -16,13 +16,11 @@
  * Seule la première animation est sauvegardée
  * Can't select axe before function
  * Resize window doesn't resize UI immediately
+ * ScaleX et ScaleY ne fonctionne pas sur les cercles
+ * Impossible d'entrer des nombres négatifs dans les numberboxes
  
  Done:
- * Opération de mise à l'échelle (changement de taille) de chaque partie relatif à son point de pivot
- * Numberboxes editables au clavier (pour changer la durée des fonctions)
- * L'amplification par défaut est de 360 pour l'axe rotation
- * Bugfix: apparition/disparition de la timeline
- * Bugfix: paramètre "start" de la fonction spin
+ * Bugfix: fonction "easeFromTo" retour à la position initiale après un backforth
  */
 
 
@@ -41,7 +39,7 @@ import java.util.*;
 import java.lang.reflect.Field;
 
 
-String version = "0.6.2";
+String version = "0.6.3";
 
 
 MainScreen mainScreen;
@@ -74,7 +72,8 @@ File mustLoad = null; // Change current screen to loading screen
 
 
 void settings() {
-  size(1200, 700);
+  //size(1200, 700);
+  size(800, 600);
   //fullScreen();
 }
 
