@@ -22,16 +22,16 @@ Un groupe peut contenir, en plus d'objets simples, d'autres sous-groupes. Vous p
 C'est donc l'organisation des groupes qui définit le "rigging" (squelettage) le l'illustration. On organise les groupes de façon hiérarchique en partant des extrémités pour aller vers la racine.<br>
 (Pour reprendre notre exemple : chaque doigt est un groupe contenu dans le groupe "main", lui-même contenu dans le groupe "avant-bras", lui-même contenu dans le groupe "bras"...)
 
+## Placement des points de pivot
+Chaque partie selectionnable dans le logiciel d'animation possède un point d'origine ou point de pivot (situé aux coordonnées 0,0 par défaut), représenté par un point bleu.<br>
+Le placement du point de pivot affecte les animations de type rotation et étirements.<br>
+Pour modifier l'emplacement du point de pivot de la partie active, faites un click droit pour ouvrir le menu contextuel et choisissez `set pivot`. Clickez ensuite à l'endroit où vous voulez placer le pivot.
+
 ## Repositionnement du modèle ou de ses parties
 <img align="right" alt="origin marker" src="res/origin.png">
 
 Vous pouvez déplacer chaque partie relativement aux autres en maintenant la touche <kbd>Maj</kbd> et le bouton gauche de la souris enfoncée. Relachez le bouton <kbd>Maj</kbd> à l'emplacement voulu.<br>
 Il est important de centrer le modèle entier (en sélectionnant le premier groupe dans le menu de gauche) par rapport à l'origine afin de faciliter le placement du modèle dans le monde virtuel de votre jeu.<br>
-
-## Placement des points de pivot
-Chaque partie selectionnable dans le logiciel d'animation possède un point d'origine ou point de pivot (situé aux coordonnées 0,0 par défaut), représenté par un point bleu.<br>
-Le placement du point de pivot affecte les animations de type rotation et étirements.<br>
-Pour modifier l'emplacement du point de pivot de la partie active, faites un click droit pour ouvrir le menu contextuel et choisissez `set pivot`. Clickez ensuite à l'endroit où vous voulez placer le pivot.
 
 ## Fonctions d'animation
 Chaque partie selectionnable dans la liste de gauche peut-être animée par une ou plusieurs fonctions d'animation.<br>
