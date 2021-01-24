@@ -18,8 +18,7 @@
  * Resize window doesn't resize UI immediately
  
  Done:
- * Bugfix: fonction "easeFromTo" retour à la position initiale après un backforth
- * Bugfix: fonction "easeFromTo" valeur par défaut corrigée
+
  */
 
 
