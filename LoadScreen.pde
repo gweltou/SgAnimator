@@ -131,13 +131,13 @@ public class LoadScreen extends Screen {
 
     // AnimationCollection is kept separated for simplicity
     // rather than storing and retrieving it from the Avatar class
-    fullAnimationIndex = 0;
+    postureIndex = 0;
     if (json.has("animation") && animToggle.getValue() == 1.0f) {
       animationCollection = AnimationCollection.fromJson(json.get("animation"));
       //avatar.setAnimationCollection(animationCollection));
       if (animationCollection.size() > 0) {
-        avatar.setFullAnimation(animationCollection.getFullAnimation(fullAnimationIndex));
-        postureName.setText(animationCollection.getFullAnimationName(fullAnimationIndex));
+        avatar.setPosture(animationCollection.getPosture(postureIndex));
+        postureName.setText(animationCollection.getPostureName(postureIndex));
       }
     } else {
       animationCollection = new AnimationCollection();

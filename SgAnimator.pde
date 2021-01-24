@@ -38,7 +38,7 @@ import java.util.*;
 import java.lang.reflect.Field;
 
 
-String version = "0.6.3";
+String version = "0.6.4";
 
 
 MainScreen mainScreen;
@@ -57,7 +57,7 @@ int selectedIndex = 0;
 String[] partsName;
 String[] functionsName;
 AnimationCollection animationCollection;
-int fullAnimationIndex = 0;
+int postureIndex = 0;
 boolean fullAnimationDirty = false;
 Animation animationClipboard;
 float lastTime;
@@ -136,21 +136,21 @@ void select(ComplexShape part) {
 
 
 
-void saveFullAnimation(String postureName, int animIndex) {
-  HashMap<String, Animation[]> fullAnimation = new HashMap();
+void savePosture(String postureName, int animIndex) {
+  HashMap<String, Animation[]> posture = new HashMap();
 
   if (postureName == null || postureName.trim().isEmpty())
     postureName = "posture"+animIndex;
 
   for (ComplexShape part : avatar.getPartsList()) {
     if (part.getAnimationList().length > 0)
-      fullAnimation.put(part.getId(), part.getAnimationList());
+      posture.put(part.getId(), part.getAnimationList());
   }
 
   if (animIndex >= animationCollection.size()) {
-    animationCollection.addFullAnimation(postureName, fullAnimation);
+    animationCollection.addPosture(postureName, posture);
   } else {
-    animationCollection.updateFullAnimation(animIndex, postureName, fullAnimation);
+    animationCollection.updatePosture(animIndex, postureName, posture);
   }
 
   fullAnimationDirty = false;

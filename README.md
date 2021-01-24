@@ -99,7 +99,7 @@ Mouvement sinusoïdal (idéal pour les mouvements de respiration par exemple).<b
 
 ### Spin
 Fonction pour créer une rotation permanente (avec l'axe "rotation"). Permet d'animer les pales d'un moulin à vent par exemple.<br>
-Elle est équivalent à une fonction en dents de scie.<br>
+Elle est équivalente à une fonction en dents de scie.<br>
 <img alt="dents de scie" src="https://learnabout-electronics.org/ac_theory/images/wave-sawtooth.jpg">
 
 | Paramètre | |

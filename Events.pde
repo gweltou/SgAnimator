@@ -24,32 +24,32 @@ void controlEvent(ControlEvent event) throws InstantiationException, IllegalAcce
       fullAnimationDirty = true;
     }
     else if (name.equals("prevposture")) {
-      if (fullAnimationIndex <= 0)
+      if (postureIndex <= 0)
         return;
       
       if (fullAnimationDirty) {
         // Save fullAnimation to animationCollection
-        saveFullAnimation(postureName.getText(), fullAnimationIndex);
+        savePosture(postureName.getText(), postureIndex);
       }
-      fullAnimationIndex--;
-      avatar.setFullAnimation(animationCollection.getFullAnimation(fullAnimationIndex));
-      postureName.setText(animationCollection.getFullAnimationName(fullAnimationIndex));
+      postureIndex--;
+      avatar.setPosture(animationCollection.getPosture(postureIndex));
+      postureName.setText(animationCollection.getPostureName(postureIndex));
       mustUpdateUI = true;
     }
     else if (name.equals("nextposture")) {
       if (fullAnimationDirty) {
         // Save fullAnimation to animationCollection
-        saveFullAnimation(postureName.getText(), fullAnimationIndex);
+        savePosture(postureName.getText(), postureIndex);
       }
       
-      fullAnimationIndex++;
-      if (fullAnimationIndex >= animationCollection.size()) {
-        fullAnimationIndex = animationCollection.size();
+      postureIndex++;
+      if (postureIndex >= animationCollection.size()) {
+        postureIndex = animationCollection.size();
         avatar.clearAnimation();
-        postureName.setText("anim"+fullAnimationIndex);
+        postureName.setText("anim"+postureIndex);
       } else {
-        avatar.setFullAnimation(animationCollection.getFullAnimation(fullAnimationIndex));
-        postureName.setText(animationCollection.getFullAnimationName(fullAnimationIndex));
+        avatar.setPosture(animationCollection.getPosture(postureIndex));
+        postureName.setText(animationCollection.getPostureName(postureIndex));
       }
       mustUpdateUI = true;
     }
@@ -125,9 +125,9 @@ void controlEvent(ControlEvent event) throws InstantiationException, IllegalAcce
       if (animationClipboard != null) {
         selected.resetAnimation();
         if (animNum < selected.getAnimationList().length) {
-          selected.setAnimation(animNum, animationClipboard);
+          selected.setAnimation(animNum, animationClipboard.copy());
         } else {
-          selected.addAnimation(animationClipboard);
+          selected.addAnimation(animationClipboard.copy());
         }
         mustUpdateUI = true;
         fullAnimationDirty = true;

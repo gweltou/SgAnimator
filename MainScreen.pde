@@ -132,7 +132,7 @@ public class MainScreen extends Screen {
       case 19: // CTRL+s, save
         if (avatar != null) {
           if (fullAnimationDirty)
-            saveFullAnimation(postureName.getText(), fullAnimationIndex);
+            savePosture(postureName.getText(), postureIndex);
           avatar.saveFile(baseFilename.concat(".json"), animationCollection);
         }
         break;
