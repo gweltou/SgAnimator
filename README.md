@@ -87,7 +87,7 @@ Permet de créer une suite de déplacements unidimensionelle en plusieurs étape
 | *Loop* | Joue l'animation en boucle |
 
 ### Sin
-Mouvement sinusoïdale (idéale pour les mouvement de respiration par exemple).<br>
+Mouvement sinusoïdal (idéal pour les mouvements de respiration par exemple).<br>
 `valeur = offset + mult × sin(2×PI × t/duration + phase)`
 
 | Paramètre | |
@@ -95,7 +95,7 @@ Mouvement sinusoïdale (idéale pour les mouvement de respiration par exemple).<
 | *Duration* | Temps nécessaire pour effectuer un cycle complet (tour du cercle trigonométrique) |
 | *Mult* | Amplitude du mouvement sinusoïdal |
 | *Offset* | Ajoute une valeur constante à la fonction sinus |
-| *Phase* | Applique un déphasage au mouvement sinusoïdale (modifie la valeur de départ) |
+| *Phase* | Applique un déphasage au mouvement sinusoïdal (modifie la valeur de départ) |
 
 ### Spin
 Fonction pour créer une rotation permanente (avec l'axe "rotation"). Permet d'animer les pales d'un moulin à vent par exemple.<br>
@@ -115,9 +115,9 @@ Change de valeur aléatoirement et applique une transition douce entre les valeu
 | ----- | ----- |
 | *Duration* | Durée d'un cycle |
 | *Prob* | Probabilité qu'un cycle produise une nouvelle valeur aléatoire |
-| *Mult* | Amplitude du mouvemnet |
+| *Mult* | Amplitude du mouvement |
 | *Offset* | Décalage du mouvement |
-| *Easing* | Fonction de transition à utiliser (appuyer 2 fois sur la touche <kbd>h</kbd> pour avoir un apperçu des fonctions de transition) |
+| *Easing* | Fonction de transition à utiliser (appuyer 2 fois sur la touche <kbd>h</kbd> pour avoir un aperçu des fonctions de transition) |
 | *EaseDuration* | Durée de transition entre deux valeurs |
 
 ### RandomBlink
@@ -127,5 +127,5 @@ Fonction idéale pour animer le clignement des yeux. A appliquer sur l'axe Y.
 | ----- | ----- |
 | *Duration* | Durée d'un cycle |
 | *Prob* | Probabilité qu'un cycle produise un clignement |
-| *Mult* | Amplitude du mouvemnet |
+| *Mult* | Amplitude du mouvement |
 | *Offset* | Décalage du mouvement |
