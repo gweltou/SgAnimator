@@ -30,8 +30,8 @@ Pour modifier l'emplacement du point de pivot de la partie active, faites un cli
 ## Repositionnement/redimensionnement du modèle ou de ses parties
 Vous pouvez déplacer chaque partie relativement aux autres en maintenant la touche <kbd>Maj</kbd> et le bouton gauche de la souris enfoncée. Relachez le bouton <kbd>Maj</kbd> à l'emplacement voulu.<br>
 Il est important de centrer le modèle entier (en sélectionnant le premier groupe dans le menu de gauche) par rapport à l'origine afin de faciliter le placement du modèle dans le monde virtuel de votre jeu.<br>
-<img align="center" alt="hard translate" src="res/hard_translate.gif">
-On peut, de la même façon, redimensionner chaque partie en maintenant la touche <kbd>Maj</kbd> et en tournant la molette de la souris. La mise à l'échelle d'une partie se fait par rapport à son point de pivot (origin de la transformation).
+<img align="center" alt="hard translate" src="res/hard_translate.gif"><br>
+On peut, de la même façon, redimensionner chaque partie en maintenant la touche <kbd>Maj</kbd> et en tournant la molette de la souris. La mise à l'échelle d'une partie se fait par rapport à son point de pivot (origin de la transformation).<br>
 <img align="center" alt="hard scale" src="res/hard_scale.gif">
 
 ## Fonctions d'animation
