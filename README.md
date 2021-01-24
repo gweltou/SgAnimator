@@ -53,7 +53,7 @@ Les différents axes sur lesquels s'appliquent les fonctions d'animation sont :<
 
 * **X** (l'axe horizontal)
 * **Y** (l'axe vertical)
-* **Rotation** (rotation en degrées autour d'un point de pivot)
+* **Rotation** (rotation en degrés autour d'un point de pivot)
 * **Scale X** (étirement horizontal avec le point de pivot pour origine)
 * **Scale Y** (étirement vertical avec le point de pivot pour origine)
 * **Zoom** (étirement dans les deux dimensions avec le point de pivot pour origine)
@@ -63,6 +63,7 @@ L'animation est réinitialisée lorsqu'on modifie un de ses paramètres dans la 
 ### Constant
 Transformation statique (ne varie pas avec le temps).
 Pratique pour redimensionner certaines parties (avec les axes "scale") à l'avant d'autres fonctions d'animation.
+
 ### EasingFromTo
 Interpolation entre deux valeurs avec différentes fonctions de transition.
 
@@ -70,14 +71,14 @@ Interpolation entre deux valeurs avec différentes fonctions de transition.
 | ----- | ----- |
 | *From* | Valeur de départ |
 | *To* | Valeur d'arrivée |
-| *Delay* | Intervale de temps entre chaque boucle de l'animation (si *loop* est actif) |
-| *EaseDuration* | Intervale de temps pour effectuer la transition |
-| *Easing* | Fonction de transition à utiliser (appuyer 2 fois sur la touche <kbd>h</kbd> pour avoir un apperçu des fonctions de transition) |
+| *Delay* | Intervalle de temps entre chaque boucle de l'animation (si *loop* est actif) |
+| *EaseDuration* | Durée de la transition |
+| *Easing* | Fonction de transition à utiliser (appuyer 2 fois sur la touche <kbd>h</kbd> pour avoir un aperçu des fonctions de transition) |
 | *BackForth* | Effectue un va-et-vient |
 | *Loop* | Joue l'animation en boucle |
 
 ### Timetable
-Permet de créer une suite de déplacement unidimensionelle en plusieurs étapes.<br>
+Permet de créer une suite de déplacements unidimensionelle en plusieurs étapes.<br>
 
 | Paramètre | |
 | ----- | ----- |
@@ -86,7 +87,7 @@ Permet de créer une suite de déplacement unidimensionelle en plusieurs étapes
 | *Loop* | Joue l'animation en boucle |
 
 ### Sin
-Mouvement sinusoïdale (idéale pour les mouvement de respiration par exemple).<br>
+Mouvement sinusoïdal (idéal pour les mouvements de respiration par exemple).<br>
 `valeur = offset + mult × sin(2×PI × t/duration + phase)`
 
 | Paramètre | |
@@ -94,7 +95,7 @@ Mouvement sinusoïdale (idéale pour les mouvement de respiration par exemple).<
 | *Duration* | Temps nécessaire pour effectuer un cycle complet (tour du cercle trigonométrique) |
 | *Mult* | Amplitude du mouvement sinusoïdal |
 | *Offset* | Ajoute une valeur constante à la fonction sinus |
-| *Phase* | Applique un déphasage au mouvement sinusoïdale (modifie la valeur de départ) |
+| *Phase* | Applique un déphasage au mouvement sinusoïdal (modifie la valeur de départ) |
 
 ### Spin
 Fonction pour créer une rotation permanente (avec l'axe "rotation"). Permet d'animer les pales d'un moulin à vent par exemple.<br>
@@ -114,9 +115,9 @@ Change de valeur aléatoirement et applique une transition douce entre les valeu
 | ----- | ----- |
 | *Duration* | Durée d'un cycle |
 | *Prob* | Probabilité qu'un cycle produise une nouvelle valeur aléatoire |
-| *Mult* | Amplitude du mouvemnet |
+| *Mult* | Amplitude du mouvement |
 | *Offset* | Décalage du mouvement |
-| *Easing* | Fonction de transition à utiliser (appuyer 2 fois sur la touche <kbd>h</kbd> pour avoir un apperçu des fonctions de transition) |
+| *Easing* | Fonction de transition à utiliser (appuyer 2 fois sur la touche <kbd>h</kbd> pour avoir un aperçu des fonctions de transition) |
 | *EaseDuration* | Durée de transition entre deux valeurs |
 
 ### RandomBlink
@@ -126,5 +127,5 @@ Fonction idéale pour animer le clignement des yeux. A appliquer sur l'axe Y.
 | ----- | ----- |
 | *Duration* | Durée d'un cycle |
 | *Prob* | Probabilité qu'un cycle produise un clignement |
-| *Mult* | Amplitude du mouvemnet |
+| *Mult* | Amplitude du mouvement |
 | *Offset* | Décalage du mouvement |
