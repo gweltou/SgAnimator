@@ -28,12 +28,12 @@ Le placement du point de pivot affecte les animations de type rotation et étire
 Pour modifier l'emplacement du point de pivot de la partie active, faites un click droit pour ouvrir le menu contextuel et choisissez `set pivot`. Clickez ensuite à l'endroit où vous voulez placer le pivot.
 
 ## Repositionnement/redimensionnement du modèle ou de ses parties
-<img align="right" alt="origin marker" src="res/origin.png">
-
 Vous pouvez déplacer chaque partie relativement aux autres en maintenant la touche <kbd>Maj</kbd> et le bouton gauche de la souris enfoncée. Relachez le bouton <kbd>Maj</kbd> à l'emplacement voulu.<br>
 Il est important de centrer le modèle entier (en sélectionnant le premier groupe dans le menu de gauche) par rapport à l'origine afin de faciliter le placement du modèle dans le monde virtuel de votre jeu.<br>
 
-<img src="res/hard_scale.gif">
+<img align="center" alt="hard translate" src="res/hard_translate.gif">
+
+<img align="center" alt="hard scale" src="res/hard_scale.gif">
 
 ## Fonctions d'animation
 Chaque partie selectionnable dans la liste de gauche peut-être animée par une ou plusieurs fonctions d'animation.<br>
