@@ -27,11 +27,12 @@ Chaque partie selectionnable dans le logiciel d'animation possède un point d'or
 Le placement du point de pivot affecte les animations de type rotation et étirements.<br>
 Pour modifier l'emplacement du point de pivot de la partie active, faites un click droit pour ouvrir le menu contextuel et choisissez `set pivot`. Clickez ensuite à l'endroit où vous voulez placer le pivot.
 
-## Repositionnement du modèle ou de ses parties
-<img align="right" alt="origin marker" src="res/origin.png">
-
+## Repositionnement/redimensionnement du modèle ou de ses parties
 Vous pouvez déplacer chaque partie relativement aux autres en maintenant la touche <kbd>Maj</kbd> et le bouton gauche de la souris enfoncée. Relachez le bouton <kbd>Maj</kbd> à l'emplacement voulu.<br>
 Il est important de centrer le modèle entier (en sélectionnant le premier groupe dans le menu de gauche) par rapport à l'origine afin de faciliter le placement du modèle dans le monde virtuel de votre jeu.<br>
+<img align="center" alt="hard translate" src="res/hard_translate.gif"><br>
+On peut, de la même façon, redimensionner chaque partie en maintenant la touche <kbd>Maj</kbd> et en tournant la molette de la souris. La mise à l'échelle d'une partie se fait par rapport à son point de pivot (origin de la transformation).<br>
+<img align="center" alt="hard scale" src="res/hard_scale.gif">
 
 ## Fonctions d'animation
 Chaque partie selectionnable dans la liste de gauche peut-être animée par une ou plusieurs fonctions d'animation.<br>
@@ -96,13 +97,34 @@ Mouvement sinusoïdale (idéale pour les mouvement de respiration par exemple).<
 | *Phase* | Applique un déphasage au mouvement sinusoïdale (modifie la valeur de départ) |
 
 ### Spin
-Fonction pour créer une rotation permanente (avec l'axe "rotation"). Permet d'animer les pales d'un moulin à vent par exemple.
+Fonction pour créer une rotation permanente (avec l'axe "rotation"). Permet d'animer les pales d'un moulin à vent par exemple.<br>
+Elle est équivalent à une fonction en dents de scie.<br>
+<img alt="dents de scie" src="https://learnabout-electronics.org/ac_theory/images/wave-sawtooth.jpg">
 
 | Paramètre | |
 | ----- | ----- |
+| *Start* | Angle initial |
+| *Duration* | Durée d'un cycle |
+| *Mult* | Multiplicateur de durée |
 
 ### RandomEase
 Change de valeur aléatoirement et applique une transition douce entre les valeurs.
 
+| Paramètre | |
+| ----- | ----- |
+| *Duration* | Durée d'un cycle |
+| *Prob* | Probabilité qu'un cycle produise une nouvelle valeur aléatoire |
+| *Mult* | Amplitude du mouvemnet |
+| *Offset* | Décalage du mouvement |
+| *Easing* | Fonction de transition à utiliser (appuyer 2 fois sur la touche <kbd>h</kbd> pour avoir un apperçu des fonctions de transition) |
+| *EaseDuration* | Durée de transition entre deux valeurs |
+
 ### RandomBlink
-Fonction crée pour animer le clignement des yeux. A appliquer sur l'axe Y.
+Fonction idéale pour animer le clignement des yeux. A appliquer sur l'axe Y.
+
+| Paramètre | |
+| ----- | ----- |
+| *Duration* | Durée d'un cycle |
+| *Prob* | Probabilité qu'un cycle produise un clignement |
+| *Mult* | Amplitude du mouvemnet |
+| *Offset* | Décalage du mouvement |
