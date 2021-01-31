@@ -7,9 +7,8 @@ void controlEvent(ControlEvent event) throws InstantiationException, IllegalAcce
   
   if (timeline != null)
       timeline.hide();
+      
   if (event.isController()) {
-    
-    
     String name = event.getName();
     float value = event.getValue();
     //println("event", name, value);
@@ -29,27 +28,27 @@ void controlEvent(ControlEvent event) throws InstantiationException, IllegalAcce
       
       if (fullAnimationDirty) {
         // Save fullAnimation to animationCollection
-        savePosture(postureName.getText(), postureIndex);
+        savePosture(transport.postureName.getText(), postureIndex);
       }
       postureIndex--;
       avatar.setPosture(animationCollection.getPosture(postureIndex));
-      postureName.setText(animationCollection.getPostureName(postureIndex));
+      transport.postureName.setText(animationCollection.getPostureName(postureIndex));
       mustUpdateUI = true;
     }
     else if (name.equals("nextposture")) {
       if (fullAnimationDirty) {
         // Save fullAnimation to animationCollection
-        savePosture(postureName.getText(), postureIndex);
+        savePosture(transport.postureName.getText(), postureIndex);
       }
       
       postureIndex++;
       if (postureIndex >= animationCollection.size()) {
         postureIndex = animationCollection.size();
         avatar.clearAnimation();
-        postureName.setText("anim"+postureIndex);
+        transport.postureName.setText("posture"+postureIndex);
       } else {
         avatar.setPosture(animationCollection.getPosture(postureIndex));
-        postureName.setText(animationCollection.getPostureName(postureIndex));
+        transport.postureName.setText(animationCollection.getPostureName(postureIndex));
       }
       mustUpdateUI = true;
     }
@@ -72,14 +71,14 @@ void controlEvent(ControlEvent event) throws InstantiationException, IllegalAcce
       } else {
         selected.addAnimation(new Animation(tf));
       }
-      selected.resetAnimation();
+      selected.reset();
       if (tf instanceof TFTimetable) {
         timeline = new Timeline(animNum);
         timeline.setFunction((TFTimetable) tf);
         timeline.show();
       }
       mustUpdateUI = true;
-      playAnim = true;
+      playing = true;
       fullAnimationDirty = true;
     }
     
@@ -88,7 +87,7 @@ void controlEvent(ControlEvent event) throws InstantiationException, IllegalAcce
       int animNum = parseInt(m[1]);
       selected.getAnimation(animNum).setAxe((int) value);
       mustUpdateUI = true;
-      playAnim = true;
+      playing = true;
       fullAnimationDirty = true;
     }
     
@@ -109,7 +108,7 @@ void controlEvent(ControlEvent event) throws InstantiationException, IllegalAcce
     else if (name.equals("pivotbutton")) {
       setPivot = ((Button) cp5.getController("pivotbutton")).isOn();
       avatar.resetAnimation();
-      playAnim = false;
+      playing = false;
     }
     
     else if (name.startsWith("copybutton")) {
@@ -123,7 +122,7 @@ void controlEvent(ControlEvent event) throws InstantiationException, IllegalAcce
       String[] m = match(name, "pastebutton(\\d+)");
       int animNum = parseInt(m[1]);
       if (animationClipboard != null) {
-        selected.resetAnimation();
+        selected.reset();
         if (animNum < selected.getAnimationList().length) {
           selected.setAnimation(animNum, animationClipboard.copy());
         } else {
@@ -137,7 +136,7 @@ void controlEvent(ControlEvent event) throws InstantiationException, IllegalAcce
     else if (name.startsWith("deletebutton")) {
       String[] m = match(name, "deletebutton(\\d+)");
       int animNum = parseInt(m[1]);
-      selected.resetAnimation(); // So transform matrix is set to identity
+      selected.reset(); // So transform matrix is set to identity
       selected.removeAnimation(animNum);
       mustUpdateUI = true;
       fullAnimationDirty = true;
@@ -210,7 +209,7 @@ void controlEvent(ControlEvent event) throws InstantiationException, IllegalAcce
         } else {
           fn.setParam(paramName, value);
         }
-        playAnim = true;
+        playing = true;
         fullAnimationDirty = true;
         if (timeline != null && timeline.getFunction() == fn)
           timeline.show();
@@ -251,7 +250,7 @@ void fileSelected(File selection) throws IOException {
       
       
       currentScreen = mainScreen;
-      postureName.setText("posture0");
+      transport.postureName.setText("posture0");
       mainScreen.resetView();
       showUI();
       accordion.hide();

@@ -50,7 +50,7 @@ public class WelcomeScreen extends Screen {
     translate(innerRadius*1.3, innerRadius*1.3);
     //translate(width/2, height);
     //scale(1.5);
-    mill.updateAnimation(1f/frameRate);
+    mill.update(1f/frameRate);
     mill.draw(renderer);
     popMatrix();
     

@@ -1,11 +1,11 @@
-// TODO:
 // programme python "key-mon" pour afficher les touches du clavier
 
-// Record images key ('r')
+// TODO:
+// éviter que les éléments d'UI sortent de la fenêtre
+// fileOutput() ***
 // Draw Coordinate's lines on editor
-// Ability to scale Avatar to normalise objects sizes according to a standard ref (1m)
 // Elastic function
-// Arrondir à 2 décimales les floats à sauvegarder dans les json
+// Arrondir à n décimales les floats à sauvegarder dans les json
 // Option to duplicate previous AnimationCollection when new animCollection
 // UV coords in polygon class
 // Add a chart for every Animation to show function progression over time
@@ -13,6 +13,7 @@
 
 /*
   BUGS:
+ * fullscreen 
  * Seule la première animation est sauvegardée
  * Can't select axe before function
  * Resize window doesn't resize UI immediately
@@ -22,12 +23,11 @@
  */
 
 
-import com.badlogic.gdx.graphics.*;
 import com.badlogic.gdx.math.*;
 import com.badlogic.gdx.utils.*;
-import gwel.spacegame.anim.*;
-import gwel.spacegame.graphics.*;
-import gwel.spacegame.entities.*;
+import gwel.game.anim.*;
+import gwel.game.graphics.*;
+import gwel.game.entities.*;
 
 import controlP5.*;
 
@@ -37,7 +37,7 @@ import java.util.*;
 import java.lang.reflect.Field;
 
 
-String version = "0.6.4";
+String version = "0.7";
 
 
 MainScreen mainScreen;
@@ -59,13 +59,13 @@ AnimationCollection animationCollection;
 int postureIndex = 0;
 boolean fullAnimationDirty = false;
 Animation animationClipboard;
-float lastTime;
 
 boolean showUI = false;
 boolean paramLocked = false;
 boolean setPivot = false;
-boolean playAnim = true;
+boolean playing = true;
 boolean mustUpdateUI = false;
+//boolean recording = false;
 File mustLoad = null; // Change current screen to loading screen
 
 
@@ -96,8 +96,6 @@ void setup() {
   }
 
   setupUI();
-
-  lastTime = (float) millis() / 1000.0f;
 }
 
 
@@ -125,14 +123,12 @@ ComplexShape buildBlob() {
 }
 
 
-
 void select(ComplexShape part) {
   showUI = true;
   selected = part;
   updateUI();
   renderer.setSelected(part);
 }
-
 
 
 void savePosture(String postureName, int animIndex) {
@@ -169,6 +165,8 @@ void draw() {
 
 public void keyPressed(KeyEvent event) { currentScreen.keyPressed(event); }
 public void keyReleased(KeyEvent event) { currentScreen.keyReleased(event); }
+public void mousePressed(MouseEvent event) {currentScreen.mousePressed(event); }
+public void mouseReleased(MouseEvent event) {currentScreen.mouseReleased(event); }
 public void mouseClicked(MouseEvent event) {currentScreen.mouseClicked(event); }
 public void mouseWheel(MouseEvent event) { currentScreen.mouseWheel(event); }
 public void mouseDragged(MouseEvent event) { currentScreen.mouseDragged(event); }
@@ -179,6 +177,8 @@ public abstract class Screen {
   
   public void keyPressed(KeyEvent event) { }
   public void keyReleased(KeyEvent event) { }
+  public void mousePressed(MouseEvent event) { }
+  public void mouseReleased(MouseEvent event) { }
   public void mouseClicked(MouseEvent event) { }
   public void mouseWheel(MouseEvent event) { }
   public void mouseDragged(MouseEvent event) { }

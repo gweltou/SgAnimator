@@ -1,10 +1,10 @@
 ControlP5 cp5; //<>//
 FunctionAccordion accordion;
 MyScrollableList partsList;
+Transport transport;
 Button pivotButton;
-Textfield postureName;
-Button prevPostureButton, nextPostureButton;
 Timeline timeline;
+
 PFont defaultFont;
 int spacing = 4;
 int margin = spacing;
@@ -51,18 +51,17 @@ class MyScrollableList extends ScrollableList {
 
 
 
-class FunctionAccordion extends Accordion {
+public class FunctionAccordion extends Accordion {
   private int accordionWidth = 207;
-  
-  
-  public FunctionAccordion(ControlP5 theControlP5, String theName) { 
+
+  public FunctionAccordion(ControlP5 theControlP5, String theName) {
     super(theControlP5, theName);
     setWidth(accordionWidth);
     setMinItemHeight(0);
     setCollapseMode(ControlP5.SINGLE);
     spacing = 4;
   }
-  
+
   // Stupid hack to fix a stupid bug
   // (groups used to collapse in wrong order after mouse hovered a scrollable list)
   @Override
@@ -76,20 +75,32 @@ class FunctionAccordion extends Accordion {
 
 
 
-public class NumberboxInput {
-  Numberbox n;
-  String text = "";
-  boolean active;
-  
-  NumberboxInput(Numberbox theNumberbox) {
-    n = theNumberbox;
-    registerMethod("keyEvent", this);
+public class NumberboxInput extends Numberbox {
+  private String text = "";
+  private boolean active;
+
+  NumberboxInput(ControlP5 theControlP5, String theName) {
+    super(theControlP5, theName);
+    
+    // control the active-status of the input handler when releasing the mouse button inside 
+    // the numberbox. deactivate input handler when mouse leaves.
+    onClick(new CallbackListener() {
+      public void controlEvent(CallbackEvent theEvent) {
+        setActive( true );
+      }
+    });
+    
+    onLeave(new CallbackListener() {
+      public void controlEvent(CallbackEvent theEvent) {
+        setActive( false );
+        submit();
+      }
+    });
   }
 
   public void keyEvent(KeyEvent k) {
     // only process key event if input is active 
     if (k.getAction() == KeyEvent.PRESS && active) {
-      println(k.getKey(), int(k.getKey()));
       if (k.getKey() == '\n') { // confirm input with enter
         submit();
         return;
@@ -103,7 +114,7 @@ public class NumberboxInput {
           text += k.getKey();
         }
       }
-      n.getValueLabel().setText(this.text);
+      getValueLabel().setText(this.text);
     }
   }
 
@@ -111,41 +122,24 @@ public class NumberboxInput {
     active = b;
     isNumberboxActive = b;
     if (active) {
-      n.getValueLabel().setText("");
-      text = ""; 
+      getValueLabel().setText("");
+      text = "";
     }
   }
-  
+
   public void submit() {
     if (!text.isEmpty()) {
       final String regex = "-?\\d+(.\\d{0,3})?";
       if (java.util.regex.Pattern.matches(regex, text)) {
-        n.setValue( float( text ) );
+        setValue( float( text ) );
       } else {
-        n.setValue(0f);
+        setValue(0f);
       }
       text = "";
     } else {
-      n.getValueLabel().setText("" + n.getValue());
+      getValueLabel().setText("" + getValue());
     }
   }
-}
-
-void makeEditable( Numberbox n ) {
-  final NumberboxInput nin = new NumberboxInput( n ); // custom input handler for the numberbox
-  
-  // control the active-status of the input handler when releasing the mouse button inside 
-  // the numberbox. deactivate input handler when mouse leaves.
-  n.onClick(new CallbackListener() {
-    public void controlEvent(CallbackEvent theEvent) {
-      nin.setActive( true ); 
-    }
-  }
-  ).onLeave(new CallbackListener() {
-    public void controlEvent(CallbackEvent theEvent) {
-      nin.setActive( false ); nin.submit();
-    }
-  });
 }
 
 
@@ -163,7 +157,9 @@ void setupUI() {
     .setItemHeight(menuBarHeight)
     .hide();
   ;
-  
+
+  transport = new Transport();
+  accordion = new FunctionAccordion(cp5, "accordion");
 
   pivotButton = cp5.addButton("pivotbutton")
     .setPosition(300, 10)
@@ -171,37 +167,6 @@ void setupUI() {
     .setSwitch(true)
     .activateBy(ControlP5.PRESS)
     .setLabel("Set pivot")
-    .hide()
-    ;
-
-  accordion = new FunctionAccordion(cp5, "accordion");
-
-  // Posture selector
-  PVector pos = new PVector(-130 + width/2, margin);
-  postureName = cp5.addTextfield("posturename")
-    //.setLabelVisible(false) // Doesn't work
-    .setLabel("")
-    .setText("posture0")
-    .setPosition(pos.x, pos.y)
-    .setSize(120, 24)
-    .setFont(defaultFont)
-    .setFocus(false)
-    .setColor(color(255, 255, 255))
-    .setAutoClear(false)
-    .hide()
-    ;
-    
-  prevPostureButton = cp5.addButton("prevposture")
-    .setLabel("<<")
-    .setPosition(pos.x-24-3, pos.y)
-    .setSize(24, 24)
-    .hide()
-    ;
-
-  nextPostureButton = cp5.addButton("nextposture")
-    .setLabel(">>")
-    .setPosition(pos.x+120+3, pos.y)
-    .setSize(24, 24)
     .hide()
     ;
 }
@@ -246,7 +211,7 @@ void updateUI() {
       .onLeave(close)
       .addItems(functionsName)
       .setValue(Arrays.asList(Animation.timeFunctions).indexOf(anim.getFunction().getClass()))
-      .moveTo(g)
+      .setGroup(g)
       .close()
       ;
     pos.add(cp5.getController("function"+animNum).getWidth() + spacing, 0);
@@ -262,11 +227,11 @@ void updateUI() {
       .onLeave(close)
       .addItems(Animation.axeNames)
       .setValue(anim.getAxe() >= 0 ? anim.getAxe() : 0)
-      .moveTo(g)
+      .setGroup(g)
       .close()
       ;
     pos.add(cp5.getController("axe"+animNum).getWidth() + spacing, 0);
-    
+
     // Delete animation button
     cp5.addButton("deletebutton"+animNum)
       .setLabel("x")
@@ -286,7 +251,7 @@ void updateUI() {
         timeline = new Timeline(animNum);
         timeline.setFunction((TFTimetable) anim.getFunction());
       }
-      
+
       cp5.addButton("showtimeline"+animNum)
         .setLabel("Open Timeline")
         .setPosition(pos.x, pos.y)
@@ -299,7 +264,7 @@ void updateUI() {
       drawParams(g, animNum, pos);
     }
     pos.add(spacing, spacing);
-    
+
     // Draw Animation general parameters
     cp5.addKnob("animamp"+animNum)
       .setLabel("")
@@ -314,27 +279,27 @@ void updateUI() {
       .setGroup(g)
       ;
     cp5.addTextlabel("amp"+animNum+"label")
-        .setPosition(pos.x + 35 + spacing, pos.y + 16)
-        .setText("amp".toUpperCase())
-        .setGroup(g)
-        ;
+      .setPosition(pos.x + 35 + spacing, pos.y + 16)
+      .setText("amp".toUpperCase())
+      .setGroup(g)
+      ;
     pos.set(accordion.getWidth()-82, pos.y);
-    
+
     cp5.addToggle("animinv"+animNum)
-        .setLabelVisible(false)
-        .setPosition(pos.x, pos.y + 10)
-        .setSize(40, 20)
-        .setMode(ControlP5.SWITCH)
-        .setValue(!anim.getInv())
-        .setGroup(g)
-        ;
-      cp5.addTextlabel("inv"+animNum+"label")
-        .setPosition(pos.x + 38 + spacing, pos.y + 15)
-        .setText("invert".toUpperCase())
-        .setGroup(g)
-        ;
+      .setLabelVisible(false)
+      .setPosition(pos.x, pos.y + 10)
+      .setSize(40, 20)
+      .setMode(ControlP5.SWITCH)
+      .setValue(!anim.getInv())
+      .setGroup(g)
+      ;
+    cp5.addTextlabel("inv"+animNum+"label")
+      .setPosition(pos.x + 38 + spacing, pos.y + 15)
+      .setText("invert".toUpperCase())
+      .setGroup(g)
+      ;
     pos.add(0, cp5.getController("animamp"+animNum).getHeight());
-    
+
     pos.set(spacing, pos.y+spacing*2);
     drawBottomButtons(g, animNum, pos);
 
@@ -386,7 +351,7 @@ void updateUI() {
 
   g.setBackgroundHeight((int) pos.y);
   accordion.addItem(g);
-  
+
   if (keepsOpenAnimNum >= 0 && keepsOpenAnimNum <= animationList.length) {
     accordion.open(keepsOpenAnimNum);
   } else {
@@ -400,7 +365,7 @@ void updateUI() {
 
 void drawParams(Group g, int animNum, PVector pos) {
   Animation anim = selected.getAnimationList()[animNum];
-  
+
   for (TFParam param : anim.getFunction().getParams()) {
     switch (param.type) {
     case TFParam.SLIDER:
@@ -414,7 +379,7 @@ void drawParams(Group g, int animNum, PVector pos) {
         .setGroup(g)
         ;
       break;
-      
+
     case TFParam.CHECKBOX:
       cp5.addToggle(param.name+animNum)
         .setLabelVisible(false)
@@ -429,7 +394,7 @@ void drawParams(Group g, int animNum, PVector pos) {
         .setGroup(g)
         ;
       break;
-      
+
     case TFParam.TOGGLE:
       cp5.addToggle(param.name+animNum)
         .setLabelVisible(false)
@@ -445,9 +410,9 @@ void drawParams(Group g, int animNum, PVector pos) {
         .setGroup(g)
         ;
       break;
-      
+
     case TFParam.NUMBERBOX:
-      Numberbox nb = cp5.addNumberbox(param.name+animNum)
+      new NumberboxInput(cp5, param.name+animNum)
         .setLabel("")
         //.setLabelVisible(false) // doesn't work
         .setPosition(pos.x, pos.y)
@@ -458,14 +423,13 @@ void drawParams(Group g, int animNum, PVector pos) {
         .setValue((float) param.getValue())
         .setGroup(g)
         ;
-      makeEditable(nb);
       cp5.addTextlabel(param.name+animNum+"label")
         .setPosition(pos.x + 60 + spacing, pos.y + 4)
         .setText(param.name.toUpperCase() + (param.unit.equals("") ? "" : "  ("+param.unit+")"))
         .setGroup(g)
         ;
       break;
-      
+
     case TFParam.EASING:
       int easingNum = 0;
       for (int i=0; i<Animation.interpolationNamesSimp.length; i++) {
@@ -507,7 +471,7 @@ void drawBottomButtons(Group g, int animNum, PVector pos) {
       .setGroup(g)
       ;
     pos.add(cp5.getController("copybutton"+animNum).getWidth()+spacing, 0);
-    
+
     // Swap position buttons
     cp5.addButton("swapup"+animNum)
       .setLabel("up")
@@ -518,7 +482,7 @@ void drawBottomButtons(Group g, int animNum, PVector pos) {
       ;
     if (animNum < 1)
       cp5.getController("swapup"+animNum).hide();
-    
+
     cp5.addButton("swapdown"+animNum)
       .setLabel("dwn")
       .setPosition(accordion.getWidth()-20-margin, pos.y)
@@ -528,7 +492,7 @@ void drawBottomButtons(Group g, int animNum, PVector pos) {
       ;
     if (animNum == selected.getAnimationList().length-1)
       cp5.getController("swapdown"+animNum).hide();
-    
+
     bottomButtons = true;
   }
 
@@ -554,9 +518,7 @@ void showUI() {
   showUI = true;
   accordion.show();
   partsList.open().show();
-  postureName.show();
-  prevPostureButton.show();
-  nextPostureButton.show();
+  transport.show();
   renderer.setSelected(selected);
 }
 
@@ -565,9 +527,7 @@ void hideUI() {
   accordion.hide();
   partsList.hide();
   pivotButton.hide();
-  postureName.hide();
-  prevPostureButton.hide();
-  nextPostureButton.hide();
+  transport.hide();
   renderer.setSelected(null);
 }
 

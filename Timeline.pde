@@ -5,6 +5,7 @@ class Timeline {
   private int spacing = 2;
   private int sliderSpacing = 3;
   private int sliderHeight = 120;
+  private int barHeight = 12;
   private int groupHeight = sliderHeight+40;
   private int groupWidth = 360;
   private int colorBackground = 0xff003652;
@@ -24,16 +25,17 @@ class Timeline {
   int selectedSlider = 0;
   int animNum;
 
+
   Timeline(int animNum) {
     paramLocked = true;
 
     this.animNum = animNum;
 
     group = cp5.addGroup("timeline")
-      .setPosition(width-accordion.getWidth()-groupWidth-2*margin, margin+groupBarHeight+1)
+      .setPosition(width-accordion.getWidth()-groupWidth-2*margin, margin+barHeight+1)
       .setWidth(groupWidth)
       //.hideBar()
-      .setBarHeight(groupBarHeight)
+      .setBarHeight(barHeight)
       .setBackgroundHeight(groupHeight)
       .setBackgroundColor(color(0, 100))
       ;
@@ -47,7 +49,7 @@ class Timeline {
       .setGroup(group)
       ;
 
-    duration = cp5.addNumberbox("duration"+animNum)
+    duration = new NumberboxInput(cp5, "duration"+animNum)
       .setLabel("duration")
       .setPosition(numSteps.getPosition()[0]+numSteps.getWidth()+spacing, spacing)
       .setSize(60, 20)
@@ -56,7 +58,6 @@ class Timeline {
       .setDirection(Controller.HORIZONTAL)
       .setGroup(group)
       ;
-    makeEditable(duration);
 
     cp5.addScrollableList("tleasing"+animNum)
       .setLabel("easing")
@@ -167,7 +168,7 @@ class Timeline {
   }
 
   public void show() {
-    group.show();
+    group.open().show();
   }
 
 
