@@ -28,6 +28,7 @@ void controlEvent(ControlEvent event) throws InstantiationException, IllegalAcce
       
       if (fullAnimationDirty) {
         // Save fullAnimation to animationCollection
+        println("dirty");
         savePosture(transport.postureName.getText(), postureIndex);
       }
       postureIndex--;
@@ -221,7 +222,7 @@ void controlEvent(ControlEvent event) throws InstantiationException, IllegalAcce
 
 
 
-void fileSelected(File selection) throws IOException { 
+void inputFileSelected(File selection) throws IOException { 
   if (selection == null) {
     println("Window was closed or the user hit cancel.");
   } else {
@@ -266,6 +267,25 @@ void fileSelected(File selection) throws IOException {
       mustLoad = selection;
     } else {
       println("Bad filename");
+    }
+  }
+}
+
+
+void outputFileSelected(File selection) {
+  if (selection == null) {
+    println("Window was closed or the user hit cancel.");
+  } else {
+    if (avatar != null) {
+      if (fullAnimationDirty)
+        savePosture(transport.postureName.getText(), postureIndex);
+      
+      String filename = selection.getAbsolutePath();
+      if (!filename.toLowerCase().endsWith(".json"))
+        filename = filename.concat(".json");
+      
+      avatar.setAnimationCollection(animationCollection);
+      avatar.saveFile(filename);
     }
   }
 }

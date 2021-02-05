@@ -5,12 +5,14 @@ public class MainScreen extends Screen {
   TimeFunction selectpartAnim;
   private boolean transportMoving = false;
 
+
   public MainScreen() {
     selectpart = loadImage("selectpart.png");
     selectpartAnim = new TFEaseFromTo(60, 0, 0.66f, 0.66f, "bounceOut", false, true);
     transform = new Affine2().setToTranslation(width/2, height/2);
     hardTransform = new Affine2();
   }
+
 
   public void resetView() {
     transform.setToTranslation(width/2, height/2);
@@ -79,7 +81,7 @@ public class MainScreen extends Screen {
       mustUpdateUI = false;
     }
   }
-
+  
 
   void keyPressed(KeyEvent event) {
     if (avatar != null && key == CODED) {
@@ -117,6 +119,10 @@ public class MainScreen extends Screen {
           }
         }
         break;
+      case 't':  // Physics scren
+        hideUI();
+        currentScreen = new PhysicsScreen(transform);
+        break;
       case 'h':  // Help screens
         hideUI();
         currentScreen = helpScreen1;
@@ -125,15 +131,11 @@ public class MainScreen extends Screen {
         renderer.toggleWireframe();
         break;
       case 15:  // CTRL+o, load a new file
-        selectInput("Select a file", "fileSelected");
+        selectInput("Select a file", "inputFileSelected");
         loadScreen = new LoadScreen();
         break;
       case 19: // CTRL+s, save
-        if (avatar != null) {
-          if (fullAnimationDirty)
-            savePosture(transport.postureName.getText(), postureIndex);
-          avatar.saveFile(baseFilename.concat(".json"), animationCollection);
-        }
+        selectOutput("Select a file", "outputFileSelected");
         break;
       }
     }
@@ -143,6 +145,11 @@ public class MainScreen extends Screen {
   void keyReleased(KeyEvent event) {
     if (key == CODED && keyCode == SHIFT && selected != null && !isNumberboxActive) {
       selected.hardTransform(hardTransform);
+      // Transform physics shell if necessary
+      if (selected == avatar.shape) {
+        for (Shape shape : avatar.physicsShapes)
+          shape.hardTransform(hardTransform);
+      }
       hardTransform.idt();
       playing = true;
       mustUpdateUI = true;
@@ -176,9 +183,11 @@ public class MainScreen extends Screen {
     }
   }
   
+  
   void mouseReleased(MouseEvent event) {
     transportMoving = false;
   }
+
 
   void mouseClicked(MouseEvent event) {
     if (event.getButton() == LEFT) {

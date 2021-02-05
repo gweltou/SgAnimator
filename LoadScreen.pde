@@ -110,34 +110,26 @@ public class LoadScreen extends Screen {
 
 
   private void loadAvatarFile(File file) {
-    JsonValue json = null;
-    try {
-      InputStream in = new FileInputStream(file);
-      json = new JsonReader().parse(in);
-    }
-    catch (IOException e) {
-      e.printStackTrace();
-    }
-    if (json == null)
+    boolean loadGeom = geomToggle.getValue() == 1.0f;
+    boolean loadAnim = animToggle.getValue() == 1.0f;
+    
+    Avatar newAvatar = Avatar.fromFile(file);
+    if (newAvatar == null)
       return;
-
-    // Load shape first
-    if (json.has("geometry") && geomToggle.getValue() == 1.0f) {
-      JsonValue jsonGeometry = json.get("geometry");
-      avatar = new Avatar();
-      avatar.setShape(ComplexShape.fromJson(jsonGeometry));
+    
+    if (loadGeom) {
+      avatar = newAvatar;
       mainScreen.resetView();
     }
-
+    
     // AnimationCollection is kept separated for simplicity
     // rather than storing and retrieving it from the Avatar class
     postureIndex = 0;
-    if (json.has("animation") && animToggle.getValue() == 1.0f) {
-      animationCollection = AnimationCollection.fromJson(json.get("animation"));
-      //avatar.setAnimationCollection(animationCollection));
+    if (loadAnim) {
+      animationCollection = newAvatar.getAnimationCollection();
       if (animationCollection.size() > 0) {
-        avatar.setPosture(animationCollection.getPosture(postureIndex));
-        transport.postureName.setText(animationCollection.getPostureName(postureIndex));
+        //avatar.setPosture(animationCollection.getPosture(0));
+        transport.postureName.setText(animationCollection.getPostureName(0));
       }
     } else {
       animationCollection = new AnimationCollection();

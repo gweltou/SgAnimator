@@ -2,8 +2,8 @@ public class PhysicsScreen extends Screen {
   private final Affine2 transform;
   private color colorSelected = color(255, 127, 0);
 
-  private ArrayList<Shape2D> clicked = new ArrayList();
-  private Shape2D selectedShape;
+  private ArrayList<Shape> clicked = new ArrayList();
+  private Shape selectedShape;
   private int selectedHandle = -1;
   private boolean computeConvexHull = false;
   private final Affine2 unproject = new Affine2();
@@ -20,7 +20,6 @@ public class PhysicsScreen extends Screen {
     convexHull = new ConvexHull();
     avatar.resetAnimation();
     Json json = new Json();
-    println(json.toJson(avatar.physicsShapes));
   }
 
 
@@ -30,8 +29,8 @@ public class PhysicsScreen extends Screen {
     renderer.pushMatrix(transform);
     avatar.draw(renderer);
     renderer.popMatrix();
-    
-    for (Shape2D shape : avatar.physicsShapes)
+
+    for (Shape shape : avatar.physicsShapes)
       drawShape(shape);
 
     if (selectedHandle >= 0) {
@@ -51,8 +50,7 @@ public class PhysicsScreen extends Screen {
         circle(tmpVec.x, tmpVec.y, 2 * c.getRadius() * transform.m00);
       }
     }
-    
-    //textSize(12);
+
     strokeWeight(0.5f);
     drawKey(16, 20, "P", 28);
     text("create a Polygon shape", 100, 20+18);
@@ -67,7 +65,7 @@ public class PhysicsScreen extends Screen {
   }
 
 
-  private void computeConvexPolygon(Polygon polygon) {
+  private void computeConvexPolygon(DrawablePolygon polygon) {
     float[] vertices = polygon.getVertices();
     FloatArray tmpArray = convexHull.computePolygon(vertices, false);
     float[] newVertices = new float[tmpArray.size-2];
@@ -76,24 +74,24 @@ public class PhysicsScreen extends Screen {
   }
 
 
-  public int getHandleIndex(Shape2D shape, float posX, float posY) {
-    if (shape.getClass() == Polygon.class) {
-      float[] vertices = ((Polygon) shape).getTransformedVertices();
+  public int getHandleIndex(Shape shape, float posX, float posY) {
+    if (shape.getClass() == DrawablePolygon.class) {
+      float[] vertices = ((DrawablePolygon) shape).getVertices();
       for (int i = 0; i < vertices.length; i += 2) {
         if (Vector2.dst(vertices[i], vertices[i+1], posX, posY) < HANDLE_RADIUS / transform.m00)
           return i;
       }
-    } else if (shape.getClass() == Circle.class) {
-      Circle c = (Circle) shape;
-      float dist = Vector2.dst(posX, posY, c.x, c.y);
-      if (abs(c.radius - dist) < 0.5 * HANDLE_RADIUS / transform.m00)
+    } else if (shape.getClass() == DrawableCircle.class) {
+      DrawableCircle c = (DrawableCircle) shape;
+      float dist = Vector2.dst(posX, posY, c.getCenter().x, c.getCenter().y);
+      if (abs(c.getRadius() - dist) < 0.5 * HANDLE_RADIUS / transform.m00)
         return 0;
     }
     return -1;
   }
 
 
-  public void drawShape(Shape2D shape) {
+  public void drawShape(Shape shape) {
     strokeWeight(1);
     if (shape == selectedShape) {
       stroke(colorSelected);
@@ -103,8 +101,8 @@ public class PhysicsScreen extends Screen {
       fill(255, 63);
     }
 
-    if (shape.getClass() == Polygon.class) {
-      float[] vertices = ((Polygon) shape).getTransformedVertices();
+    if (shape.getClass() == DrawablePolygon.class) {
+      float[] vertices = ((DrawablePolygon) shape).getVertices();
       beginShape();
       for (int i = 0; i < vertices.length; i += 2) {
         tmpVec.set(vertices[i], vertices[i+1]);
@@ -121,11 +119,11 @@ public class PhysicsScreen extends Screen {
           point(tmpVec.x, tmpVec.y);
         }
       }
-    } else if (shape.getClass() == Circle.class) {
-      Circle c = (Circle) shape;
-      tmpVec.set(c.x, c.y);
+    } else if (shape.getClass() == DrawableCircle.class) {
+      DrawableCircle c = (DrawableCircle) shape;
+      tmpVec.set(c.getCenter());
       transform.applyTo(tmpVec);
-      circle(tmpVec.x, tmpVec.y, 2 * c.radius * transform.m00);
+      circle(tmpVec.x, tmpVec.y, 2 * c.getRadius() * transform.m00);
       if (shape == selectedShape) {
         strokeWeight(4);
         point(tmpVec.x, tmpVec.y);
@@ -147,18 +145,16 @@ public class PhysicsScreen extends Screen {
       // New polygon shape
       float r = 40 / transform.m00;
       float[] vertices = new float[] {-r, +r, +r, +r, +r, -r, -r, -r};
-      Polygon polygon = new Polygon();
-      Vector2 origin = avatar.shape.getLocalOrigin();
-      polygon.setOrigin(origin.x, origin.y);
-      polygon.setPosition(tmpVec.x, tmpVec.y);
+      DrawablePolygon polygon = new DrawablePolygon();
       polygon.setVertices(vertices);
+      polygon.hardTransform(new Affine2().setToTranslation(tmpVec.x, tmpVec.y));
       avatar.physicsShapes.add(polygon);
       selectedShape = polygon;
       break;
     case 'c':
       // New circle shape
       r = 40 / transform.m00;
-      Circle circle = new Circle(tmpVec.x, tmpVec.y, r);
+      DrawableCircle circle = new DrawableCircle(tmpVec.x, tmpVec.y, r);
       avatar.physicsShapes.add(circle);
       selectedShape = circle;
       break;
@@ -180,15 +176,15 @@ public class PhysicsScreen extends Screen {
 
       // Maj key is pressed, add new point to selected Polygon
       if (keyPressed && keyCode == 16
-        && selectedShape.getClass() == Polygon.class
+        && selectedShape.getClass() == DrawablePolygon.class
         && !selectedShape.contains(tmpVec.x, tmpVec.y)) {
-        Polygon polygon = (Polygon) selectedShape;
+        DrawablePolygon polygon = (DrawablePolygon) selectedShape;
         float[] vertices = polygon.getVertices();
         if (vertices.length < 2 * MAX_POINTS) {
           float[] newVertices = new float[vertices.length + 2];
           System.arraycopy(vertices, 0, newVertices, 0, vertices.length);
-          newVertices[vertices.length] = tmpVec.x - polygon.getX();
-          newVertices[vertices.length + 1] = tmpVec.y - polygon.getY();
+          newVertices[vertices.length] = tmpVec.x;
+          newVertices[vertices.length + 1] = tmpVec.y;
           polygon.setVertices(newVertices);
           computeConvexPolygon(polygon);
         }
@@ -198,7 +194,7 @@ public class PhysicsScreen extends Screen {
 
     // List all shapes pointed by the mouse click
     clicked.clear();
-    for (Shape2D shape : avatar.physicsShapes) {
+    for (Shape shape : avatar.physicsShapes) {
       if (shape.contains(tmpVec.x, tmpVec.y))
         clicked.add(shape);
     }
@@ -234,17 +230,16 @@ public class PhysicsScreen extends Screen {
 
     // Move handle
     if (selectedHandle >= 0) {
-      if (selectedShape.getClass() == Polygon.class) {
-        float[] vertices = ((Polygon) selectedShape).getVertices();
+      if (selectedShape.getClass() == DrawablePolygon.class) {
+        float[] vertices = ((DrawablePolygon) selectedShape).getVertices();
         vertices[selectedHandle] += dx;
         vertices[selectedHandle + 1] += dy;
-        ((Polygon) selectedShape).dirty();
         computeConvexHull = true;
-      } else if (selectedShape.getClass() == Circle.class) {
+      } else if (selectedShape.getClass() == DrawableCircle.class) {
         tmpVec.set(mouseX, mouseY);
         unproject.applyTo(tmpVec);
-        Circle c = (Circle) selectedShape;
-        float dist = Vector2.dst(tmpVec.x, tmpVec.y, c.x, c.y);
+        DrawableCircle c = (DrawableCircle) selectedShape;
+        float dist = Vector2.dst(tmpVec.x, tmpVec.y, c.getCenter().x, c.getCenter().y);
         c.setRadius(dist);
       }
       return;
@@ -252,12 +247,12 @@ public class PhysicsScreen extends Screen {
 
     // Translate whole shape
     if (selectedShape != null) {
-      if (selectedShape.getClass() == Polygon.class) {
-        ((Polygon) selectedShape).translate(dx, dy);
-      } else if (selectedShape.getClass() == Circle.class) {
-        Circle circle = (Circle) selectedShape;
-        circle.x += dx;
-        circle.y += dy;
+      Affine2 translation = new Affine2().setToTranslation(dx, dy);
+      if (selectedShape.getClass() == DrawablePolygon.class) {
+        ((DrawablePolygon) selectedShape).hardTransform(translation);
+      } else if (selectedShape.getClass() == DrawableCircle.class) {
+        DrawableCircle circle = (DrawableCircle) selectedShape;
+        circle.hardTransform(translation);
       }
     }
   }
@@ -265,7 +260,7 @@ public class PhysicsScreen extends Screen {
 
   void mouseReleased(MouseEvent event) {
     if (computeConvexHull) {
-      computeConvexPolygon((Polygon) selectedShape);
+      computeConvexPolygon((DrawablePolygon) selectedShape);
       computeConvexHull = false;
       selectedHandle = -1;
     }

@@ -81,6 +81,7 @@ public class NumberboxInput extends Numberbox {
 
   NumberboxInput(ControlP5 theControlP5, String theName) {
     super(theControlP5, theName);
+    setLabel("");
     
     // control the active-status of the input handler when releasing the mouse button inside 
     // the numberbox. deactivate input handler when mouse leaves.
@@ -413,7 +414,6 @@ void drawParams(Group g, int animNum, PVector pos) {
 
     case TFParam.NUMBERBOX:
       new NumberboxInput(cp5, param.name+animNum)
-        .setLabel("")
         //.setLabelVisible(false) // doesn't work
         .setPosition(pos.x, pos.y)
         .setSize(60, 20)

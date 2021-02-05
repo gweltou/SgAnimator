@@ -37,7 +37,7 @@ public class WelcomeScreen extends Screen {
   }
 
   @Override
-    public void draw() {
+  public void draw() {
     if (avatar != null) {
       showUI();
       currentScreen = mainScreen;
@@ -56,27 +56,32 @@ public class WelcomeScreen extends Screen {
     
     fill(127);
     textSize(32);
-    text("Press CTRL+o  to load a file", width/3, height/2);
+    text("Press       +      to load a file", width/3, height/2);
+    drawKey(width/3 + 95, height/2 - 32, "Ctrl", 40);
+    drawKey(width/3 + 180, height/2 - 32, "O", 40);
+    
     fill(63);
     textSize(20);
-    text("'h' to show help", (width/2) - 80, 50 + height/2);
+    text("to show help", (width/2) - 50, 60 + height/2);
+    drawKey((width/2) - 90, 36 + height/2, "H", 32);
+    
     text("Ver. "+version, width-110, height-20);
   }
 
   @Override
-    void mouseClicked(MouseEvent event) {
-    selectInput("Select a file", "fileSelected");
+  void mouseClicked(MouseEvent event) {
+    selectInput("Select a file", "inputFileSelected");
     loadScreen = new LoadScreen();
   }
 
   @Override
-    void keyPressed(KeyEvent event) {
+  void keyPressed(KeyEvent event) {
     switch (key) {
     case 'h':  // Help screens
       currentScreen = helpScreen1;
       break;
     case 15:  // CTRL+o, load a new file
-      selectInput("Select a file", "fileSelected");
+      selectInput("Select a file", "inputFileSelected");
       loadScreen = new LoadScreen();
       break;
     }

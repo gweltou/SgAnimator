@@ -14,7 +14,8 @@ public class HelpScreen1 extends Screen {
       "h\n"+
       "w\n"+
       "right click\n"+
-      "MAJ + right drag\n", width/4, height/4);
+      "MAJ + right drag/mouseWheel\n"+
+      "Escape\n", width/4, height/4);
     text("Open file (svg or json)\n"+
       "Save json file\n"+
       "Select next/previous shape group\n"+
@@ -24,7 +25,8 @@ public class HelpScreen1 extends Screen {
       "Help screen\n"+
       "Wireframe\n"+
       "Place pivot\n"+
-      "Translate geometry\n", width/2, height/4);
+      "Translate/scale geometry\n"+
+      "Exit program\n", width/2, height/4);
     text("Ver. "+version, width-110, height-20);
   }
   

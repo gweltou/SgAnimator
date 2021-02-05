@@ -2,7 +2,6 @@
 
 // TODO:
 // éviter que les éléments d'UI sortent de la fenêtre
-// fileOutput() ***
 // Draw Coordinate's lines on editor
 // Elastic function
 // Arrondir à n décimales les floats à sauvegarder dans les json
@@ -14,6 +13,7 @@
 /*
   BUGS:
  * fullscreen 
+ * PhysicsShapes should scale when hardscaling
  * Seule la première animation est sauvegardée
  * Can't select axe before function
  * Resize window doesn't resize UI immediately
@@ -70,9 +70,9 @@ File mustLoad = null; // Change current screen to loading screen
 
 
 void settings() {
+  fullScreen();
   //size(1200, 700);
-  size(800, 600);
-  //fullScreen();
+  //size(800, 600);
 }
 
 
@@ -131,24 +131,42 @@ void select(ComplexShape part) {
 }
 
 
-void savePosture(String postureName, int animIndex) {
+void savePosture(String postureName, int postureIdx) {
   HashMap<String, Animation[]> posture = new HashMap();
 
   if (postureName == null || postureName.trim().isEmpty())
-    postureName = "posture"+animIndex;
+    postureName = "posture"+postureIdx;
 
   for (ComplexShape part : avatar.getPartsList()) {
     if (part.getAnimationList().length > 0)
       posture.put(part.getId(), part.getAnimationList());
   }
 
-  if (animIndex >= animationCollection.size()) {
+  if (postureIdx >= animationCollection.size()) {
     animationCollection.addPosture(postureName, posture);
   } else {
-    animationCollection.updatePosture(animIndex, postureName, posture);
+    animationCollection.updatePosture(postureIdx, postureName, posture);
   }
 
   fullAnimationDirty = false;
+}
+
+
+void drawKey(int x, int y, String k, float height) {
+  textSize(floor(height * 0.5f));
+  float margin = 0.1f * height;
+  float wi = max(height - 2*margin, textWidth(k) + 10);
+  float w = wi + 2*margin;
+  fill(180);
+  stroke(63);
+  rect(x, y, w, height, 0.15f * height);
+  fill(220);
+  stroke(240);
+  float hi = height * 0.8f;
+  rect(x + margin, y + 0.8f*margin, wi, hi, 0.15f * hi);
+  
+  fill(0);
+  text(k, x + 2*margin, y + hi - 1.5f*margin);
 }
 
 
@@ -158,7 +176,6 @@ void draw() {
     currentScreen = loadScreen;
     mustLoad = null;
   }
-
   currentScreen.draw();
 }
 
@@ -174,7 +191,6 @@ public void mouseDragged(MouseEvent event) { currentScreen.mouseDragged(event); 
 
 public abstract class Screen {
   public void draw() { }
-  
   public void keyPressed(KeyEvent event) { }
   public void keyReleased(KeyEvent event) { }
   public void mousePressed(MouseEvent event) { }
