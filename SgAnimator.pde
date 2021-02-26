@@ -2,9 +2,7 @@
 
 // TODO:
 // éviter que les éléments d'UI sortent de la fenêtre
-// Draw Coordinate's lines on editor
 // Elastic function
-// Arrondir à n décimales les floats à sauvegarder dans les json
 // Option to duplicate previous AnimationCollection when new animCollection
 // UV coords in polygon class
 // Add a chart for every Animation to show function progression over time
@@ -13,7 +11,6 @@
 /*
   BUGS:
  * fullscreen 
- * PhysicsShapes should scale when hardscaling
  * Seule la première animation est sauvegardée
  * Can't select axe before function
  * Resize window doesn't resize UI immediately
@@ -37,7 +34,7 @@ import java.util.*;
 import java.lang.reflect.Field;
 
 
-String version = "0.7";
+String version = "0.6.6";
 
 
 MainScreen mainScreen;
@@ -53,9 +50,8 @@ String baseFilename;
 
 ComplexShape selected = null;
 int selectedIndex = 0;
-String[] partsName;
 String[] functionsName;
-AnimationCollection animationCollection;
+PostureCollection postures;
 int postureIndex = 0;
 boolean fullAnimationDirty = false;
 Animation animationClipboard;
@@ -132,20 +128,28 @@ void select(ComplexShape part) {
 
 
 void savePosture(String postureName, int postureIdx) {
-  HashMap<String, Animation[]> posture = new HashMap();
+  //HashMap<String, Animation[]> posture = new HashMap();
+  Posture posture = new Posture();
 
   if (postureName == null || postureName.trim().isEmpty())
     postureName = "posture"+postureIdx;
-
-  for (ComplexShape part : avatar.getPartsList()) {
+  posture.name = postureName;
+  
+  posture.duration = 0f;
+  
+  Animation[][] groups = new Animation[avatar.getPartsList().length][];
+  Arrays.fill(groups, null);
+  for (int i = 0; i < groups.length; i++) {
+    ComplexShape part = avatar.getPartsList()[i];
     if (part.getAnimationList().length > 0)
-      posture.put(part.getId(), part.getAnimationList());
+      groups[i] = part.getAnimationList();
   }
+  posture.groups = groups;
 
-  if (postureIdx >= animationCollection.size()) {
-    animationCollection.addPosture(postureName, posture);
+  if (postureIdx >= postures.size()) {
+    postures.addPosture(posture);
   } else {
-    animationCollection.updatePosture(postureIdx, postureName, posture);
+    postures.updatePosture(postureIdx, posture);
   }
 
   fullAnimationDirty = false;

@@ -96,11 +96,7 @@ public class LoadScreen extends Screen {
 
     selectedIndex = 0;
     selected = null;
-    partsName = new String[avatar.getPartsList().length];
-    for (int i=0; i<partsName.length; i++) {
-      partsName[i] = avatar.getPartsList()[i].getId();
-    }
-    partsList.setItems(partsName);
+    partsList.setItems(avatar.getPartsNamePre());
     baseFilename = filename.substring(0, filename.length()-5);
     showUI();
     accordion.hide();
@@ -126,13 +122,14 @@ public class LoadScreen extends Screen {
     // rather than storing and retrieving it from the Avatar class
     postureIndex = 0;
     if (loadAnim) {
-      animationCollection = newAvatar.getAnimationCollection();
-      if (animationCollection.size() > 0) {
-        //avatar.setPosture(animationCollection.getPosture(0));
-        transport.postureName.setText(animationCollection.getPostureName(0));
+      postures = newAvatar.postures;
+      if (postures.size() > 0) {
+        avatar.postures = postures;
+        transport.postureName.setText(postures.getPosture(0).name);
+        avatar.loadPosture(0);
       }
     } else {
-      animationCollection = new AnimationCollection();
+      postures = new PostureCollection();
     }
   }
 

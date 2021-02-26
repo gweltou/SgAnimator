@@ -5,7 +5,7 @@ public class HelpScreen1 extends Screen {
     background(255);
     fill(63);
     textSize(20);
-    text("CTRL+o\n"+
+    /*text("CTRL+o\n"+
       "CTRL+s\n"+
       "Up/Down\n"+
       "p\n"+
@@ -15,7 +15,32 @@ public class HelpScreen1 extends Screen {
       "w\n"+
       "right click\n"+
       "MAJ + right drag/mouseWheel\n"+
-      "Escape\n", width/4, height/4);
+      "Escape\n", width/4, height/4);*/
+    int w = (width/2) - 120;
+    int h = (height/4) - 2;
+    int hStep = 30;
+    int keySize = 24;
+    drawKey(w, h - 2*keySize/3, "Ctrl", keySize);
+    textSize(20);
+    text("+", w + 40, h);
+    drawKey(w + 60, h - 2*keySize/3, "O", keySize);
+    h += hStep;
+    drawKey(w, h - 2*keySize/3, "Ctrl", keySize);
+    textSize(20);
+    text("+", w + 40, h);
+    drawKey(w + 60, h - 2*keySize/3, "S", keySize);
+    h += 2*hStep;
+    w = (width/2) - 60;
+    drawKey(w, h - 2*keySize/3, "P", keySize);
+    h += hStep;
+    drawKey(w, h - 2*keySize/3, "R", keySize);
+    h += hStep;
+    drawKey(w, h - 2*keySize/3, "D", keySize);
+    h += hStep;
+    drawKey(w, h - 2*keySize/3, "H", keySize);
+    h += hStep;
+    drawKey(w, h - 2*keySize/3, "W", keySize);
+    textSize(20);
     text("Open file (svg or json)\n"+
       "Save json file\n"+
       "Select next/previous shape group\n"+

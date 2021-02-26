@@ -19,7 +19,6 @@ public class PhysicsScreen extends Screen {
     unproject.set(transform).inv();
     convexHull = new ConvexHull();
     avatar.resetAnimation();
-    Json json = new Json();
   }
 
 

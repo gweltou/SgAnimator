@@ -32,8 +32,9 @@ void controlEvent(ControlEvent event) throws InstantiationException, IllegalAcce
         savePosture(transport.postureName.getText(), postureIndex);
       }
       postureIndex--;
-      avatar.setPosture(animationCollection.getPosture(postureIndex));
-      transport.postureName.setText(animationCollection.getPostureName(postureIndex));
+      Posture prevPosture = postures.getPosture(postureIndex);
+      avatar.loadPosture(prevPosture);
+      transport.postureName.setText(prevPosture.name);
       mustUpdateUI = true;
     }
     else if (name.equals("nextposture")) {
@@ -43,13 +44,14 @@ void controlEvent(ControlEvent event) throws InstantiationException, IllegalAcce
       }
       
       postureIndex++;
-      if (postureIndex >= animationCollection.size()) {
-        postureIndex = animationCollection.size();
+      if (postureIndex >= postures.size()) {
+        postureIndex = postures.size();
         avatar.clearAnimation();
         transport.postureName.setText("posture"+postureIndex);
       } else {
-        avatar.setPosture(animationCollection.getPosture(postureIndex));
-        transport.postureName.setText(animationCollection.getPostureName(postureIndex));
+        Posture nextPosture = postures.getPosture(postureIndex);
+        avatar.loadPosture(nextPosture);
+        transport.postureName.setText(nextPosture.name);
       }
       mustUpdateUI = true;
     }
@@ -230,8 +232,10 @@ void inputFileSelected(File selection) throws IOException {
     String filename = selection.getAbsolutePath();
     if (filename.endsWith("svg")) {
       ComplexShape shape = ComplexShape.fromPShape(loadShape(filename));
-      if (shape == null)
+      if (shape == null) {
+        println("Could not load SVG file");
         return;
+      }
       
       selectedIndex = 0;
       selected = null;
@@ -239,14 +243,10 @@ void inputFileSelected(File selection) throws IOException {
       while (shape.getShapes().size() == 1 && shape.getChildren().size() == 1)
         shape = (ComplexShape) shape.getShapes().get(0);
       
-      animationCollection = new AnimationCollection();
+      postures = new PostureCollection();
       avatar = new Avatar();
       avatar.setShape(shape);
-      partsName = new String[avatar.getPartsList().length];
-      for (int i=0; i<partsName.length; i++) {
-        partsName[i] = avatar.getPartsList()[i].getId();
-      }
-      partsList.setItems(partsName);
+      partsList.setItems(avatar.getPartsNamePre());
       baseFilename = filename.substring(0, filename.length()-4);
       
       
@@ -284,7 +284,7 @@ void outputFileSelected(File selection) {
       if (!filename.toLowerCase().endsWith(".json"))
         filename = filename.concat(".json");
       
-      avatar.setAnimationCollection(animationCollection);
+      avatar.postures = postures;
       avatar.saveFile(filename);
     }
   }

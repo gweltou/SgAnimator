@@ -24,6 +24,7 @@ class MyScrollableList extends ScrollableList {
     setFont(defaultFont);
     setBarHeight(0);
     setBarVisible(false);
+    setWidth(120);
   }
 
   public void highlightPart() {
