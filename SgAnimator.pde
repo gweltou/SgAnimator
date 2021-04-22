@@ -1,22 +1,21 @@
 // programme python "key-mon" pour afficher les touches du clavier
 
 // TODO:
-// éviter que les éléments d'UI sortent de la fenêtre
+// Ouverture de plusieurs fichiers avec Tabs
+// Points de pivots différents par postures
 // Elastic function
 // Option to duplicate previous AnimationCollection when new animCollection
 // UV coords in polygon class
 // Add a chart for every Animation to show function progression over time
-// Lib : avatar.playSequencialy()
+// Lib : avatar.playSequentially()
 
 /*
   BUGS:
  * fullscreen 
- * Seule la première animation est sauvegardée
+ * Alpha modulation
  * Can't select axe before function
  * Resize window doesn't resize UI immediately
- 
- Done:
-
+ *
  */
 
 
@@ -34,7 +33,8 @@ import java.util.*;
 import java.lang.reflect.Field;
 
 
-String version = "0.6.6";
+String version = "0.6.9";
+String appName = "SgAnimator " + version;
 
 
 MainScreen mainScreen;
@@ -53,7 +53,7 @@ int selectedIndex = 0;
 String[] functionsName;
 PostureCollection postures;
 int postureIndex = 0;
-boolean fullAnimationDirty = false;
+boolean animationCollectionDirty = false;
 Animation animationClipboard;
 
 boolean showUI = false;
@@ -61,20 +61,19 @@ boolean paramLocked = false;
 boolean setPivot = false;
 boolean playing = true;
 boolean mustUpdateUI = false;
-//boolean recording = false;
-File mustLoad = null; // Change current screen to loading screen
+File mustLoad = null; // Change current screen to loadScreen
 
 
 void settings() {
-  fullScreen();
+  //fullScreen();
   //size(1200, 700);
-  //size(800, 600);
+  size(800, 600);
 }
 
 
 void setup() {
   surface.setResizable(true);
-  surface.setTitle("Avatar5");
+  surface.setTitle(appName);
 
   mainScreen = new MainScreen();
   welcomeScreen = new WelcomeScreen();
@@ -127,15 +126,15 @@ void select(ComplexShape part) {
 }
 
 
-void savePosture(String postureName, int postureIdx) {
-  //HashMap<String, Animation[]> posture = new HashMap();
+void savePosture() {
   Posture posture = new Posture();
 
+  String postureName = transport.postureName.getText();
   if (postureName == null || postureName.trim().isEmpty())
-    postureName = "posture"+postureIdx;
+    postureName = "posture" + postureIndex;
   posture.name = postureName;
   
-  posture.duration = 0f;
+  posture.duration = transport.animDuration.getValue();
   
   Animation[][] groups = new Animation[avatar.getPartsList().length][];
   Arrays.fill(groups, null);
@@ -146,13 +145,15 @@ void savePosture(String postureName, int postureIdx) {
   }
   posture.groups = groups;
 
-  if (postureIdx >= postures.size()) {
+  if (postureIndex >= postures.size()) {
     postures.addPosture(posture);
   } else {
-    postures.updatePosture(postureIdx, posture);
+    postures.updatePosture(postureIndex, posture);
   }
+  
+  avatar.postures = postures;
 
-  fullAnimationDirty = false;
+  animationCollectionDirty = false;
 }
 
 

@@ -6,7 +6,7 @@ class Timeline {
   private int sliderSpacing = 3;
   private int sliderHeight = 120;
   private int barHeight = 12;
-  private int groupHeight = sliderHeight+40;
+  private int groupHeight = sliderHeight + 40;
   private int groupWidth = 360;
   private int colorBackground = 0xff003652;
   private int colorActiveStep = 0xff00709B;

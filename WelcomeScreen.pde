@@ -5,7 +5,7 @@ public class WelcomeScreen extends Screen {
   public WelcomeScreen() {
     int numWings = floor(random(8, 32));
     innerRadius = numWings * 4;
-    float duration = 4f;
+    float duration = 8f;
     int r1 = floor(random(1, 12));
 
     // Single wing shape
@@ -25,14 +25,15 @@ public class WelcomeScreen extends Screen {
     mill = new ComplexShape();
     for (int i=0; i<numWings; i++) {
       ComplexShape newWing = wing.copy();
-      newWing.setColorMod(random(0.9, 1.1), random(0.9, 1.1), random(0.9, 1.1), 1f);
+      //newWing.setColorMod(random(0.9, 1.1), random(0.9, 1.1), random(0.9, 1.1), 1f);
+      newWing.setColorMod(random(-0.1, 0.1), random(-0.1, 0.1), random(-0.1, 0.1), 1f);
       newWing.getAnimation(0).setParam("phase", r1*i*360/numWings);
       TimeFunction rotate = new TFConstant((float) i/numWings);
       newWing.addAnimation(new Animation(rotate, Animation.AXE_ROT));
       mill.addShape(newWing);
     }
 
-    TimeFunction spin = new TFSpin(0f, duration*random(2.4f, 4f), 1f);
+    TimeFunction spin = new TFSpin(0f, duration * random(3f, 4f), 1f);
     mill.addAnimation(new Animation(spin, Animation.AXE_ROT));
   }
 
@@ -57,8 +58,8 @@ public class WelcomeScreen extends Screen {
     fill(127);
     textSize(32);
     text("Press       +      to load a file", width/3, height/2);
-    drawKey(width/3 + 95, height/2 - 32, "Ctrl", 40);
-    drawKey(width/3 + 180, height/2 - 32, "O", 40);
+    drawKey(width/3 + 96, height/2 - 32, "Ctrl", 40);
+    drawKey(width/3 + 188, height/2 - 32, "O", 40);
     
     fill(63);
     textSize(20);

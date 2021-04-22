@@ -98,6 +98,7 @@ public class LoadScreen extends Screen {
     selected = null;
     partsList.setItems(avatar.getPartsNamePre());
     baseFilename = filename.substring(0, filename.length()-5);
+    println("json baseFilename", baseFilename);
     showUI();
     accordion.hide();
 
@@ -126,11 +127,15 @@ public class LoadScreen extends Screen {
       if (postures.size() > 0) {
         avatar.postures = postures;
         transport.postureName.setText(postures.getPosture(0).name);
+        transport.animDuration.setValue(postures.getPosture(0).duration);
+        transport.prevAnimDuration = postures.getPosture(0).duration;
         avatar.loadPosture(0);
       }
     } else {
       postures = new PostureCollection();
     }
+    
+    surface.setTitle(appName + " - " + filename);
   }
 
 

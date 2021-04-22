@@ -4,6 +4,14 @@ public class MainScreen extends Screen {
   Affine2 hardTransform;
   TimeFunction selectpartAnim;
   private boolean transportMoving = false;
+  private float[] selectedColorMod = new float[] {0.1f, 0.1f, 0.1f, 0.4f};
+  
+  private float defaultFramerate = frameRate;
+  private float recordingFramerate = 25f;
+  private float framerate = defaultFramerate;
+  private int remainingFrames = 0;
+  private boolean clearBackground = true;
+  private float timeScale = 1f;
 
 
   public MainScreen() {
@@ -17,6 +25,21 @@ public class MainScreen extends Screen {
   public void resetView() {
     transform.setToTranslation(width/2, height/2);
   }
+  
+  
+  public void startRecording() {
+    framerate = recordingFramerate;
+    remainingFrames = floor(transport.animDuration.getValue() * framerate);
+    avatar.resetAnimation();
+    renderer.setBackgroundColor(1, 1, 1, 1);
+    renderer.startRecording(transport.getCounter());
+  }
+  
+  
+  public void stopRecording() {
+    renderer.stopRecording();
+    framerate = defaultFramerate;
+  }
 
 
   public void draw() {
@@ -26,15 +49,24 @@ public class MainScreen extends Screen {
       return;
     }
 
-    background(255);
+    if (clearBackground || showUI)
+      background(255);
 
     renderer.pushMatrix(transform);
     if (playing)
-      avatar.updateAnimation(1/frameRate);
+      avatar.update(1f/framerate);
     avatar.draw(renderer);
     
     if (renderer.isRecording() && playing) {
       renderer.flush();
+      if (remainingFrames > 0) {
+        remainingFrames--;
+        transport.increaseCounter();
+        if (remainingFrames == 0) {
+          stopRecording();
+          transport.buttonRec.setOff();
+        }
+      }
     } else {
       avatar.drawSelectedOnly(renderer);
     }
@@ -43,16 +75,16 @@ public class MainScreen extends Screen {
       if (selected != null) {
         if (!hardTransform.isIdt()) {
           renderer.pushMatrix(hardTransform);
-          selected.setColorMod(1f, 1f, 1f, 0.4f);
+          renderer.pushColorMod(selectedColorMod);
           selected.draw(renderer);
-          selected.setColorMod(1f, 1f, 1f, 1f);
+          renderer.popColorMod();
           renderer.drawPivot();
           renderer.popMatrix();
         } else {
           renderer.drawPivot();
         }
       } else {
-        selectpartAnim.update(1/frameRate);
+        selectpartAnim.update(1/framerate);
         if (selectpart != null)
           image(selectpart, partsList.getPosition()[0] + partsList.getWidth() + 4 + selectpartAnim.getValue(), partsList.getPosition()[1] + selectpartAnim.getValue()/3);
       }
@@ -104,9 +136,10 @@ public class MainScreen extends Screen {
           playing = !playing;
         break;
       case 'r':  // Reset animation
-        if (avatar != null)
+        if (avatar != null) {
           avatar.resetAnimation();
-        if (selected != null) mustUpdateUI = true;
+          background(255);
+        }
         break;
       case 'd':  // Show/Hide UI
         if (avatar != null) {
@@ -114,12 +147,16 @@ public class MainScreen extends Screen {
             hideUI();
             if (timeline != null)
               timeline.hide();
+            background(255);
+            avatar.timeScale(timeScale);
+            avatar.resetAnimation();
           } else {
             showUI();
+            avatar.timeScale(1.0f);
           }
         }
         break;
-      case 't':  // Physics scren
+      case 'x':  // Physics scren
         hideUI();
         currentScreen = new PhysicsScreen(transform);
         break;
@@ -137,6 +174,25 @@ public class MainScreen extends Screen {
       case 19: // CTRL+s, save
         selectOutput("Select a file", "outputFileSelected");
         break;
+      case 's':  // Save file
+        if (avatar != null && animationCollectionDirty) {
+          savePosture();
+          avatar.saveFile(baseFilename + ".json");
+          surface.setTitle(appName + " - " + baseFilename + ".json");
+        }
+        break;
+      case 'b':  // Background clear, trail effect
+        if (!showUI) {
+          if (clearBackground ) {
+            timeScale = 0.16f;
+          } else {
+            timeScale = 1.0f;
+          }
+          avatar.timeScale(timeScale);
+          avatar.resetAnimation();
+          background(255);
+          clearBackground = !clearBackground;
+        }
       }
     }
   }
@@ -153,6 +209,7 @@ public class MainScreen extends Screen {
       hardTransform.idt();
       playing = true;
       mustUpdateUI = true;
+      setAnimationCollectionDirty();
     }
   }
 

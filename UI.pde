@@ -13,6 +13,8 @@ int groupBarHeight = 16;
 int keepsOpenAnimNum = -1;
 int axeWidth = 72;
 boolean isNumberboxActive = false;
+color backgroundColor = color(0, 100);
+
 
 
 class MyScrollableList extends ScrollableList {
@@ -22,8 +24,8 @@ class MyScrollableList extends ScrollableList {
     super(theControlP5, theName);
     setType(ScrollableList.LIST);
     setFont(defaultFont);
-    setBarHeight(0);
-    setBarVisible(false);
+    //setBarHeight(0);
+    //setBarVisible(false);
     setWidth(120);
   }
 
@@ -34,7 +36,27 @@ class MyScrollableList extends ScrollableList {
       }
     }
     oldItemHover = itemHover;
-  } 
+  }
+  
+  @Override ScrollableList setItems(String[] items) {
+    // Set scrollableList width according to longest item
+    int maxItemLength = 0;
+    int length;
+    int numSpaces;
+    for (String s : items) {
+      // Count number of spaces in item string
+      numSpaces = 0;
+      for (int i = 0; i < s.length(); i++) {
+        if (s.charAt(i) == ' ')
+          numSpaces++;
+      }
+      length = 7 * numSpaces + 8 * (s.length() - numSpaces);
+      if (length > maxItemLength)
+        maxItemLength = length;
+    }
+    setWidth(maxItemLength + 1);
+    return super.setItems(items);
+  }
 
   @Override protected void onEnter() {
     super.onEnter();
@@ -178,7 +200,7 @@ void setupUI() {
 void updateUI() {
   paramLocked = true;
 
-  partsList.open().show();
+  //partsList.open().show();
 
   // Remove accordion and create new one
   if (accordion != null) {

@@ -9,6 +9,7 @@ void controlEvent(ControlEvent event) throws InstantiationException, IllegalAcce
       timeline.hide();
       
   if (event.isController()) {
+    avatar.resetAnimation();
     String name = event.getName();
     float value = event.getValue();
     //println("event", name, value);
@@ -20,40 +21,7 @@ void controlEvent(ControlEvent event) throws InstantiationException, IllegalAcce
     
     else if (name.equals("posturename")) {
       // Change fullAnim name
-      fullAnimationDirty = true;
-    }
-    else if (name.equals("prevposture")) {
-      if (postureIndex <= 0)
-        return;
-      
-      if (fullAnimationDirty) {
-        // Save fullAnimation to animationCollection
-        println("dirty");
-        savePosture(transport.postureName.getText(), postureIndex);
-      }
-      postureIndex--;
-      Posture prevPosture = postures.getPosture(postureIndex);
-      avatar.loadPosture(prevPosture);
-      transport.postureName.setText(prevPosture.name);
-      mustUpdateUI = true;
-    }
-    else if (name.equals("nextposture")) {
-      if (fullAnimationDirty) {
-        // Save fullAnimation to animationCollection
-        savePosture(transport.postureName.getText(), postureIndex);
-      }
-      
-      postureIndex++;
-      if (postureIndex >= postures.size()) {
-        postureIndex = postures.size();
-        avatar.clearAnimation();
-        transport.postureName.setText("posture"+postureIndex);
-      } else {
-        Posture nextPosture = postures.getPosture(postureIndex);
-        avatar.loadPosture(nextPosture);
-        transport.postureName.setText(nextPosture.name);
-      }
-      mustUpdateUI = true;
+      setAnimationCollectionDirty();
     }
     
     else if (name.startsWith("function")) {
@@ -82,7 +50,7 @@ void controlEvent(ControlEvent event) throws InstantiationException, IllegalAcce
       }
       mustUpdateUI = true;
       playing = true;
-      fullAnimationDirty = true;
+      setAnimationCollectionDirty();
     }
     
     else if (name.startsWith("axe")) {
@@ -91,21 +59,21 @@ void controlEvent(ControlEvent event) throws InstantiationException, IllegalAcce
       selected.getAnimation(animNum).setAxe((int) value);
       mustUpdateUI = true;
       playing = true;
-      fullAnimationDirty = true;
+      setAnimationCollectionDirty();
     }
     
     else if (name.startsWith("animamp")) {
       String[] m = match(name, "animamp(\\d+)");
       int animNum = parseInt(m[1]);
       selected.getAnimation(animNum).setAmp(value);
-      fullAnimationDirty = true;
+      setAnimationCollectionDirty();
     }
     
     else if (name.startsWith("animinv")) {
       String[] m = match(name, "animinv(\\d+)");
       int animNum = parseInt(m[1]);
       selected.getAnimation(animNum).setInv(value == 0 ? true : false);
-      fullAnimationDirty = true;
+      setAnimationCollectionDirty();
     }
     
     else if (name.equals("pivotbutton")) {
@@ -132,7 +100,7 @@ void controlEvent(ControlEvent event) throws InstantiationException, IllegalAcce
           selected.addAnimation(animationClipboard.copy());
         }
         mustUpdateUI = true;
-        fullAnimationDirty = true;
+        setAnimationCollectionDirty();
       }
     }
     
@@ -142,7 +110,7 @@ void controlEvent(ControlEvent event) throws InstantiationException, IllegalAcce
       selected.reset(); // So transform matrix is set to identity
       selected.removeAnimation(animNum);
       mustUpdateUI = true;
-      fullAnimationDirty = true;
+      setAnimationCollectionDirty();
     }
     
     else if (name.startsWith("swapup")) {
@@ -154,7 +122,7 @@ void controlEvent(ControlEvent event) throws InstantiationException, IllegalAcce
       //updateUI();
       keepsOpenAnimNum = animNum-1;
       mustUpdateUI = true;
-      fullAnimationDirty = true;
+      setAnimationCollectionDirty();
     }
     
     else if (name.startsWith("swapdown")) {
@@ -166,7 +134,7 @@ void controlEvent(ControlEvent event) throws InstantiationException, IllegalAcce
       //updateUI();
       keepsOpenAnimNum = animNum+1;
       mustUpdateUI = true;
-      fullAnimationDirty = true;
+      setAnimationCollectionDirty();
     }
     
     else if (name.startsWith("showtimeline")) {
@@ -196,7 +164,7 @@ void controlEvent(ControlEvent event) throws InstantiationException, IllegalAcce
         }
       }
       timeline.show();
-      fullAnimationDirty = true;
+      setAnimationCollectionDirty();
     }
     
     else {
@@ -213,7 +181,7 @@ void controlEvent(ControlEvent event) throws InstantiationException, IllegalAcce
           fn.setParam(paramName, value);
         }
         playing = true;
-        fullAnimationDirty = true;
+        setAnimationCollectionDirty();
         if (timeline != null && timeline.getFunction() == fn)
           timeline.show();
       }
@@ -222,6 +190,11 @@ void controlEvent(ControlEvent event) throws InstantiationException, IllegalAcce
 }
 
 
+
+void setAnimationCollectionDirty() {
+  animationCollectionDirty = true;
+  surface.setTitle(appName + " - " + baseFilename + ".json*");
+}
 
 
 void inputFileSelected(File selection) throws IOException { 
@@ -248,7 +221,8 @@ void inputFileSelected(File selection) throws IOException {
       avatar.setShape(shape);
       partsList.setItems(avatar.getPartsNamePre());
       baseFilename = filename.substring(0, filename.length()-4);
-      
+      println("svg shape", avatar.getShape());
+      println("svg baseFilename", baseFilename);
       
       currentScreen = mainScreen;
       transport.postureName.setText("posture0");
@@ -277,15 +251,16 @@ void outputFileSelected(File selection) {
     println("Window was closed or the user hit cancel.");
   } else {
     if (avatar != null) {
-      if (fullAnimationDirty)
-        savePosture(transport.postureName.getText(), postureIndex);
+      if (animationCollectionDirty)
+        savePosture();
       
       String filename = selection.getAbsolutePath();
       if (!filename.toLowerCase().endsWith(".json"))
         filename = filename.concat(".json");
       
-      avatar.postures = postures;
       avatar.saveFile(filename);
+      baseFilename = filename.substring(0, filename.length()-5);
+      surface.setTitle(appName + " - " + baseFilename + ".json");
     }
   }
 }
