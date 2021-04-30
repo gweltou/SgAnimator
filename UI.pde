@@ -1,9 +1,7 @@
 ControlP5 cp5; //<>//
 FunctionAccordion accordion;
-MyScrollableList partsList;
-Transport transport;
 Button pivotButton;
-Timeline timeline;
+
 
 PFont defaultFont;
 int spacing = 4;
@@ -17,58 +15,44 @@ color backgroundColor = color(0, 100);
 
 
 
-class MyScrollableList extends ScrollableList {
-  int oldItemHover = -1;
-
-  public MyScrollableList(ControlP5 theControlP5, String theName) { 
-    super(theControlP5, theName);
-    setType(ScrollableList.LIST);
-    setFont(defaultFont);
-    //setBarHeight(0);
-    //setBarVisible(false);
-    setWidth(120);
-  }
-
-  public void highlightPart() {
-    if (itemHover != oldItemHover) {
-      if (itemHover >= 0 && itemHover < avatar.getPartsList().length) {
-        renderer.setSelected(avatar.getPartsList()[itemHover]);
-      }
-    }
-    oldItemHover = itemHover;
+public class MoveableGroup {
+  protected Group group;
+  protected int barHeight = 10;
+  protected int groupWidth = 20;
+  protected int groupHeight = 20;
+  protected int spacing = 2;
+  protected int x;
+  protected int y;
+  public boolean isMoving = false;
+  
+  
+  public boolean contains(int x, int y) {
+    return (x >= this.x && x <= this.x+groupWidth
+            && y >= this.y-barHeight && y <= this.y);
   }
   
-  @Override ScrollableList setItems(String[] items) {
-    // Set scrollableList width according to longest item
-    int maxItemLength = 0;
-    int length;
-    int numSpaces;
-    for (String s : items) {
-      // Count number of spaces in item string
-      numSpaces = 0;
-      for (int i = 0; i < s.length(); i++) {
-        if (s.charAt(i) == ' ')
-          numSpaces++;
-      }
-      length = 7 * numSpaces + 8 * (s.length() - numSpaces);
-      if (length > maxItemLength)
-        maxItemLength = length;
-    }
-    setWidth(maxItemLength + 1);
-    return super.setItems(items);
+  public void move(int dx, int dy) {
+    group.open();
+    x += dx;
+    y += dy;
+    x = max(1, min(sketchWidth() - group.getWidth() - 1, x));
+    y = max(barHeight + 2, min(sketchHeight() - groupHeight - 1, y));
+    group.bringToFront();
+    group.setPosition(x, y);
+  }
+  
+  public void setPosition(int x, int y) {
+    this.x = x;
+    this.y = y;
+    group.setPosition(x, y);
   }
 
-  @Override protected void onEnter() {
-    super.onEnter();
-    highlightPart();
+  public void show() {
+    group.show();
   }
-  @Override protected void onLeave() {
-    super.onLeave();
-    renderer.setSelected(selected);
-  }
-  @Override protected void onMove() {
-    super.onMove();
-    highlightPart();
+
+  public void hide() {
+    group.hide();
   }
 }
 
@@ -174,7 +158,7 @@ void setupUI() {
 
   cp5 = new ControlP5(this);
 
-  partsList = (MyScrollableList) new MyScrollableList(cp5, "partslist")
+  partsList = (PartsList) new PartsList(cp5, "partslist")
     .setLabel("parts list")
     .setPosition(margin, margin)
     .setHeight(height-2*margin)
@@ -209,6 +193,9 @@ void updateUI() {
   }
   accordion = new FunctionAccordion(cp5, "accordion");
   accordion.setPosition(width-accordion.getWidth()-margin, 1);
+  
+  if (timeline != null)
+    timeline.remove();
 
   PVector pos = new PVector();
   Animation[] animationList = selected.getAnimationList();
@@ -271,11 +258,6 @@ void updateUI() {
 
     // Draw specific parameters
     if (anim.getFunction() instanceof TFTimetable) {
-      if (timeline == null) {
-        timeline = new Timeline(animNum);
-        timeline.setFunction((TFTimetable) anim.getFunction());
-      }
-
       cp5.addButton("showtimeline"+animNum)
         .setLabel("Open Timeline")
         .setPosition(pos.x, pos.y)
@@ -292,7 +274,6 @@ void updateUI() {
     // Draw Animation general parameters
     cp5.addKnob("animamp"+animNum)
       .setLabel("")
-      //.setLabelVisible(false)
       .setPosition(pos.x, pos.y)
       .setRange(0, 500)
       .setResolution(-500f)  // A negative resolution inverse the drag direction
@@ -543,6 +524,8 @@ void showUI() {
   partsList.open().show();
   transport.show();
   renderer.setSelected(selected);
+  if (timeline != null)
+    timeline.show();
 }
 
 void hideUI() {
@@ -552,6 +535,8 @@ void hideUI() {
   pivotButton.hide();
   transport.hide();
   renderer.setSelected(null);
+  if (timeline != null)
+    timeline.hide();
 }
 
 

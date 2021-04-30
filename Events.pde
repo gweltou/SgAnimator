@@ -5,11 +5,10 @@ void controlEvent(ControlEvent event) throws InstantiationException, IllegalAcce
   if (paramLocked)
     return;
   
-  if (timeline != null)
-      timeline.hide();
+  if (event.isGroup() && timeline != null)
+      timeline.remove();
       
   if (event.isController()) {
-    avatar.resetAnimation();
     String name = event.getName();
     float value = event.getValue();
     //println("event", name, value);
@@ -17,9 +16,12 @@ void controlEvent(ControlEvent event) throws InstantiationException, IllegalAcce
     if (name.equals("partslist")) {
       select(avatar.getPartsList()[int(value)]);
       selectedIndex = int(partsList.getValue());
+      return;
+    } else {  // Don't reset animation when selecting parts
+      avatar.resetAnimation();
     }
     
-    else if (name.equals("posturename")) {
+    if (name.equals("posturename")) {
       // Change fullAnim name
       setAnimationCollectionDirty();
     }
@@ -32,22 +34,16 @@ void controlEvent(ControlEvent event) throws InstantiationException, IllegalAcce
       TimeFunction tf = ctor.newInstance();
       int numberOfAnimations = selected.getAnimationList().length;
       if (animNum < numberOfAnimations) {
-        // Transfer compatible parameters to new TimeFunction
-        //for (TFParam param : selected.getAnimation(animNum).getFunction().getParams()) {
-        //  Object payload = param.getValue();
-        //  println(payload.getClass());
-        //  //tf.setParam(param.name, param.getValue()); // BROKEN
-        //}
         selected.getAnimation(animNum).setFunction(tf);
       } else {
         selected.addAnimation(new Animation(tf));
       }
-      selected.reset();
-      if (tf instanceof TFTimetable) {
+      //selected.reset();
+      /*if (tf instanceof TFTimetable) {
         timeline = new Timeline(animNum);
-        timeline.setFunction((TFTimetable) tf);
-        timeline.show();
-      }
+        //timeline.setFunction((TFTimetable) tf);
+        //timeline.show();
+      }*/
       mustUpdateUI = true;
       playing = true;
       setAnimationCollectionDirty();
@@ -93,7 +89,7 @@ void controlEvent(ControlEvent event) throws InstantiationException, IllegalAcce
       String[] m = match(name, "pastebutton(\\d+)");
       int animNum = parseInt(m[1]);
       if (animationClipboard != null) {
-        selected.reset();
+        //selected.reset();
         if (animNum < selected.getAnimationList().length) {
           selected.setAnimation(animNum, animationClipboard.copy());
         } else {
@@ -107,7 +103,7 @@ void controlEvent(ControlEvent event) throws InstantiationException, IllegalAcce
     else if (name.startsWith("deletebutton")) {
       String[] m = match(name, "deletebutton(\\d+)");
       int animNum = parseInt(m[1]);
-      selected.reset(); // So transform matrix is set to identity
+      //selected.reset(); // So transform matrix is set to identity
       selected.removeAnimation(animNum);
       mustUpdateUI = true;
       setAnimationCollectionDirty();
@@ -140,10 +136,15 @@ void controlEvent(ControlEvent event) throws InstantiationException, IllegalAcce
     else if (name.startsWith("showtimeline")) {
       String[] m = match(name, "([a-z]+)(\\d+)");
       if (m != null) {
-        int animNum = parseInt(m[2]);
-        timeline.setFunction((TFTimetable) selected.getAnimation(animNum).getFunction());
+        if (timeline != null) {
+          timeline.remove();
+        } else {
+          int animNum = parseInt(m[2]);
+          timeline = new Timeline(animNum);
+          //timeline.setFunction((TFTimetable) selected.getAnimation(animNum).getFunction());
+          //timeline.show();
+        }
       }
-      timeline.show();
     }
     
     else if (name.startsWith("tl")) {
@@ -163,7 +164,7 @@ void controlEvent(ControlEvent event) throws InstantiationException, IllegalAcce
           timeline.rshift();
         }
       }
-      timeline.show();
+      //timeline.show();
       setAnimationCollectionDirty();
     }
     
@@ -182,8 +183,8 @@ void controlEvent(ControlEvent event) throws InstantiationException, IllegalAcce
         }
         playing = true;
         setAnimationCollectionDirty();
-        if (timeline != null && timeline.getFunction() == fn)
-          timeline.show();
+        //if (timeline != null && timeline.getFunction() == fn)
+        //  timeline.show();
       }
     }
   }
@@ -193,7 +194,7 @@ void controlEvent(ControlEvent event) throws InstantiationException, IllegalAcce
 
 void setAnimationCollectionDirty() {
   animationCollectionDirty = true;
-  surface.setTitle(appName + " - " + baseFilename + ".json*");
+  surface.setTitle(appName + " - *" + baseFilename + ".json");
 }
 
 
@@ -221,8 +222,6 @@ void inputFileSelected(File selection) throws IOException {
       avatar.setShape(shape);
       partsList.setItems(avatar.getPartsNamePre());
       baseFilename = filename.substring(0, filename.length()-4);
-      println("svg shape", avatar.getShape());
-      println("svg baseFilename", baseFilename);
       
       currentScreen = mainScreen;
       transport.postureName.setText("posture0");

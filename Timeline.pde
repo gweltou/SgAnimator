@@ -1,38 +1,38 @@
+Timeline timeline;
 public final PFont BitFontStandard58 = new BitFont( CP.decodeBase64( BitFont.standard58base64 ) );
 
 
-class Timeline {
-  private int spacing = 2;
+class Timeline extends MoveableGroup {
   private int sliderSpacing = 3;
   private int sliderHeight = 120;
-  private int barHeight = 12;
-  private int groupHeight = sliderHeight + 40;
-  private int groupWidth = 360;
   private int colorBackground = 0xff003652;
   private int colorActiveStep = 0xff00709B;
   private int colorSelected = 0xff9B7900;
   private int colorSelectedActive = 0xffFFC905;
   private int[][] colorMatrix = new int[][] {{colorBackground, colorActiveStep}, {colorSelected, colorSelectedActive}};
-  Group group;
-  Numberbox numSteps;
-  Numberbox duration;
-  Button lshift, rshift;
-  Toggle loop, smoothend;
-  ScrollableList easing;
-  TFTimetable fn;
+  private Numberbox numSteps;
+  private Numberbox duration;
+  private Button lshift, rshift;
+  private Toggle loop, smoothend;
+  private ScrollableList easing;
+  private TFTimetable fn;
 
   Slider[] sliders;
   int selectedSlider = 0;
-  int animNum;
-
 
   Timeline(int animNum) {
+    barHeight = 12;
+    groupHeight = sliderHeight + 40;
+    groupWidth = 360;
+    x = width - accordion.getWidth() - groupWidth - 2*margin;
+    y = margin + barHeight + 1;
+    
+    this.fn = (TFTimetable) selected.getAnimation(animNum).getFunction();
+    
     paramLocked = true;
 
-    this.animNum = animNum;
-
     group = cp5.addGroup("timeline")
-      .setPosition(width-accordion.getWidth()-groupWidth-2*margin, margin+barHeight+1)
+      .setPosition(x, y)
       .setWidth(groupWidth)
       //.hideBar()
       .setBarHeight(barHeight)
@@ -59,7 +59,7 @@ class Timeline {
       .setGroup(group)
       ;
 
-    cp5.addScrollableList("tleasing"+animNum)
+    easing = cp5.addScrollableList("easing"+animNum)
       .setLabel("easing")
       .setPosition(duration.getPosition()[0]+duration.getWidth()+spacing, spacing)
       .setWidth(80)
@@ -129,6 +129,7 @@ class Timeline {
     }
 
     paramLocked = false;
+    update();
   }
 
 
@@ -141,12 +142,20 @@ class Timeline {
     return fn;
   }
 
+  /*
+  public void setEasing(float idx) {
+   println("setEasing", idx);
+   fn.setEasing(Animation.interpolationNamesSimp[int(idx)]);
+   }*/
 
+  /*
   public int getAnimNum() { 
     return animNum;
-  }
+  }*/
 
 
+  /* Change the size of the timeline table and update its values
+  */
   public void updateTable() {
     int size = (int) numSteps.getValue();
     float[] array = new float[size];
@@ -162,14 +171,15 @@ class Timeline {
     fn.setTableValue(idx, value);
     selectedSlider = idx;
   }
-
+  
+  /*
   public void hide() {
     group.hide();
   }
 
   public void show() {
     group.open().show();
-  }
+  }*/
 
 
   public void update() {
@@ -178,7 +188,16 @@ class Timeline {
 
     numSteps.setValue(fn.getTable().length);
     duration.setValue((float) fn.getParam("duration").getValue());
-    //easing.setValue((int) fn.getParam("easing").getValue());
+
+    int easingNum = 0;
+    String easingName = (String) fn.getParam("easing").getValue();
+    for (int i=0; i<Animation.interpolationNamesSimp.length; i++) {
+      if (Animation.interpolationNamesSimp[i].equals(easingName)) {
+        easingNum = i;
+        break;
+      }
+    }
+    easing.setValue(easingNum);
     loop.setValue((boolean) fn.getParam("loop").getValue());
     smoothend.setValue((boolean) fn.getParam("smoothend").getValue());
 
@@ -235,6 +254,12 @@ class Timeline {
       sliders[i].setValue(sliders[i-1].getValue());
     sliders[0].setValue(last);
     updateTable();
+  }
+  
+  
+  public void remove() {
+    group.remove();
+    timeline = null;
   }
 
 

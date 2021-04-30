@@ -1,20 +1,21 @@
 // programme python "key-mon" pour afficher les touches du clavier
 
 // TODO:
-// Ouverture de plusieurs fichiers avec Tabs
-// Points de pivots différents par postures
+// Lib : Points de pivots différents par postures
 // Elastic function
 // Option to duplicate previous AnimationCollection when new animCollection
 // UV coords in polygon class
 // Add a chart for every Animation to show function progression over time
 // Lib : avatar.playSequentially()
+// Ouverture de plusieurs fichiers avec Tabs
+// Librairie d'Avatars à l'ouverture d'un fichier
 
 /*
   BUGS:
  * fullscreen 
  * Alpha modulation
  * Can't select axe before function
- * Resize window doesn't resize UI immediately
+ * Resize window doesn't resize UI immediately (click on displaced controls are missed)
  *
  */
 
@@ -66,8 +67,8 @@ File mustLoad = null; // Change current screen to loadScreen
 
 void settings() {
   //fullScreen();
-  //size(1200, 700);
   size(800, 600);
+  //size(800, 600, P2D);
 }
 
 

@@ -1,5 +1,7 @@
-public class Transport {
-  Group group;
+Transport transport;
+
+
+public class Transport extends MoveableGroup {
   Textfield postureName;
   Button prevPostureButton;
   Button nextPostureButton;
@@ -8,21 +10,20 @@ public class Transport {
   Textlabel frameCounter;
   
   public int frameNumber = 0;
-  private int barHeight = 10;
-  private int height = 20;
-  private int width;
-  private int spacing = 2;
   private int textfieldWidth = 100;
   private int buttonSize = 24;
-  private int x = 200;
-  private int y = margin + barHeight;
   private float prevAnimDuration = 0f;
 
 
   public Transport() {
+    x = 200;
+    y = margin + barHeight;
+    barHeight = 10;
+    groupHeight = 20;
+    
     group = cp5.addGroup("transportgroup")
       .setBarHeight(barHeight)
-      .setBackgroundHeight(height + 1)
+      .setBackgroundHeight(groupHeight + 1)
       .setBackgroundColor(backgroundColor)
       .setCaptionLabel("transport")
       .setPosition(x, y)
@@ -33,7 +34,7 @@ public class Transport {
     prevPostureButton = cp5.addButton("prevposture")
       .setLabel("<<")
       .setPosition(pos.x, pos.y)
-      .setSize(buttonSize, height)
+      .setSize(buttonSize, groupHeight)
       .setGroup(group)
       ;
     prevPostureButton.addCallback(new CallbackListener() {
@@ -63,7 +64,7 @@ public class Transport {
       .setLabel("")
       .setText("posture0")
       .setPosition(pos.x, pos.y)
-      .setSize(textfieldWidth, height)
+      .setSize(textfieldWidth, groupHeight)
       .setFont(defaultFont)
       .setFocus(false)
       .setColor(color(255, 255, 255))
@@ -76,7 +77,7 @@ public class Transport {
     nextPostureButton = cp5.addButton("nextposture")
       .setLabel(">>")
       .setPosition(pos.x, pos.y)
-      .setSize(buttonSize, height)
+      .setSize(buttonSize, groupHeight)
       .setGroup(group)
       ;
     nextPostureButton.addCallback(new CallbackListener() {
@@ -109,7 +110,7 @@ public class Transport {
 
     animDuration = new NumberboxInput(cp5, "animduration")
       .setPosition(pos.x, pos.y)
-      .setSize(40, height)
+      .setSize(40, groupHeight)
       .setGroup(group);
     animDuration.addCallback(new CallbackListener() {
       public void controlEvent(CallbackEvent theEvent) {
@@ -125,7 +126,7 @@ public class Transport {
       .setLabel("counter")
       .setText(String.valueOf(frameNumber))
       .setPosition(pos.x, pos.y)
-      .setSize(30, height)
+      .setSize(30, groupHeight)
       .setFont(defaultFont)
       .setColor(color(255, 255, 255))
       .setGroup(group)
@@ -133,10 +134,9 @@ public class Transport {
     pos.add(30 + spacing, 0);
 
 
-    //cp5.addButton("resetcounter")
     new Button(cp5, "resetcounter")
       .setLabel("Rst")
-      .setSize(buttonSize, height)
+      .setSize(buttonSize, groupHeight)
       .setPosition(pos.x, pos.y)
       .setGroup(group)
       .plugTo(this, "resetCounter")
@@ -149,8 +149,8 @@ public class Transport {
     pos.add(buttonSize, 0);
 
 
-    width = (int) pos.x;
-    group.setWidth(width);
+    groupWidth = (int) pos.x;
+    group.setWidth(groupWidth);
     hide();
   }
   
@@ -169,42 +169,11 @@ public class Transport {
   }
   
   
-  public boolean contains(int x, int y) {
-    return (x >= this.x && x <= this.x+width && y >= this.y-barHeight && y <= this.y);
-  }
-  
-  
-  public void move(int dx, int dy) {
-    group.open();
-    x += dx;
-    y += dy;
-    x = max(1, min(sketchWidth() - group.getWidth() - 1, x));
-    y = max(barHeight + 2, min(sketchHeight() - height - 1, y));
-    group.setPosition(x, y);
-  }
-  
-  
-  public void setPosition(int x, int y) {
-    this.x = x;
-    this.y = y;
-    group.setPosition(x, y);
-  }
-
-
-  public void show() {
-    group.show();
-  }
-
-  public void hide() {
-    group.hide();
-  }
-
-
   private class ButtonRec extends Button {
     public ButtonRec(ControlP5 theControlP5, String theName, PVector position) {
       super(theControlP5, theName);
       setLabel("Rec");
-      setSize(buttonSize, height);
+      setSize(buttonSize, groupHeight);
       setPosition(position.x, position.y);
       setSwitch(true);
       setColorActive(color(255, 0, 0));

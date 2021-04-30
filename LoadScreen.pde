@@ -98,7 +98,6 @@ public class LoadScreen extends Screen {
     selected = null;
     partsList.setItems(avatar.getPartsNamePre());
     baseFilename = filename.substring(0, filename.length()-5);
-    println("json baseFilename", baseFilename);
     showUI();
     accordion.hide();
 
@@ -122,7 +121,7 @@ public class LoadScreen extends Screen {
     // AnimationCollection is kept separated for simplicity
     // rather than storing and retrieving it from the Avatar class
     postureIndex = 0;
-    if (loadAnim) {
+    if (loadAnim && newAvatar.postures != null) {
       postures = newAvatar.postures;
       if (postures.size() > 0) {
         avatar.postures = postures;

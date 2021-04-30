@@ -3,7 +3,6 @@ public class MainScreen extends Screen {
   Affine2 transform;
   Affine2 hardTransform;
   TimeFunction selectpartAnim;
-  private boolean transportMoving = false;
   private float[] selectedColorMod = new float[] {0.1f, 0.1f, 0.1f, 0.4f};
   
   private float defaultFramerate = frameRate;
@@ -24,6 +23,8 @@ public class MainScreen extends Screen {
 
   public void resetView() {
     transform.setToTranslation(width/2, height/2);
+    if (timeline != null)
+      timeline.remove();
   }
   
   
@@ -145,8 +146,6 @@ public class MainScreen extends Screen {
         if (avatar != null) {
           if (showUI) {
             hideUI();
-            if (timeline != null)
-              timeline.hide();
             background(255);
             avatar.timeScale(timeScale);
             avatar.resetAnimation();
@@ -207,7 +206,7 @@ public class MainScreen extends Screen {
           shape.hardTransform(hardTransform);
       }
       hardTransform.idt();
-      playing = true;
+      //playing = true;
       mustUpdateUI = true;
       setAnimationCollectionDirty();
     }
@@ -235,14 +234,17 @@ public class MainScreen extends Screen {
   
   
   void mousePressed(MouseEvent event) {
-    if (transport.contains(mouseX, mouseY)) {
-      transportMoving = true;
-    }
+    if (transport.contains(mouseX, mouseY))
+      transport.isMoving = true;
+    else if (timeline != null && timeline.contains(mouseX, mouseY))
+      timeline.isMoving = true;
   }
   
   
   void mouseReleased(MouseEvent event) {
-    transportMoving = false;
+    transport.isMoving = false;
+    if (timeline != null)
+      timeline.isMoving = false;
   }
 
 
@@ -269,9 +271,9 @@ public class MainScreen extends Screen {
 
   void mouseDragged(MouseEvent event) {
     pivotButton.hide();
+    int dx = mouseX-pmouseX;
+    int dy = mouseY-pmouseY;
     if (event.getButton() == RIGHT) {
-      int dx = mouseX-pmouseX;
-      int dy = mouseY-pmouseY;
       if (keyPressed && keyCode == SHIFT && selected != null) {
         // scale translation by the zoom factor
         hardTransform.translate(dx/transform.m00, dy/transform.m11);
@@ -279,8 +281,10 @@ public class MainScreen extends Screen {
         // scale translation by the zoom factor
         transform.translate(dx/transform.m00, dy/transform.m11);
       }
-    } else if (transportMoving) {
-      transport.move(mouseX-pmouseX, mouseY-pmouseY);
+    } else if (transport.isMoving) {
+      transport.move(dx, dy);
+    } else if (timeline.isMoving) {
+      timeline.move(dx, dy);
     }
   }
 }
