@@ -1,2 +1,5 @@
 # Ignore Gimp files
 /res/*.xcf
+
+# Ignore outputed frames
+/frames

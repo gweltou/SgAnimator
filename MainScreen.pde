@@ -126,6 +126,10 @@ public class MainScreen extends Screen {
       } else if (keyCode == DOWN) {  // Select previous part
         selectedIndex = (selectedIndex+1) % avatar.getPartsList().length;
         partsList.setValue(selectedIndex);
+      } else if (keyCode == LEFT) {
+        transport.prevPosture();
+      } else if (keyCode == RIGHT) {
+        transport.nextPosture();
       } else if (keyCode == SHIFT && selected != null && !isNumberboxActive) {
         playing = false;
         avatar.resetAnimation();
@@ -283,7 +287,7 @@ public class MainScreen extends Screen {
       }
     } else if (transport.isMoving) {
       transport.move(dx, dy);
-    } else if (timeline.isMoving) {
+    } else if (timeline != null && timeline.isMoving) {
       timeline.move(dx, dy);
     }
   }

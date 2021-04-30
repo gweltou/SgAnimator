@@ -34,7 +34,7 @@ import java.util.*;
 import java.lang.reflect.Field;
 
 
-String version = "0.6.9";
+String version = "0.7";
 String appName = "SgAnimator " + version;
 
 
@@ -81,7 +81,7 @@ void setup() {
   helpScreen1 = new HelpScreen1();
   helpScreenEasing = new HelpScreenEasing();
   currentScreen = welcomeScreen;
-  
+
   renderer = new MyRenderer(this);
 
   int numFn = Animation.timeFunctions.length;
@@ -134,9 +134,9 @@ void savePosture() {
   if (postureName == null || postureName.trim().isEmpty())
     postureName = "posture" + postureIndex;
   posture.name = postureName;
-  
+
   posture.duration = transport.animDuration.getValue();
-  
+
   Animation[][] groups = new Animation[avatar.getPartsList().length][];
   Arrays.fill(groups, null);
   for (int i = 0; i < groups.length; i++) {
@@ -151,7 +151,7 @@ void savePosture() {
   } else {
     postures.updatePosture(postureIndex, posture);
   }
-  
+
   avatar.postures = postures;
 
   animationCollectionDirty = false;
@@ -170,7 +170,7 @@ void drawKey(int x, int y, String k, float height) {
   stroke(240);
   float hi = height * 0.8f;
   rect(x + margin, y + 0.8f*margin, wi, hi, 0.15f * hi);
-  
+
   fill(0);
   text(k, x + 2*margin, y + hi - 1.5f*margin);
 }
@@ -186,22 +186,44 @@ void draw() {
 }
 
 
-public void keyPressed(KeyEvent event) { currentScreen.keyPressed(event); }
-public void keyReleased(KeyEvent event) { currentScreen.keyReleased(event); }
-public void mousePressed(MouseEvent event) {currentScreen.mousePressed(event); }
-public void mouseReleased(MouseEvent event) {currentScreen.mouseReleased(event); }
-public void mouseClicked(MouseEvent event) {currentScreen.mouseClicked(event); }
-public void mouseWheel(MouseEvent event) { currentScreen.mouseWheel(event); }
-public void mouseDragged(MouseEvent event) { currentScreen.mouseDragged(event); }
+public void keyPressed(KeyEvent event) { 
+  currentScreen.keyPressed(event);
+}
+public void keyReleased(KeyEvent event) { 
+  currentScreen.keyReleased(event);
+}
+public void mousePressed(MouseEvent event) {
+  currentScreen.mousePressed(event);
+}
+public void mouseReleased(MouseEvent event) {
+  currentScreen.mouseReleased(event);
+}
+public void mouseClicked(MouseEvent event) {
+  currentScreen.mouseClicked(event);
+}
+public void mouseWheel(MouseEvent event) { 
+  currentScreen.mouseWheel(event);
+}
+public void mouseDragged(MouseEvent event) { 
+  currentScreen.mouseDragged(event);
+}
 
 
 public abstract class Screen {
-  public void draw() { }
-  public void keyPressed(KeyEvent event) { }
-  public void keyReleased(KeyEvent event) { }
-  public void mousePressed(MouseEvent event) { }
-  public void mouseReleased(MouseEvent event) { }
-  public void mouseClicked(MouseEvent event) { }
-  public void mouseWheel(MouseEvent event) { }
-  public void mouseDragged(MouseEvent event) { }
+  public void draw() {
+  }
+  public void keyPressed(KeyEvent event) {
+  }
+  public void keyReleased(KeyEvent event) {
+  }
+  public void mousePressed(MouseEvent event) {
+  }
+  public void mouseReleased(MouseEvent event) {
+  }
+  public void mouseClicked(MouseEvent event) {
+  }
+  public void mouseWheel(MouseEvent event) {
+  }
+  public void mouseDragged(MouseEvent event) {
+  }
 }

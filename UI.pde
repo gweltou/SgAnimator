@@ -183,11 +183,14 @@ void setupUI() {
 
 void updateUI() {
   paramLocked = true;
+  boolean visible = true;
 
   //partsList.open().show();
 
   // Remove accordion and create new one
   if (accordion != null) {
+    if (!accordion.isVisible())
+      visible = false;
     cp5.remove("accordion");
     accordion = null;
   }
@@ -364,6 +367,8 @@ void updateUI() {
   }
 
   paramLocked = false;
+  if (!visible)
+    accordion.hide();
 }
 
 

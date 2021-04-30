@@ -8,7 +8,7 @@ public class Transport extends MoveableGroup {
   ButtonRec buttonRec;
   Numberbox animDuration;
   Textlabel frameCounter;
-  
+
   public int frameNumber = 0;
   private int textfieldWidth = 100;
   private int buttonSize = 24;
@@ -20,7 +20,7 @@ public class Transport extends MoveableGroup {
     y = margin + barHeight;
     barHeight = 10;
     groupHeight = 20;
-    
+
     group = cp5.addGroup("transportgroup")
       .setBarHeight(barHeight)
       .setBackgroundHeight(groupHeight + 1)
@@ -28,34 +28,16 @@ public class Transport extends MoveableGroup {
       .setCaptionLabel("transport")
       .setPosition(x, y)
       ;
-    
+
     PVector pos = new PVector(0, 0);
 
     prevPostureButton = cp5.addButton("prevposture")
       .setLabel("<<")
       .setPosition(pos.x, pos.y)
       .setSize(buttonSize, groupHeight)
+      .plugTo(this, "prevPosture")
       .setGroup(group)
       ;
-    prevPostureButton.addCallback(new CallbackListener() {
-      public void controlEvent(CallbackEvent theEvent) {
-        if (theEvent.getAction() == ControlP5.ACTION_CLICK) {
-          if (postureIndex <= 0)
-            return;
-          if (animationCollectionDirty) {
-            // Save fullAnimation to animationCollection
-            savePosture();
-          }
-          postureIndex--;
-          Posture prevPosture = postures.getPosture(postureIndex);
-          avatar.loadPosture(prevPosture);
-          postureName.setText(prevPosture.name);
-          animDuration.setValue(prevPosture.duration);
-          prevAnimDuration = prevPosture.duration;
-          mustUpdateUI = true;
-        }
-      }
-    });
     pos.add(buttonSize + spacing, 0);
 
 
@@ -78,35 +60,11 @@ public class Transport extends MoveableGroup {
       .setLabel(">>")
       .setPosition(pos.x, pos.y)
       .setSize(buttonSize, groupHeight)
+      .plugTo(this, "nextPosture")
       .setGroup(group)
       ;
-    nextPostureButton.addCallback(new CallbackListener() {
-      public void controlEvent(CallbackEvent theEvent) {
-        if (theEvent.getAction() == ControlP5.ACTION_CLICK) {
-          if (animationCollectionDirty) {
-            // Save posture to animationCollection
-            savePosture();
-          }
-          postureIndex++;
-          if (postureIndex >= postures.size()) {
-            postureIndex = postures.size();
-            avatar.clearAnimation();
-            postureName.setText("posture" + postureIndex);
-            animDuration.setValue(0f);
-            prevAnimDuration = 0f;
-          } else {
-            Posture nextPosture = postures.getPosture(postureIndex);
-            avatar.loadPosture(nextPosture);
-            postureName.setText(nextPosture.name);
-            animDuration.setValue(nextPosture.duration);
-            prevAnimDuration = nextPosture.duration;
-          }
-          mustUpdateUI = true;
-        }
-      }
-    });
     pos.add(buttonSize + 2*spacing, 0);
-    
+
 
     animDuration = new NumberboxInput(cp5, "animduration")
       .setPosition(pos.x, pos.y)
@@ -118,10 +76,11 @@ public class Transport extends MoveableGroup {
           animationCollectionDirty = true;
         }
       }
-    });
+    }
+    );
     pos.add(animDuration.getWidth(), 0);
-    
-    
+
+
     frameCounter = cp5.addTextlabel("framecounter")
       .setLabel("counter")
       .setText(String.valueOf(frameNumber))
@@ -142,8 +101,8 @@ public class Transport extends MoveableGroup {
       .plugTo(this, "resetCounter")
       ;
     pos.add(buttonSize + spacing, 0);
-    
-    
+
+
     buttonRec = new ButtonRec(cp5, "buttonrec", pos);
     buttonRec.setGroup(group);
     pos.add(buttonSize, 0);
@@ -153,22 +112,63 @@ public class Transport extends MoveableGroup {
     group.setWidth(groupWidth);
     hide();
   }
-  
-  
+
+
+  public void prevPosture() {
+    if (postureIndex <= 0)
+      return;
+    if (animationCollectionDirty) {
+      // Save fullAnimation to animationCollection
+      savePosture();
+    }
+    postureIndex--;
+    Posture prevPosture = postures.getPosture(postureIndex);
+    avatar.loadPosture(prevPosture);
+    postureName.setText(prevPosture.name);
+    animDuration.setValue(prevPosture.duration);
+    prevAnimDuration = prevPosture.duration;
+    mustUpdateUI = true;
+  }
+
+
+  public void nextPosture() {
+    if (animationCollectionDirty) {
+      // Save posture to animationCollection
+      savePosture();
+    }
+    postureIndex++;
+    if (postureIndex >= postures.size()) {
+      postureIndex = postures.size();
+      avatar.clearAnimation();
+      postureName.setText("posture" + postureIndex);
+      animDuration.setValue(0f);
+      prevAnimDuration = 0f;
+    } else {
+      Posture nextPosture = postures.getPosture(postureIndex);
+      avatar.loadPosture(nextPosture);
+      postureName.setText(nextPosture.name);
+      animDuration.setValue(nextPosture.duration);
+      prevAnimDuration = nextPosture.duration;
+      avatar.resetAnimation();
+    }
+    mustUpdateUI = true;
+  }
+
+
   public void increaseCounter() {
     frameCounter.setText(String.valueOf(++frameNumber));
   }
-  
+
   public int getCounter() {
     return frameNumber;
   }
-  
+
   public void resetCounter() {
     frameNumber = 0;
     frameCounter.setText("0");
   }
-  
-  
+
+
   private class ButtonRec extends Button {
     public ButtonRec(ControlP5 theControlP5, String theName, PVector position) {
       super(theControlP5, theName);
@@ -180,7 +180,7 @@ public class Transport extends MoveableGroup {
     }
 
     @Override
-    public void mousePressed() {
+      public void mousePressed() {
       super.mousePressed();
       if (isOn()) {
         mainScreen.stopRecording();
