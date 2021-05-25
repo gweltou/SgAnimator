@@ -227,7 +227,8 @@ void inputFileSelected(File selection) throws IOException {
       transport.postureName.setText("posture0");
       mainScreen.resetView();
       showUI();
-      accordion.hide();
+      //accordion.hide(); // Whyyy ???
+      setAnimationCollectionDirty();
       
     /*} else if (filename.endsWith("tdat")) {
       rootShape = loadGeometry(selection);

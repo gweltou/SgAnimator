@@ -9,7 +9,7 @@ class PartsList extends ScrollableList {
     setType(ScrollableList.LIST);
     setFont(defaultFont);
     //setBarHeight(0);
-    //setBarVisible(false);
+    setBarVisible(false);
   }
 
   public void highlightPart() {

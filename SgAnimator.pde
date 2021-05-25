@@ -13,7 +13,6 @@
 /*
   BUGS:
  * fullscreen 
- * Alpha modulation
  * Can't select axe before function
  * Resize window doesn't resize UI immediately (click on displaced controls are missed)
  *
@@ -34,7 +33,7 @@ import java.util.*;
 import java.lang.reflect.Field;
 
 
-String version = "0.7";
+String version = "0.7.0";
 String appName = "SgAnimator " + version;
 
 
@@ -67,7 +66,7 @@ File mustLoad = null; // Change current screen to loadScreen
 
 void settings() {
   //fullScreen();
-  size(800, 600);
+  size(1024, 700);
   //size(800, 600, P2D);
 }
 

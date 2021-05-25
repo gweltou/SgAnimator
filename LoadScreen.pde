@@ -99,7 +99,7 @@ public class LoadScreen extends Screen {
     partsList.setItems(avatar.getPartsNamePre());
     baseFilename = filename.substring(0, filename.length()-5);
     showUI();
-    accordion.hide();
+    //accordion.hide(); // Whyyy ???
 
     mustDestroy = true;
   }
