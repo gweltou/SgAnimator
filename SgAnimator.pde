@@ -15,7 +15,7 @@
  * fullscreen 
  * Can't select axe before function
  * Resize window doesn't resize UI immediately (click on displaced controls are missed)
- *
+ * Part list disapearing (Remove part list header Bar)
  */
 
 
