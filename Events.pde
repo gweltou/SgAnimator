@@ -17,7 +17,7 @@ void controlEvent(ControlEvent event) throws InstantiationException, IllegalAcce
       select(avatar.getPartsList()[int(value)]);
       selectedIndex = int(partsList.getValue());
       return;
-    } else {  // Don't reset animation when selecting parts
+    } else if (avatar != null) {  // Don't reset animation when selecting parts
       avatar.resetAnimation();
     }
     
@@ -76,6 +76,13 @@ void controlEvent(ControlEvent event) throws InstantiationException, IllegalAcce
       setPivot = ((Button) cp5.getController("pivotbutton")).isOn();
       avatar.resetAnimation();
       playing = false;
+    }
+    
+    else if (name.equals("importbutton")) {
+      println("yay");
+      importButton.hide();
+      selectInput("Select a file", "inputFileSelected");
+      loadScreen = new LoadScreen();
     }
     
     else if (name.startsWith("copybutton")) {

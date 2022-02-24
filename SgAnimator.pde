@@ -39,7 +39,7 @@ String appName = "SgAnimator " + version;
 
 MainScreen mainScreen;
 LoadScreen loadScreen;
-Screen welcomeScreen;
+//Screen welcomeScreen;
 Screen helpScreen1;
 Screen helpScreenEasing;
 Screen currentScreen;
@@ -76,10 +76,10 @@ void setup() {
   surface.setTitle(appName);
 
   mainScreen = new MainScreen();
-  welcomeScreen = new WelcomeScreen();
+  //welcomeScreen = new WelcomeScreen();
   helpScreen1 = new HelpScreen1();
   helpScreenEasing = new HelpScreenEasing();
-  currentScreen = welcomeScreen;
+  currentScreen = mainScreen;
 
   renderer = new MyRenderer(this);
 

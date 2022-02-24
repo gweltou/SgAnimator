@@ -1,6 +1,7 @@
 ControlP5 cp5; //<>//
 FunctionAccordion accordion;
 Button pivotButton;
+Button importButton;
 
 
 PFont defaultFont;
@@ -170,13 +171,23 @@ void setupUI() {
   accordion = new FunctionAccordion(cp5, "accordion");
 
   pivotButton = cp5.addButton("pivotbutton")
-    .setPosition(300, 10)
+    //.setPosition(300, 10)
     .setSize(70, 20)
     .setSwitch(true)
     .activateBy(ControlP5.PRESS)
     .setLabel("Set pivot")
     .hide()
     ;
+  
+  importButton = cp5.addButton("importbutton")
+    //.setPosition(300, 30)
+    .setSize(70, 20)
+    .setSwitch(true)
+    .activateBy(ControlP5.PRESS)
+    .setLabel("Import")
+    .hide()
+    ;
+  
 }
 
 
@@ -538,6 +549,7 @@ void hideUI() {
   accordion.hide();
   partsList.hide();
   pivotButton.hide();
+  importButton.hide();
   transport.hide();
   renderer.setSelected(null);
   if (timeline != null)
