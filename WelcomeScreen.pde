@@ -69,7 +69,7 @@ public class WelcomeScreen extends Screen {
     text("Ver. " + version, width-100, height-40);
     text("Lib. " + MyRenderer.version(), width-100, height-20);
   }
-
+  
   @Override
   void mouseClicked(MouseEvent event) {
     selectInput("Select a file", "inputFileSelected");

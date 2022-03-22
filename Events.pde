@@ -1,6 +1,10 @@
 import java.lang.reflect.Constructor;
 import java.lang.reflect.InvocationTargetException;
 
+
+boolean axeSetFirst = false;  // Used when animation's axe is chosen before function
+String axeSetFirstName;
+
 void controlEvent(ControlEvent event) throws InstantiationException, IllegalAccessException, NoSuchMethodException, InvocationTargetException  {
   if (paramLocked)
     return;
@@ -11,13 +15,13 @@ void controlEvent(ControlEvent event) throws InstantiationException, IllegalAcce
   if (event.isController()) {
     String name = event.getName();
     float value = event.getValue();
-    //println("event", name, value);
+    //println("event", event);
     
     if (name.equals("partslist")) {
       select(avatar.getPartsList()[int(value)]);
       selectedIndex = int(partsList.getValue());
       return;
-    } else {  // Don't reset animation when selecting parts
+    } else if (avatar != null) {  // Don't reset animation when selecting parts
       avatar.resetAnimation();
     }
     
@@ -36,7 +40,12 @@ void controlEvent(ControlEvent event) throws InstantiationException, IllegalAcce
       if (animNum < numberOfAnimations) {
         selected.getAnimation(animNum).setFunction(tf);
       } else {
-        selected.addAnimation(new Animation(tf));
+        Animation a = new Animation(tf);
+        if (axeSetFirst && parseInt(match(axeSetFirstName, "axe(\\d+)")[1]) == animNum) {
+          int axeVal = (int) cp5.getController(axeSetFirstName).getValue();
+          a.setAxe(axeVal);
+        }
+        selected.addAnimation(a);
       }
       //selected.reset();
       /*if (tf instanceof TFTimetable) {
@@ -52,16 +61,23 @@ void controlEvent(ControlEvent event) throws InstantiationException, IllegalAcce
     else if (name.startsWith("axe")) {
       String[] m = match(name, "axe(\\d+)");
       int animNum = parseInt(m[1]);
-      selected.getAnimation(animNum).setAxe((int) value);
-      mustUpdateUI = true;
-      playing = true;
-      setAnimationCollectionDirty();
+      // Should check if an function is set first
+      if (animNum == selected.getAnimationList().length) {
+        // No function set yet
+        axeSetFirst = true;
+        axeSetFirstName = name;
+      } else {      
+        selected.getAnimation(animNum).setAxe((int) value);
+        mustUpdateUI = true;
+        playing = true;
+        setAnimationCollectionDirty();
+      }
     }
     
     else if (name.startsWith("animamp")) {
       String[] m = match(name, "animamp(\\d+)");
       int animNum = parseInt(m[1]);
-      selected.getAnimation(animNum).setAmp(value);
+      selected.getAnimation(animNum).setAmp(int(value*100f) / 100f);
       setAnimationCollectionDirty();
     }
     
@@ -76,6 +92,13 @@ void controlEvent(ControlEvent event) throws InstantiationException, IllegalAcce
       setPivot = ((Button) cp5.getController("pivotbutton")).isOn();
       avatar.resetAnimation();
       playing = false;
+    }
+    
+    else if (name.equals("importbutton")) {
+      println("yay");
+      importButton.hide();
+      selectInput("Select a file", "inputFileSelected");
+      loadScreen = new LoadScreen();
     }
     
     else if (name.startsWith("copybutton")) {
@@ -179,6 +202,8 @@ void controlEvent(ControlEvent event) throws InstantiationException, IllegalAcce
           int idx = floor(value);
           fn.setParam(paramName, Animation.interpolationNamesSimp[idx]);
         } else {
+          // Round to 2 decimals
+          value = int(value*100f) / 100f;
           fn.setParam(paramName, value);
         }
         playing = true;

@@ -11,6 +11,8 @@ public class MainScreen extends Screen {
   private int remainingFrames = 0;
   private boolean clearBackground = true;
   private float timeScale = 1f;
+  
+  private int mouse_button;
 
 
   public MainScreen() {
@@ -44,32 +46,35 @@ public class MainScreen extends Screen {
 
 
   public void draw() {
-    if (avatar == null) {
+    /*if (avatar == null) {
       hideUI();
-      currentScreen = welcomeScreen;
+      currentScreen = mainScreen;
       return;
-    }
+    }*/
 
     if (clearBackground || showUI)
       background(255);
 
     renderer.pushMatrix(transform);
-    if (playing)
-      avatar.update(1f/framerate);
-    avatar.draw(renderer);
     
-    if (renderer.isRecording() && playing) {
-      renderer.flush();
-      if (remainingFrames > 0) {
-        remainingFrames--;
-        transport.increaseCounter();
-        if (remainingFrames == 0) {
-          stopRecording();
-          transport.buttonRec.setOff();
+    if (avatar != null) {
+      if (playing)
+        avatar.update(1f/framerate);
+      avatar.draw(renderer);
+      
+      if (renderer.isRecording() && playing) {
+        renderer.flush();
+        if (remainingFrames > 0) {
+          remainingFrames--;
+          transport.increaseCounter();
+          if (remainingFrames == 0) {
+            stopRecording();
+            transport.buttonRec.setOff();
+          }
         }
+      } else {
+        avatar.drawSelectedOnly(renderer);
       }
-    } else {
-      avatar.drawSelectedOnly(renderer);
     }
 
     if (showUI) {
@@ -219,6 +224,7 @@ public class MainScreen extends Screen {
 
   void mouseWheel(MouseEvent event) {
     pivotButton.hide();
+    importButton.hide();
     if (!partsList.isInside()) {
       float z = pow(1.1, -event.getCount());
       Affine2 unproject = new Affine2(transform).inv();
@@ -238,6 +244,7 @@ public class MainScreen extends Screen {
   
   
   void mousePressed(MouseEvent event) {
+    mouse_button = event.getButton();
     if (transport.contains(mouseX, mouseY))
       transport.isMoving = true;
     else if (timeline != null && timeline.contains(mouseX, mouseY))
@@ -249,6 +256,8 @@ public class MainScreen extends Screen {
     transport.isMoving = false;
     if (timeline != null)
       timeline.isMoving = false;
+    
+    mouse_button = 0;
   }
 
 
@@ -263,21 +272,27 @@ public class MainScreen extends Screen {
         playing = true;
       }
       pivotButton.hide();
+      importButton.hide();
     } else {
       // RIGHT CLICK opens context menu (pivot button)
+      int btn_y = 0;
       if (selected != null) {
-        pivotButton.setPosition(mouseX, mouseY);
+        pivotButton.setPosition(mouseX, mouseY+btn_y);
         pivotButton.show();
+        btn_y += 20;
       }
+      importButton.setPosition(mouseX, mouseY+btn_y);
+      importButton.show();
     }
   }
 
 
   void mouseDragged(MouseEvent event) {
     pivotButton.hide();
+    importButton.hide();
     int dx = mouseX-pmouseX;
     int dy = mouseY-pmouseY;
-    if (event.getButton() == RIGHT) {
+    if (mouse_button == RIGHT) {
       if (keyPressed && keyCode == SHIFT && selected != null) {
         // scale translation by the zoom factor
         hardTransform.translate(dx/transform.m00, dy/transform.m11);
