@@ -2,20 +2,20 @@
 
 // TODO:
 // Lib : Points de pivots différents par postures
+// Option to reset control values (by double clicking on them ?)
 // Elastic function
 // Option to duplicate previous AnimationCollection when new animCollection
 // UV coords in polygon class
-// Add a chart for every Animation to show function progression over time
 // Lib : avatar.playSequentially()
 // Ouverture de plusieurs fichiers avec Tabs
 // Librairie d'Avatars à l'ouverture d'un fichier
+// Add a chart for every Animation to show function progression over time
 
 /*
   BUGS:
- * fullscreen 
- * Can't select axe before function
- * Resize window doesn't resize UI immediately (click on displaced controls are missed)
- * Part list disapearing (Remove part list header Bar)
+   * fullscreen 
+   * Resize window doesn't resize UI immediately (click on displaced controls are missed)
+   * Part list disapearing (Remove part list header Bar)
  */
 
 
@@ -33,13 +33,13 @@ import java.util.*;
 import java.lang.reflect.Field;
 
 
-String version = "0.7.0";
+String version = "0.7.1";
 String appName = "SgAnimator " + version;
 
 
 MainScreen mainScreen;
 LoadScreen loadScreen;
-//Screen welcomeScreen;
+Screen welcomeScreen;
 Screen helpScreen1;
 Screen helpScreenEasing;
 Screen currentScreen;
@@ -72,14 +72,14 @@ void settings() {
 
 
 void setup() {
-  surface.setResizable(true);
-  surface.setTitle(appName);
+  windowResizable(true);
+  windowTitle(appName);
 
   mainScreen = new MainScreen();
-  //welcomeScreen = new WelcomeScreen();
+  welcomeScreen = new WelcomeScreen();
   helpScreen1 = new HelpScreen1();
   helpScreenEasing = new HelpScreenEasing();
-  currentScreen = mainScreen;
+  currentScreen = welcomeScreen;
 
   renderer = new MyRenderer(this);
 

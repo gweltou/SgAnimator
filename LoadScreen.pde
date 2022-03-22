@@ -93,13 +93,15 @@ public class LoadScreen extends Screen {
       return;
 
     loadAvatarFile(selection);
-
-    selectedIndex = 0;
-    selected = null;
-    partsList.setItems(avatar.getPartsNamePre());
-    baseFilename = filename.substring(0, filename.length()-5);
-    showUI();
-    //accordion.hide(); // Whyyy ???
+    
+    if (avatar != null) {
+      selectedIndex = 0;
+      selected = null;
+      partsList.setItems(avatar.getPartsNamePre());
+      baseFilename = filename.substring(0, filename.length()-5);
+      showUI();
+      //accordion.hide(); // Whyyy ???
+    }
 
     mustDestroy = true;
   }
@@ -110,6 +112,7 @@ public class LoadScreen extends Screen {
     boolean loadAnim = animToggle.getValue() == 1.0f;
     
     Avatar newAvatar = Avatar.fromFile(file);
+    
     if (newAvatar == null)
       return;
     

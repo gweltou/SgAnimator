@@ -1,0 +1,4 @@
+0.7.1
+  * Values from controlers are rounded to 2 decimals
+  * Axe can be chosen before function for new animations
+  * Opening a corrupted json file will not make the program crash anymore
