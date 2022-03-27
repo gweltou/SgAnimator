@@ -1,11 +1,12 @@
 0.8
   * Selection by directly clicking on parts
   * Left mouse button is used instead of MAJ + right mouse button to move parts
+  * Resizing/scale parts with North-West and South-East selection handles
+  * Rotating parts with North-East selection handle
   * Imported SVGs are automatically centered on axes 
-  
 
 
-0.7.1
+0.7.1   2022-03-22
   * Values from controlers are rounded to 2 decimals
   * Axe can be chosen before function for new animations
   * Opening a corrupted json file will not make the program crash anymore

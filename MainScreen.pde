@@ -17,6 +17,8 @@ public class MainScreen extends Screen {
   private boolean partMoving = false;
   private boolean partScalingNW = false;
   private boolean partScalingSE = false;
+  private boolean partRotating = false;
+  private float partRotation = 0f;
   
   Vector2 bb_nw, bb_se; // Selection's bounding box
 
@@ -54,7 +56,6 @@ public class MainScreen extends Screen {
 
 
   public void draw() {
-  
     if (clearBackground || showUI)
       background(255);
 
@@ -82,31 +83,29 @@ public class MainScreen extends Screen {
 
     if (showUI) {
       if (selected != null) {
-        /*if (!hardTransform.isIdt()) {
-          renderer.pushMatrix(hardTransform);
-          renderer.pushColorMod(selectedColorMod);
-          selected.draw(renderer);
-          renderer.popColorMod();
-          renderer.drawPivot();
-          renderer.popMatrix();
-        } else {
-          
-        }*/
         renderer.drawPivot();
         
         // Draw bounding box
-        BoundingBox bb = selected.getBoundingBox();
-        bb_nw.set(bb.left, bb.top);
-        bb_se.set(bb.right, bb.bottom);
-        transform.applyTo(bb_nw);
-        transform.applyTo(bb_se);
         noFill();
         stroke(255, 0, 0);
         strokeWeight(2 + 0.6 * MathUtils.sin( TWO_PI * (millis() % 600) / 600 ) );
+        pushMatrix();
+        if (!partRotating) {
+          BoundingBox bb = selected.getBoundingBox();
+          bb_nw.set(bb.left, bb.top);
+          bb_se.set(bb.right, bb.bottom);
+          transform.applyTo(bb_nw);
+          transform.applyTo(bb_se);
+        } else {
+          translate((bb_nw.x+bb_se.x)*0.5, (bb_nw.y+bb_se.y)*0.5);
+          rotate(partRotation);
+          translate(-(bb_nw.x+bb_se.x)*0.5, -(bb_nw.y+bb_se.y)*0.5);
+        }
         rect(bb_nw.x, bb_nw.y, bb_se.x-bb_nw.x, bb_se.y-bb_nw.y);
         circle(bb_se.x, bb_nw.y, 8);
         square(bb_nw.x-4, bb_nw.y-4, 8);
         square(bb_se.x-4, bb_se.y-4, 8);
+        popMatrix();
       } else {
         selectpartAnim.update(1/framerate);
         if (selectpart != null)
@@ -136,6 +135,18 @@ public class MainScreen extends Screen {
       updateUI();
       mustUpdateUI = false;
     }
+  }
+  
+  
+  Vector2 getWorldPos(Vector2 v) {
+    return getWorldPos(v.x, v.y);
+  }
+  
+  Vector2 getWorldPos(float x, float y) {
+    Vector2 pos = new Vector2(x, y);
+    Affine2 t = new Affine2(transform).inv();
+    t.applyTo(pos);
+    return pos;
   }
   
 
@@ -239,19 +250,9 @@ public class MainScreen extends Screen {
     pivotButton.hide();
     importButton.hide();
     if (!partsList.isInside()) {
-      float z = pow(1.1, -event.getCount());
-      Affine2 unproject = new Affine2(transform).inv();
-      Vector2 point = new Vector2(mouseX, mouseY);
-      unproject.applyTo(point);
-      if (keyPressed && keyCode == SHIFT && selected != null) {
-        // scale translation by the zoom factor
-        point = selected.getLocalOrigin();
-        z = 1 + (z-1) * 0.1f;
-        hardTransform.translate(point.x, point.y).scale(z, z).translate(-point.x, -point.y);
-      } else {
-        // scale translation by the zoom factor
-        transform.translate(point.x, point.y).scale(z, z).translate(-point.x, -point.y);
-      }
+      float z = pow(1.12, -event.getCount());
+      Vector2 point = getWorldPos(mouseX, mouseY);
+      transform.translate(point.x, point.y).scale(z, z).translate(-point.x, -point.y);  // scale translation by the zoom factor
     }
   }
   
@@ -265,13 +266,13 @@ public class MainScreen extends Screen {
       timeline.isMoving = true;
     else if (selected != null) {
       BoundingBox bb = selected.getBoundingBox();
-      Vector2 mouseWorldPos = new Vector2(mouseX, mouseY);
-      Affine2 unproject = new Affine2(transform).inv();
-      unproject.applyTo(mouseWorldPos);
+      Vector2 mouseWorldPos = getWorldPos(mouseX, mouseY);
       if (Vector2.dst(mouseWorldPos.x, mouseWorldPos.y, bb.left, bb.top) < 10/transform.m00)
         partScalingNW = true;
       else if (Vector2.dst(mouseWorldPos.x, mouseWorldPos.y, bb.right, bb.bottom) < 10/transform.m00)
-      partScalingSE = true;
+        partScalingSE = true;
+      else if (Vector2.dst(mouseWorldPos.x, mouseWorldPos.y, bb.right, bb.top) < 10/transform.m00)
+        partRotating = true;
     }
   }
   
@@ -284,29 +285,28 @@ public class MainScreen extends Screen {
     mouseClickBtn = 0;
     partMoving = false;
     partScalingNW = false;
+    partScalingSE = false;
+    partRotating = false;
+    partRotation = 0f;
   }
 
 
   void mouseClicked(MouseEvent event) {
     if (event.getButton() == LEFT) {
       if (setPivot && !cp5.getController("pivotbutton").isInside()) {
-        Vector2 point = new Vector2(mouseX, mouseY);
-        Affine2 t = new Affine2(transform).inv();
-        t.applyTo(point);
-        selected.setLocalOrigin(point.x, point.y);
+        Vector2 mouseWorldPos = getWorldPos(mouseX, mouseY);
+        selected.setLocalOrigin(mouseWorldPos.x, mouseWorldPos.y);
         ((Button) cp5.getController("pivotbutton")).setOff();
         playing = true;
       } else if (!controllerClicked) {
         // Select a part
-        Vector2 clickPos = new Vector2(mouseX, mouseY);
-        Affine2 unproject = new Affine2(transform).inv();
-        unproject.applyTo(clickPos);
+        Vector2 mouseWorldPos = getWorldPos(mouseX, mouseY);
         ComplexShape[] parts = avatar.getPartsList();
         selectedIndex = 0;
         ComplexShape clickedPart = null;
 
         for (int i = parts.length-1; i >= 0; i--) {
-          if (parts[i].contains(clickPos)) {
+          if (parts[i].contains(mouseWorldPos)) {
             clickedPart = parts[i];
             break;
           }
@@ -352,13 +352,40 @@ public class MainScreen extends Screen {
         }
       }
       else if (partScalingNW) {
-        
+        Vector2 mouseWorldPos = getWorldPos(mouseX, mouseY);
+        BoundingBox bb = selected.getBoundingBox();
+        Vector2 dim = bb.getDimensions();
+        float sx = max(0.2f, bb.right - mouseWorldPos.x) / dim.x;
+        float sy = max(0.2f, bb.bottom - mouseWorldPos.y) / dim.y;
+        Affine2 tr = new Affine2();
+        tr.translate(bb.right, bb.bottom).scale(sx, sy).translate(-bb.right, -bb.bottom);
+        selected.hardTransform(tr);
       }
       else if (partScalingSE) {
-        
+        Vector2 mouseWorldPos = getWorldPos(mouseX, mouseY);
+        BoundingBox bb = selected.getBoundingBox();
+        Vector2 dim = bb.getDimensions();
+        float sx = max(0.2f, mouseWorldPos.x - bb.left) / dim.x;
+        float sy = max(0.2f, mouseWorldPos.y - bb.top) / dim.y;
+        Affine2 tr = new Affine2();
+        tr.translate(bb.left, bb.top).scale(sx, sy).translate(-bb.left, -bb.top);
+        selected.hardTransform(tr);
+      }
+      else if (partRotating) {
+        Vector2 pMouseWorldPos = getWorldPos(pmouseX, pmouseY);
+        Vector2 mouseWorldPos = getWorldPos(mouseX, mouseY);
+        BoundingBox bb = selected.getBoundingBox();
+        Vector2 center = bb.getCenter();
+        pMouseWorldPos.sub(center);
+        mouseWorldPos.sub(center);
+        float angle = mouseWorldPos.angleRad(pMouseWorldPos);
+        partRotation += angle;
+        Affine2 tr = new Affine2();
+        tr.translate(center).rotateRad(angle).translate(-center.x, -center.y);
+        selected.hardTransform(tr);
       }
       else {
-        if (selected != null && isInside(mouseClickPos.x, mouseClickPos.y, bb_nw, bb_se) && drag_distance > 400) {
+        if (selected != null && isInside(mouseClickPos.x, mouseClickPos.y, bb_nw, bb_se) && drag_distance > 300) {
           partMoving = true;
           Affine2 tr = new Affine2();
           tr.setToTranslation((mouseX - mouseClickPos.x)/transform.m00,
@@ -379,6 +406,7 @@ public class MainScreen extends Screen {
         timeline.move(dx, dy);
       }
     }
+    
     else if (mouseClickBtn == RIGHT) {
         // scale translation by the zoom factor
         transform.translate(dx/transform.m00, dy/transform.m11);

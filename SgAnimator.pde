@@ -99,8 +99,10 @@ void select(ComplexShape part) {
   showUI = true;
   selected = part;
   renderer.setSelected(part);
-  if (selected != null)
+  if (selected != null) {
     updateUI();
+    println(selected.getBoundingBox(), selected.getBoundingBox().getDimensions());
+  }
 }
 
 
