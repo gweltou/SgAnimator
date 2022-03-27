@@ -24,6 +24,7 @@ import com.badlogic.gdx.utils.*;
 import gwel.game.anim.*;
 import gwel.game.graphics.*;
 import gwel.game.entities.*;
+import gwel.game.utils.*;
 
 import controlP5.*;
 
@@ -94,35 +95,12 @@ void setup() {
 }
 
 
-ComplexShape buildBlob() {
-  // A try at a generative rigging
-  int n = 10;
-
-  ComplexShape root = new ComplexShape();
-  ComplexShape parent = root;
-  float x = 0;
-  for (int i=0; i<n; i++) {
-    ComplexShape segment = new ComplexShape();
-    segment.addShape(new DrawableCircle(x, 0, 20));
-    float[] verts = {x, 10, x+50, 6, x+50, -6, x, -10};
-    segment.addShape(new DrawablePolygon(verts, null));
-    segment.setLocalOrigin(x, 0);
-    Animation[] anims = new Animation[1];
-    anims[0] = new Animation(new TFSin(0.2f, 0.3f, 0f, x*0.012f), Animation.AXE_ROT);
-    segment.setAnimationList(anims);
-    parent.addShape(segment);
-    parent = segment;
-    x += 50;
-  }
-  return root;
-}
-
-
 void select(ComplexShape part) {
   showUI = true;
   selected = part;
-  updateUI();
   renderer.setSelected(part);
+  if (selected != null)
+    updateUI();
 }
 
 

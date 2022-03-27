@@ -4,10 +4,14 @@ import java.lang.reflect.InvocationTargetException;
 
 boolean axeSetFirst = false;  // Used when animation's axe is chosen before function
 String axeSetFirstName;
+boolean controllerClicked = false;
+
 
 void controlEvent(ControlEvent event) throws InstantiationException, IllegalAccessException, NoSuchMethodException, InvocationTargetException  {
   if (paramLocked)
     return;
+  
+  controllerClicked = true;
   
   if (event.isGroup() && timeline != null)
       timeline.remove();
@@ -15,7 +19,7 @@ void controlEvent(ControlEvent event) throws InstantiationException, IllegalAcce
   if (event.isController()) {
     String name = event.getName();
     float value = event.getValue();
-    //println("event", event);
+    println("event", event);
     
     if (name.equals("partslist")) {
       select(avatar.getPartsList()[int(value)]);
@@ -241,6 +245,10 @@ void inputFileSelected(File selection) throws IOException {
       // Go down the complexShape tree if the root is empty
       while (shape.getShapes().size() == 1 && shape.getChildren().size() == 1)
         shape = (ComplexShape) shape.getShapes().get(0);
+      
+      // Center shape
+      shape.hardTranslate(-shape.getBoundingBox().getCenter().x, -shape.getBoundingBox().bottom);
+      
       
       postures = new PostureCollection();
       avatar = new Avatar();

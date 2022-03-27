@@ -3,7 +3,7 @@ public class MainScreen extends Screen {
   Affine2 transform;
   Affine2 hardTransform;
   TimeFunction selectpartAnim;
-  private float[] selectedColorMod = new float[] {0.1f, 0.1f, 0.1f, 0.4f};
+  //private float[] selectedColorMod = new float[] {0.1f, 0.1f, 0.1f, 0.4f};
   
   private float defaultFramerate = frameRate;
   private float recordingFramerate = 25f;
@@ -12,7 +12,13 @@ public class MainScreen extends Screen {
   private boolean clearBackground = true;
   private float timeScale = 1f;
   
-  private int mouse_button;
+  private int mouseClickBtn;
+  private Vector2 mouseClickPos = new Vector2();
+  private boolean partMoving = false;
+  private boolean partScalingNW = false;
+  private boolean partScalingSE = false;
+  
+  Vector2 bb_nw, bb_se; // Selection's bounding box
 
 
   public MainScreen() {
@@ -20,6 +26,8 @@ public class MainScreen extends Screen {
     selectpartAnim = new TFEaseFromTo(60, 0, 0.66f, 0.66f, "bounceOut", false, true);
     transform = new Affine2().setToTranslation(width/2, height/2);
     hardTransform = new Affine2();
+    bb_nw = new Vector2();
+    bb_se = new Vector2();
   }
 
 
@@ -46,12 +54,7 @@ public class MainScreen extends Screen {
 
 
   public void draw() {
-    /*if (avatar == null) {
-      hideUI();
-      currentScreen = mainScreen;
-      return;
-    }*/
-
+  
     if (clearBackground || showUI)
       background(255);
 
@@ -79,7 +82,7 @@ public class MainScreen extends Screen {
 
     if (showUI) {
       if (selected != null) {
-        if (!hardTransform.isIdt()) {
+        /*if (!hardTransform.isIdt()) {
           renderer.pushMatrix(hardTransform);
           renderer.pushColorMod(selectedColorMod);
           selected.draw(renderer);
@@ -87,8 +90,23 @@ public class MainScreen extends Screen {
           renderer.drawPivot();
           renderer.popMatrix();
         } else {
-          renderer.drawPivot();
-        }
+          
+        }*/
+        renderer.drawPivot();
+        
+        // Draw bounding box
+        BoundingBox bb = selected.getBoundingBox();
+        bb_nw.set(bb.left, bb.top);
+        bb_se.set(bb.right, bb.bottom);
+        transform.applyTo(bb_nw);
+        transform.applyTo(bb_se);
+        noFill();
+        stroke(255, 0, 0);
+        strokeWeight(2 + 0.6 * MathUtils.sin( TWO_PI * (millis() % 600) / 600 ) );
+        rect(bb_nw.x, bb_nw.y, bb_se.x-bb_nw.x, bb_se.y-bb_nw.y);
+        circle(bb_se.x, bb_nw.y, 8);
+        square(bb_nw.x-4, bb_nw.y-4, 8);
+        square(bb_se.x-4, bb_se.y-4, 8);
       } else {
         selectpartAnim.update(1/framerate);
         if (selectpart != null)
@@ -99,10 +117,10 @@ public class MainScreen extends Screen {
     }
     renderer.popMatrix();
     
-    if (playing == false && (frameCount>>5)%2 == 0) {
+    if (playing == false && (frameCount>>5) % 2 == 0) {
       fill(255, 0, 0, 127);
       textSize(32);
-      text("PAUSED", -60+width/2, height-80);
+      text("PAUSED", -60 + width/2, height - 80);
     }
     if (timeline != null) {
       timeline.highlightSliders();
@@ -208,13 +226,8 @@ public class MainScreen extends Screen {
 
   void keyReleased(KeyEvent event) {
     if (key == CODED && keyCode == SHIFT && selected != null && !isNumberboxActive) {
-      selected.hardTransform(hardTransform);
-      // Transform physics shell if necessary
-      if (selected == avatar.shape) {
-        for (Shape shape : avatar.physicsShapes)
-          shape.hardTransform(hardTransform);
-      }
-      hardTransform.idt();
+      
+      //hardTransform.idt();
       //playing = true;
       mustUpdateUI = true;
       setAnimationCollectionDirty();
@@ -244,11 +257,22 @@ public class MainScreen extends Screen {
   
   
   void mousePressed(MouseEvent event) {
-    mouse_button = event.getButton();
+    mouseClickBtn = event.getButton();
+    mouseClickPos.set(mouseX, mouseY);
     if (transport.contains(mouseX, mouseY))
       transport.isMoving = true;
     else if (timeline != null && timeline.contains(mouseX, mouseY))
       timeline.isMoving = true;
+    else if (selected != null) {
+      BoundingBox bb = selected.getBoundingBox();
+      Vector2 mouseWorldPos = new Vector2(mouseX, mouseY);
+      Affine2 unproject = new Affine2(transform).inv();
+      unproject.applyTo(mouseWorldPos);
+      if (Vector2.dst(mouseWorldPos.x, mouseWorldPos.y, bb.left, bb.top) < 10/transform.m00)
+        partScalingNW = true;
+      else if (Vector2.dst(mouseWorldPos.x, mouseWorldPos.y, bb.right, bb.bottom) < 10/transform.m00)
+      partScalingSE = true;
+    }
   }
   
   
@@ -257,7 +281,9 @@ public class MainScreen extends Screen {
     if (timeline != null)
       timeline.isMoving = false;
     
-    mouse_button = 0;
+    mouseClickBtn = 0;
+    partMoving = false;
+    partScalingNW = false;
   }
 
 
@@ -270,6 +296,22 @@ public class MainScreen extends Screen {
         selected.setLocalOrigin(point.x, point.y);
         ((Button) cp5.getController("pivotbutton")).setOff();
         playing = true;
+      } else if (!controllerClicked) {
+        // Select a part
+        Vector2 clickPos = new Vector2(mouseX, mouseY);
+        Affine2 unproject = new Affine2(transform).inv();
+        unproject.applyTo(clickPos);
+        ComplexShape[] parts = avatar.getPartsList();
+        selectedIndex = 0;
+        ComplexShape clickedPart = null;
+
+        for (int i = parts.length-1; i >= 0; i--) {
+          if (parts[i].contains(clickPos)) {
+            clickedPart = parts[i];
+            break;
+          }
+        }
+        select(clickedPart);
       }
       pivotButton.hide();
       importButton.hide();
@@ -284,26 +326,71 @@ public class MainScreen extends Screen {
       importButton.setPosition(mouseX, mouseY+btn_y);
       importButton.show();
     }
+    
+    controllerClicked = false;
   }
 
 
   void mouseDragged(MouseEvent event) {
     pivotButton.hide();
     importButton.hide();
+    
     int dx = mouseX-pmouseX;
     int dy = mouseY-pmouseY;
-    if (mouse_button == RIGHT) {
-      if (keyPressed && keyCode == SHIFT && selected != null) {
-        // scale translation by the zoom factor
-        hardTransform.translate(dx/transform.m00, dy/transform.m11);
-      } else {
+    float drag_distance = mouseClickPos.dst2(mouseX, mouseY);
+    
+    if (mouseClickBtn == LEFT) {      
+      if (partMoving) {
+        Affine2 tr = new Affine2();
+        tr.setToTranslation(dx/transform.m00, dy/transform.m11);    // scale translation by the zoom factor
+        selected.hardTransform(tr);
+        
+        // Transform physics shell if necessary
+        if (selected == avatar.shape) {
+          for (Shape shape : avatar.physicsShapes)
+            shape.hardTransform(tr);
+        }
+      }
+      else if (partScalingNW) {
+        
+      }
+      else if (partScalingSE) {
+        
+      }
+      else {
+        if (selected != null && isInside(mouseClickPos.x, mouseClickPos.y, bb_nw, bb_se) && drag_distance > 400) {
+          partMoving = true;
+          Affine2 tr = new Affine2();
+          tr.setToTranslation((mouseX - mouseClickPos.x)/transform.m00,
+                              (mouseY - mouseClickPos.y)/transform.m11);    // scale translation by the zoom factor
+          selected.hardTransform(tr);
+          
+          // Transform physics shell if necessary
+          if (selected == avatar.shape) {
+            for (Shape shape : avatar.physicsShapes)
+              shape.hardTransform(tr);
+          }
+        }
+      }
+      
+      if (transport.isMoving) {
+        transport.move(dx, dy);
+      } else if (timeline != null && timeline.isMoving) {
+        timeline.move(dx, dy);
+      }
+    }
+    else if (mouseClickBtn == RIGHT) {
         // scale translation by the zoom factor
         transform.translate(dx/transform.m00, dy/transform.m11);
-      }
-    } else if (transport.isMoving) {
-      transport.move(dx, dy);
-    } else if (timeline != null && timeline.isMoving) {
-      timeline.move(dx, dy);
     }
   }
+}
+
+
+boolean isInside(Vector2 pos, Vector2 nw, Vector2 se) {
+  return isInside(pos.x, pos.y, nw, se);
+}
+
+boolean isInside(float x, float y, Vector2 nw, Vector2 se) {
+  return x > nw.x && x < se.x && y > nw.y && y < se.y;
 }

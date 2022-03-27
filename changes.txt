@@ -1,3 +1,10 @@
+0.8
+  * Selection by directly clicking on parts
+  * Left mouse button is used instead of MAJ + right mouse button to move parts
+  * Imported SVGs are automatically centered on axes 
+  
+
+
 0.7.1
   * Values from controlers are rounded to 2 decimals
   * Axe can be chosen before function for new animations
