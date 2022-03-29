@@ -1,3 +1,6 @@
+ContextMenu contextMenu;
+FunctionAccordion accordion;
+
 public class MainScreen extends Screen {
   PImage selectpart;
   Affine2 transform;
@@ -21,7 +24,7 @@ public class MainScreen extends Screen {
   private float partRotation = 0f;
   
   Vector2 bb_nw, bb_se; // Selection's bounding box
-
+  
 
   public MainScreen() {
     selectpart = loadImage("selectpart.png");
@@ -30,6 +33,22 @@ public class MainScreen extends Screen {
     hardTransform = new Affine2();
     bb_nw = new Vector2();
     bb_se = new Vector2();
+    
+    // CP5 UI
+    transport = new Transport();
+    accordion = new FunctionAccordion(cp5, "accordion"); 
+    contextMenu = new ContextMenu();
+    contextMenu.addItem("Place pivot", "pivotbtn");
+    contextMenu.addItem("Reset transform", "resettr");
+    contextMenu.addItem("Import", "importbtn");
+    
+    partsList = (PartsList) new PartsList(cp5, "partslist")
+      .setLabel("parts list")
+      .setPosition(margin, margin)
+      .setHeight(height-2*margin)
+      .setItemHeight(menuBarHeight)
+      .hide();
+    ;
   }
 
 
@@ -247,8 +266,9 @@ public class MainScreen extends Screen {
 
 
   void mouseWheel(MouseEvent event) {
-    pivotButton.hide();
-    importButton.hide();
+    contextMenu.hide();
+    //pivotButton.hide();
+    //importButton.hide();
     if (!partsList.isInside()) {
       float z = pow(1.12, -event.getCount());
       Vector2 point = getWorldPos(mouseX, mouseY);
@@ -293,12 +313,14 @@ public class MainScreen extends Screen {
 
   void mouseClicked(MouseEvent event) {
     if (event.getButton() == LEFT) {
-      if (setPivot && !cp5.getController("pivotbutton").isInside()) {
+      // TODO : rewrite this shit
+      if (setPivot && !cp5.getController("pivotbtn").isInside()) {
         Vector2 mouseWorldPos = getWorldPos(mouseX, mouseY);
         selected.setLocalOrigin(mouseWorldPos.x, mouseWorldPos.y);
-        ((Button) cp5.getController("pivotbutton")).setOff();
+        ((Button) cp5.getController("pivotbtn")).setOff();
         playing = true;
-      } else if (!controllerClicked) {
+      }
+      else if (!controllerClicked) {
         // Select a part
         Vector2 mouseWorldPos = getWorldPos(mouseX, mouseY);
         ComplexShape[] parts = avatar.getPartsList();
@@ -313,18 +335,20 @@ public class MainScreen extends Screen {
         }
         select(clickedPart);
       }
-      pivotButton.hide();
-      importButton.hide();
+      contextMenu.hide();
+      //pivotButton.hide();
+      //importButton.hide();
     } else {
       // RIGHT CLICK opens context menu (pivot button)
-      int btn_y = 0;
+      contextMenu.display("importbtn");
+      
+      //int btn_y = 0;
       if (selected != null) {
-        pivotButton.setPosition(mouseX, mouseY+btn_y);
-        pivotButton.show();
-        btn_y += 20;
+        contextMenu.display("pivotbtn");
+        contextMenu.display("resettr");
       }
-      importButton.setPosition(mouseX, mouseY+btn_y);
-      importButton.show();
+      contextMenu.setPosition(mouseX, mouseY);
+      contextMenu.show();
     }
     
     controllerClicked = false;
@@ -332,8 +356,7 @@ public class MainScreen extends Screen {
 
 
   void mouseDragged(MouseEvent event) {
-    pivotButton.hide();
-    importButton.hide();
+    contextMenu.hide();
     
     int dx = mouseX-pmouseX;
     int dy = mouseY-pmouseY;

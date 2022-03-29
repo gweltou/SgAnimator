@@ -1,7 +1,10 @@
 // programme python "key-mon" pour afficher les touches du clavier
 
 // TODO:
+// Editor : Part selection menu when click on many overlaping parts
 // Lib : Points de pivots différents par postures
+// Lib : Part affine transform per posture
+// Display bones (connected pivots)
 // Option to reset control values (by double clicking on them ?)
 // Elastic function
 // Option to duplicate previous AnimationCollection when new animCollection
@@ -30,6 +33,7 @@ import controlP5.*;
 
 import java.util.Deque;
 import java.util.ArrayDeque;
+import java.util.Collections;
 import java.util.*;
 import java.lang.reflect.Field;
 
@@ -64,6 +68,8 @@ boolean playing = true;
 boolean mustUpdateUI = false;
 File mustLoad = null; // Change current screen to loadScreen
 
+PFont defaultFont;
+
 
 void settings() {
   //fullScreen();
@@ -75,6 +81,9 @@ void settings() {
 void setup() {
   windowResizable(true);
   windowTitle(appName);
+  
+  cp5 = new ControlP5(this);
+  defaultFont = createFont("DejaVu Sans Mono", 12);
 
   mainScreen = new MainScreen();
   welcomeScreen = new WelcomeScreen();
@@ -90,8 +99,6 @@ void setup() {
     int idx = Animation.timeFunctions[i].getName().lastIndexOf('.');
     functionsName[i] = Animation.timeFunctions[i].getName().substring(idx+3);
   }
-
-  setupUI();
 }
 
 

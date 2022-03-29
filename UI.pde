@@ -1,10 +1,6 @@
 ControlP5 cp5; //<>//
-FunctionAccordion accordion;
-Button pivotButton;
-Button importButton;
 
 
-PFont defaultFont;
 int spacing = 4;
 int margin = spacing;
 int menuBarHeight = 18;
@@ -14,6 +10,63 @@ int axeWidth = 72;
 boolean isNumberboxActive = false;
 color backgroundColor = color(0, 100);
 
+
+public class ContextMenu {
+  List<Button> items = new ArrayList<>();
+  List<Boolean> visible;
+  int itemHeight = 20;
+  int menuWidth = 90; 
+  Vector2 position;
+  
+  public ContextMenu() {
+    position = new Vector2();
+    visible = new ArrayList<>();
+    //Byte.SIZE;
+  }
+  
+  public void addItem(String label, String cp5name) {
+    println(label, cp5name);
+    Button newItem = cp5.addButton(cp5name)
+      .setSize(menuWidth, itemHeight)
+      .setSwitch(true)
+      .activateBy(ControlP5.PRESS)
+      .setLabel(label)
+      .hide()
+    ;
+    
+    items.add(newItem);
+    visible.add(false);
+  }
+  
+  public void setPosition(int x, int y) {
+    position.set(x, y);
+  }
+  
+  public void display(String name) {
+    for (int i = 0; i < items.size(); i++) {
+      if (items.get(i).getName() == name)
+        visible.set(i, true);
+    }
+  }
+  
+  public void hide() {
+    for (Button item : items)
+      item.hide();
+    Collections.fill(visible, false);
+  }
+  
+  public void show() {
+    int y = 0;
+    for (int i = 0; i < items.size(); i++) {
+      Button item = items.get(i);
+      if (visible.get(i)) {
+        item.setPosition(position.x, position.y + y);
+        item.show();
+        y += itemHeight;
+      }
+    }
+  }
+}
 
 
 public class MoveableGroup {
@@ -153,45 +206,6 @@ public class NumberboxInput extends Numberbox {
 
 
 
-void setupUI() {
-  //printArray(PFont.list());
-  defaultFont = createFont("DejaVu Sans Mono", 12);
-
-  cp5 = new ControlP5(this);
-
-  partsList = (PartsList) new PartsList(cp5, "partslist")
-    .setLabel("parts list")
-    .setPosition(margin, margin)
-    .setHeight(height-2*margin)
-    .setItemHeight(menuBarHeight)
-    .hide();
-  ;
-
-  transport = new Transport();
-  accordion = new FunctionAccordion(cp5, "accordion");
-
-  pivotButton = cp5.addButton("pivotbutton")
-    //.setPosition(300, 10)
-    .setSize(70, 20)
-    .setSwitch(true)
-    .activateBy(ControlP5.PRESS)
-    .setLabel("Set pivot")
-    .hide()
-    ;
-  
-  importButton = cp5.addButton("importbutton")
-    //.setPosition(300, 30)
-    .setSize(70, 20)
-    .setSwitch(true)
-    .activateBy(ControlP5.PRESS)
-    .setLabel("Import")
-    .hide()
-    ;
-  
-}
-
-
-
 void updateUI() {
   paramLocked = true;
   boolean visible = true;
@@ -258,7 +272,7 @@ void updateUI() {
     pos.add(cp5.getController("axe"+animNum).getWidth() + spacing, 0);
 
     // Delete animation button
-    cp5.addButton("deletebutton"+animNum)
+    cp5.addButton("delbtn"+animNum)
       .setLabel("x")
       .setColorBackground(0xffff0000)
       .setPosition(pos.x, pos.y)
@@ -483,14 +497,14 @@ void drawBottomButtons(Group g, int animNum, PVector pos) {
 
   if (animNum < selected.getAnimationList().length) {
     // Copy animation
-    cp5.addButton("copybutton"+animNum)
+    cp5.addButton("copybtn"+animNum)
       .setLabel("copy")
       .setPosition(pos.x, pos.y)
       .setSize(40, 20)
       .activateBy(ControlP5.PRESS)
       .setGroup(g)
       ;
-    pos.add(cp5.getController("copybutton"+animNum).getWidth()+spacing, 0);
+    pos.add(cp5.getController("copybtn"+animNum).getWidth()+spacing, 0);
 
     // Swap position buttons
     cp5.addButton("swapup"+animNum)
@@ -518,7 +532,7 @@ void drawBottomButtons(Group g, int animNum, PVector pos) {
 
   if (animationClipboard != null) {
     // Paste animation
-    cp5.addButton("pastebutton"+animNum)
+    cp5.addButton("pastebtn"+animNum)
       .setLabel("paste")
       .setPosition(pos.x, pos.y)
       .setSize(42, 20)
@@ -548,8 +562,7 @@ void hideUI() {
   showUI = false;
   accordion.hide();
   partsList.hide();
-  pivotButton.hide();
-  importButton.hide();
+  contextMenu.hide();
   transport.hide();
   renderer.setSelected(null);
   if (timeline != null)

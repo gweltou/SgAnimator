@@ -92,28 +92,28 @@ void controlEvent(ControlEvent event) throws InstantiationException, IllegalAcce
       setAnimationCollectionDirty();
     }
     
-    else if (name.equals("pivotbutton")) {
-      setPivot = ((Button) cp5.getController("pivotbutton")).isOn();
+    else if (name.equals("pivotbtn")) {
+      setPivot = ((Button) cp5.getController("pivotbtn")).isOn();
       avatar.resetAnimation();
       playing = false;
     }
     
-    else if (name.equals("importbutton")) {
+    else if (name.equals("importbtn")) {
       println("yay");
-      importButton.hide();
+      //importButton.hide();
       selectInput("Select a file", "inputFileSelected");
       loadScreen = new LoadScreen();
     }
     
-    else if (name.startsWith("copybutton")) {
-      String[] m = match(name, "copybutton(\\d+)");
+    else if (name.startsWith("copybtn")) {
+      String[] m = match(name, "copybtn(\\d+)");
       int animNum = parseInt(m[1]);
       animationClipboard = selected.getAnimation(animNum).copy();
       mustUpdateUI = true;
     }
     
-    else if (name.startsWith("pastebutton")) {
-      String[] m = match(name, "pastebutton(\\d+)");
+    else if (name.startsWith("pastebtn")) {
+      String[] m = match(name, "pastebtn(\\d+)");
       int animNum = parseInt(m[1]);
       if (animationClipboard != null) {
         //selected.reset();
@@ -127,8 +127,8 @@ void controlEvent(ControlEvent event) throws InstantiationException, IllegalAcce
       }
     }
     
-    else if (name.startsWith("deletebutton")) {
-      String[] m = match(name, "deletebutton(\\d+)");
+    else if (name.startsWith("delbtn")) {
+      String[] m = match(name, "delbtn(\\d+)");
       int animNum = parseInt(m[1]);
       //selected.reset(); // So transform matrix is set to identity
       selected.removeAnimation(animNum);
