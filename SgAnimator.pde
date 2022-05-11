@@ -16,6 +16,7 @@
 
 /*
   BUGS:
+   * Check physics shapes after soft-transforming
    * fullscreen 
    * Resize window doesn't resize UI immediately (click on displaced controls are missed)
    * Part list disapearing (Remove part list header Bar)
@@ -108,7 +109,6 @@ void select(ComplexShape part) {
   renderer.setSelected(part);
   if (selected != null) {
     updateUI();
-    println(selected.getBoundingBox(), selected.getBoundingBox().getDimensions());
   }
 }
 

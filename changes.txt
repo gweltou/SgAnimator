@@ -3,7 +3,7 @@
   * Left mouse button is used instead of MAJ + right mouse button to move parts
   * Resizing/scale parts with North-West and South-East selection handles
   * Rotating parts with North-East selection handle
-  * Imported SVGs are automatically centered on axes 
+  * Imported SVGs are automatically centered on axes
 
 
 0.7.1   2022-03-22

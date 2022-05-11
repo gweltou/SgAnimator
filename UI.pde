@@ -15,46 +15,70 @@ public class ContextMenu {
   List<Button> items = new ArrayList<>();
   List<Boolean> visible;
   int itemHeight = 20;
-  int menuWidth = 90; 
+  int menuWidth = 90;
   Vector2 position;
-  
+
   public ContextMenu() {
     position = new Vector2();
     visible = new ArrayList<>();
-    //Byte.SIZE;
+
+    addItem("Place pivot", "pivotbtn", "onPivot");
+    addItem("Reset transform", "resettr", "onReset");
+    addItem("Import", "importbtn", "onImport");
   }
-  
-  public void addItem(String label, String cp5name) {
-    println(label, cp5name);
+
+  public void clear() {
+    items.clear();
+    visible.clear();
+  }
+
+  private void addItem(String label, String cp5name, String fn) {
     Button newItem = cp5.addButton(cp5name)
       .setSize(menuWidth, itemHeight)
       .setSwitch(true)
       .activateBy(ControlP5.PRESS)
       .setLabel(label)
+      .plugTo(this, fn)
       .hide()
-    ;
-    
+      ;
+
     items.add(newItem);
     visible.add(false);
   }
+
+  public void onPivot(boolean value) {
+    setPivot = ((Button) cp5.getController("pivotbtn")).isOn();
+    avatar.resetAnimation();
+    playing = false;
+  }
   
+  public void onReset(boolean value) {
+    println(selected);    
+  }
+  
+  public void onImport(boolean value) {
+    hide();
+    selectInput("Select a file", "inputFileSelected");
+    loadScreen = new LoadScreen();
+  }
+
   public void setPosition(int x, int y) {
     position.set(x, y);
   }
-  
+
   public void display(String name) {
     for (int i = 0; i < items.size(); i++) {
       if (items.get(i).getName() == name)
         visible.set(i, true);
     }
   }
-  
+
   public void hide() {
     for (Button item : items)
       item.hide();
     Collections.fill(visible, false);
   }
-  
+
   public void show() {
     int y = 0;
     for (int i = 0; i < items.size(); i++) {
@@ -78,13 +102,13 @@ public class MoveableGroup {
   protected int x;
   protected int y;
   public boolean isMoving = false;
-  
-  
+
+
   public boolean contains(int x, int y) {
     return (x >= this.x && x <= this.x+groupWidth
-            && y >= this.y-barHeight && y <= this.y);
+      && y >= this.y-barHeight && y <= this.y);
   }
-  
+
   public void move(int dx, int dy) {
     group.open();
     x += dx;
@@ -94,7 +118,7 @@ public class MoveableGroup {
     group.bringToFront();
     group.setPosition(x, y);
   }
-  
+
   public void setPosition(int x, int y) {
     this.x = x;
     this.y = y;
@@ -126,7 +150,7 @@ public class FunctionAccordion extends Accordion {
   // Stupid hack to fix a stupid bug
   // (groups used to collapse in wrong order after mouse hovered a scrollable list)
   @Override
-  public void controlEvent( ControlEvent theEvent ) {
+    public void controlEvent( ControlEvent theEvent ) {
     super.controlEvent(theEvent);
     String[] m = match(theEvent.getName(), "animation(\\d+)");
     keepsOpenAnimNum = parseInt(m[1]);
@@ -143,30 +167,32 @@ public class NumberboxInput extends Numberbox {
   NumberboxInput(ControlP5 theControlP5, String theName) {
     super(theControlP5, theName);
     setLabel("");
-    
-    // control the active-status of the input handler when releasing the mouse button inside 
+
+    // control the active-status of the input handler when releasing the mouse button inside
     // the numberbox. deactivate input handler when mouse leaves.
     onClick(new CallbackListener() {
       public void controlEvent(CallbackEvent theEvent) {
         setActive( true );
       }
-    });
-    
+    }
+    );
+
     onLeave(new CallbackListener() {
       public void controlEvent(CallbackEvent theEvent) {
         setActive( false );
         submit();
       }
-    });
+    }
+    );
   }
 
   public void keyEvent(KeyEvent k) {
-    // only process key event if input is active 
+    // only process key event if input is active
     if (k.getAction() == KeyEvent.PRESS && active) {
       if (k.getKey() == '\n') { // confirm input with enter
         submit();
         return;
-      } else if (k.getKeyCode() == BACKSPACE) { 
+      } else if (k.getKeyCode() == BACKSPACE) {
         text = text.isEmpty() ? "" : text.substring(0, text.length()-1);
       } else if (k.getKey() < 255) {
         // check if the input is a valid (decimal) number
@@ -221,7 +247,7 @@ void updateUI() {
   }
   accordion = new FunctionAccordion(cp5, "accordion");
   accordion.setPosition(width-accordion.getWidth()-margin, 1);
-  
+
   if (timeline != null)
     timeline.remove();
 
@@ -551,7 +577,7 @@ void drawBottomButtons(Group g, int animNum, PVector pos) {
 void showUI() {
   showUI = true;
   accordion.show();
-  partsList.open().show();
+  //partsList.open().show();
   transport.show();
   renderer.setSelected(selected);
   if (timeline != null)

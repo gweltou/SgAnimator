@@ -19,15 +19,15 @@ void controlEvent(ControlEvent event) throws InstantiationException, IllegalAcce
   if (event.isController()) {
     String name = event.getName();
     float value = event.getValue();
-    println("event", event);
+    //println("event", event);
     
-    if (name.equals("partslist")) {
+    /*if (name.equals("partslist")) {
       select(avatar.getPartsList()[int(value)]);
       selectedIndex = int(partsList.getValue());
       return;
     } else if (avatar != null) {  // Don't reset animation when selecting parts
       avatar.resetAnimation();
-    }
+    }*/
     
     if (name.equals("posturename")) {
       // Change fullAnim name
@@ -90,19 +90,6 @@ void controlEvent(ControlEvent event) throws InstantiationException, IllegalAcce
       int animNum = parseInt(m[1]);
       selected.getAnimation(animNum).setInv(value == 0 ? true : false);
       setAnimationCollectionDirty();
-    }
-    
-    else if (name.equals("pivotbtn")) {
-      setPivot = ((Button) cp5.getController("pivotbtn")).isOn();
-      avatar.resetAnimation();
-      playing = false;
-    }
-    
-    else if (name.equals("importbtn")) {
-      println("yay");
-      //importButton.hide();
-      selectInput("Select a file", "inputFileSelected");
-      loadScreen = new LoadScreen();
     }
     
     else if (name.startsWith("copybtn")) {

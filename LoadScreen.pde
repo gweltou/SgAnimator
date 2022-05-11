@@ -98,6 +98,7 @@ public class LoadScreen extends Screen {
       selectedIndex = 0;
       selected = null;
       partsList.setItems(avatar.getPartsNamePre());
+      //partsMenu
       baseFilename = filename.substring(0, filename.length()-5);
       showUI();
       //accordion.hide(); // Whyyy ???
