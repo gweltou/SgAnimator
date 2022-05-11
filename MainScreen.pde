@@ -3,7 +3,7 @@ ContextMenu contextMenu;
 FunctionAccordion accordion;
 
 public class MainScreen extends Screen {
-  Affine2 transform;
+  Affine2 transform; // Window view transform
   //private float[] selectedColorMod = new float[] {0.1f, 0.1f, 0.1f, 0.4f};
   
   private float defaultFramerate = frameRate;
@@ -294,8 +294,7 @@ public class MainScreen extends Screen {
       timeline.isMoving = false;
     
     mouseClickBtn = 0;
-    if (partMoving)
-      println(selected.getBoundingBox());
+    
     partMoving = false;
     partScalingNW = false;
     partScalingSE = false;
@@ -309,11 +308,11 @@ public class MainScreen extends Screen {
 
   void mouseClicked(MouseEvent event) {
     if (event.getButton() == LEFT) {
-      // TODO : rewrite this shit
-      if (setPivot && !cp5.getController("pivotbtn").isInside()) {
+      if (setPivot && !controllerClicked) {
         Vector2 mouseWorldPos = getWorldPos(mouseX, mouseY);
+        selected.getAbsoluteTransform().inv().applyTo(mouseWorldPos);
         selected.setLocalOrigin(mouseWorldPos.x, mouseWorldPos.y);
-        ((Button) cp5.getController("pivotbtn")).setOff();
+        setPivot = false;
         playing = true;
       }
       else if (!controllerClicked) {
@@ -397,7 +396,6 @@ public class MainScreen extends Screen {
         avatar.resetAnimation();
         Vector2 pMouseWorldPos = getWorldPos(pmouseX, pmouseY);
         Vector2 mouseWorldPos = getWorldPos(mouseX, mouseY);
-        //BoundingBox bb = selected.getBoundingBox();
         Vector2 center = getWorldPos((bb_nw.x+bb_se.x)*0.5, (bb_nw.y+bb_se.y)*0.5);
         pMouseWorldPos.sub(center);
         mouseWorldPos.sub(center);

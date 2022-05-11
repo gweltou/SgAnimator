@@ -11,6 +11,7 @@ boolean isNumberboxActive = false;
 color backgroundColor = color(0, 100);
 
 
+
 public class ContextMenu {
   List<Button> items = new ArrayList<>();
   List<Boolean> visible;
@@ -35,7 +36,7 @@ public class ContextMenu {
   private void addItem(String label, String cp5name, String fn) {
     Button newItem = cp5.addButton(cp5name)
       .setSize(menuWidth, itemHeight)
-      .setSwitch(true)
+      //.setSwitch(true)
       .activateBy(ControlP5.PRESS)
       .setLabel(label)
       .plugTo(this, fn)
@@ -47,17 +48,17 @@ public class ContextMenu {
   }
 
   public void onPivot(boolean value) {
-    setPivot = ((Button) cp5.getController("pivotbtn")).isOn();
+    setPivot = true;
     avatar.resetAnimation();
     playing = false;
   }
   
   public void onReset(boolean value) {
-    println(selected);    
+    selected.resetTransform();
   }
   
   public void onImport(boolean value) {
-    hide();
+    //hide();
     selectInput("Select a file", "inputFileSelected");
     loadScreen = new LoadScreen();
   }
@@ -91,6 +92,7 @@ public class ContextMenu {
     }
   }
 }
+
 
 
 public class MoveableGroup {
