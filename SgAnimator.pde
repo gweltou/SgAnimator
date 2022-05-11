@@ -107,7 +107,10 @@ void select(ComplexShape part) {
   showUI = true;
   selected = part;
   renderer.setSelected(part);
-  if (selected != null) {
+  if (selected == null) {
+    cp5.remove("accordion");
+    accordion = null;
+  } else {
     updateUI();
   }
 }
