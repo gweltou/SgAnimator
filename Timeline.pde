@@ -40,7 +40,8 @@ class Timeline extends MoveableGroup {
       .setBackgroundColor(color(0, 100))
       ;
 
-    numSteps = cp5.addNumberbox("tlnumsteps"+animNum)
+    //numSteps = cp5.addNumberbox("tlnumsteps"+animNum)
+    numSteps = new NumberboxInput(cp5, "tlnumsteps"+animNum)
       .setLabel("Num steps")
       .setPosition(spacing, spacing)
       .setSize(60, 20)

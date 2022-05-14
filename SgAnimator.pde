@@ -1,6 +1,7 @@
 // programme python "key-mon" pour afficher les touches du clavier
 
 // TODO:
+// Revoir la fenêtre de sur-chargement de fichier (pour la version 1.8)
 // Editor : Part selection menu when click on many overlaping parts
 // Lib : Points de pivots différents par postures
 // Lib : Part affine transform per posture
@@ -16,6 +17,7 @@
 
 /*
   BUGS:
+   * controllerClicked is not reseted after a mouse drag on a controller (eg. timeline sliders)
    * Check physics shapes after soft-transforming
    * fullscreen 
    * Resize window doesn't resize UI immediately (click on displaced controls are missed)
@@ -39,7 +41,7 @@ import java.util.*;
 import java.lang.reflect.Field;
 
 
-String version = "0.7.1";
+String version = "0.8";
 String appName = "SgAnimator " + version;
 
 
@@ -49,17 +51,19 @@ Screen welcomeScreen;
 Screen helpScreen1;
 Screen helpScreenEasing;
 Screen currentScreen;
+Screen previousScreen;
 
 MyRenderer renderer;
 Avatar avatar;
-String baseFilename;
+String baseFilename;  // Used for window title and to save file (independent of its source format)
 
 ComplexShape selected = null;
 int selectedIndex = 0;
 String[] functionsName;
+
 PostureCollection postures;
 int postureIndex = 0;
-boolean animationCollectionDirty = false;
+boolean postureCollectionDirty = false;  // When true, postures in editor are yet to be saved in avatar
 Animation animationClipboard;
 
 boolean showUI = false;
@@ -67,7 +71,7 @@ boolean paramLocked = false;
 boolean setPivot = false;
 boolean playing = true;
 boolean mustUpdateUI = false;
-File mustLoad = null; // Change current screen to loadScreen
+File fileToLoad = null; // Change current screen to loadScreen
 
 PFont defaultFont;
 
@@ -111,6 +115,7 @@ void select(ComplexShape part) {
     cp5.remove("accordion");
     accordion = null;
   } else {
+    avatar.getShape().invalidateBoundingBox(); // Fixes bb not updated between parts selection (which moves when playing)
     updateUI();
   }
 }
@@ -142,8 +147,7 @@ void savePosture() {
   }
 
   avatar.postures = postures;
-
-  animationCollectionDirty = false;
+  postureCollectionDirty = false;
 }
 
 
@@ -166,10 +170,11 @@ void drawKey(int x, int y, String k, float height) {
 
 
 void draw() {
-  if (mustLoad != null) {
-    loadScreen.setupUI(mustLoad);
+  if (fileToLoad != null) {
+    loadScreen.createModalBox(fileToLoad);
+    previousScreen = currentScreen;
     currentScreen = loadScreen;
-    mustLoad = null;
+    fileToLoad = null;
   }
   currentScreen.draw();
 }

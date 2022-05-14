@@ -60,7 +60,7 @@ public class ContextMenu {
   public void onImport(boolean value) {
     //hide();
     selectInput("Select a file", "inputFileSelected");
-    loadScreen = new LoadScreen();
+    //loadScreen = new LoadScreen();
   }
 
   public void setPosition(int x, int y) {
@@ -578,7 +578,8 @@ void drawBottomButtons(Group g, int animNum, PVector pos) {
 
 void showUI() {
   showUI = true;
-  accordion.show();
+  if (accordion != null)
+    accordion.show();
   //partsList.open().show();
   transport.show();
   renderer.setSelected(selected);
@@ -588,8 +589,9 @@ void showUI() {
 
 void hideUI() {
   showUI = false;
-  accordion.hide();
-  partsList.hide();
+  if (accordion != null)
+    accordion.hide();
+  //partsList.hide();
   contextMenu.hide();
   transport.hide();
   renderer.setSelected(null);

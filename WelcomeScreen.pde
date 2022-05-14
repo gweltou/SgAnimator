@@ -57,9 +57,9 @@ public class WelcomeScreen extends Screen {
     
     fill(127);
     textSize(32);
-    text("Press       +      to load a file", width/3, height/2);
-    drawKey(width/3 + 96, height/2 - 32, "Ctrl", 40);
-    drawKey(width/3 + 188, height/2 - 32, "O", 40);
+    text("Press           +          to load a file", width/3, height/2);
+    drawKey(width/3 + 85, height/2 - 32, "Ctrl", 40);
+    drawKey(width/3 + 168, height/2 - 32, "O", 40);
     
     fill(63);
     textSize(20);
@@ -73,7 +73,7 @@ public class WelcomeScreen extends Screen {
   @Override
   void mouseClicked(MouseEvent event) {
     selectInput("Select a file", "inputFileSelected");
-    loadScreen = new LoadScreen();
+    //loadScreen = new LoadScreen();
   }
 
   @Override
@@ -84,7 +84,6 @@ public class WelcomeScreen extends Screen {
       break;
     case 15:  // CTRL+o, load a new file
       selectInput("Select a file", "inputFileSelected");
-      loadScreen = new LoadScreen();
       break;
     }
   }

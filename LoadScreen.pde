@@ -1,21 +1,22 @@
-import java.io.FileInputStream;
+//import java.io.FileInputStream;
 
 
 public class LoadScreen extends Screen {
   private PImage backgroundImage;
   Group loadGroup;
   Toggle geomToggle, animToggle;
-  int groupWidth = 180;
-  int groupHeight = 180;
+  Button loadAllBtn, keepGeomBtn;
+  int groupWidth = 2*24 + 80 + 100 + 60 + 2*10;
+  int groupHeight = 90;
   String filename;
   File selection;
   boolean mustDestroy = false;
-  
+
   public LoadScreen() {
     doBackground();
   }
 
-  public void setupUI(File selection) {
+  public void createModalBox(File selection) {
     this.selection = selection;
     filename = selection.getAbsolutePath();
 
@@ -29,7 +30,7 @@ public class LoadScreen extends Screen {
       .setBackgroundColor(color(0, 100))
       .hideBar()
       ;
-    
+
     cp5.addTextlabel("filenamelabel")
       .setPosition(4, 10)
       .setFont(defaultFont)
@@ -37,44 +38,39 @@ public class LoadScreen extends Screen {
       .setGroup(loadGroup)
       ;
 
-    geomToggle = cp5.addToggle("loadgeometrytoggle")
-      .setLabelVisible(false)
-      .setPosition(groupWidth-56, 60)
-      .setSize(20, 20)
-      .setValue(1.0f)
-      .setGroup(loadGroup)
-      ;
-    cp5.addTextlabel("loadgeometrylabel")
-      .setPosition(32, 60 + 3)
-      .setFont(defaultFont)
-      .setText("Geometry")
-      .setGroup(loadGroup)
-      ;
-
-    animToggle = cp5.addToggle("loadanimationtoggle")
-      .setLabelVisible(false)
-      .setPosition(groupWidth-56, 90)
-      .setSize(20, 20)
-      .setValue(1.0f)
-      .setGroup(loadGroup)
-      ;
-    cp5.addTextlabel("loadanimationlabel")
-      .setPosition(32, 90 + 3)
-      .setFont(defaultFont)
-      .setText("Animations")
-      .setGroup(loadGroup)
-      ;
-
-    int okWidth = 50;
-    cp5.addButton("loadokbutton")
+    int w = 24;
+    loadAllBtn = cp5.addButton("loadallbtn")
       .removeCallback()
-      .setWidth(okWidth)
-      .setPosition((groupWidth/2)-(okWidth/2), groupHeight-34)
-      .setLabel("Ok")
+      .setWidth(80)
+      .setPosition(w, groupHeight/2f)
+      .setLabel("Load all")
       .setGroup(loadGroup)
-      .plugTo(this, "okFunction")
+      .plugTo(this, "loadAllFn")
+      ;
+    w += 80 + 10;
+
+    keepGeomBtn = cp5.addButton("keepgeombtn")
+      .removeCallback()
+      .setWidth(100)
+      .setPosition(w, groupHeight/2f)
+      .setLabel("Keep Geometry")
+      .setGroup(loadGroup)
+      .plugTo(this, "keepGeomFn")
+      ;
+    w += 100 + 10;
+
+    cp5.addButton("cancelbtn")
+      .removeCallback()
+      .setWidth(60)
+      .setPosition(w, groupHeight/2f)
+      .setLabel("Cancel")
+      .setGroup(loadGroup)
+      .plugTo(this, "cancelFn")
       ;
     paramLocked = false;
+    
+    fill(64);
+    textSize(18);
   }
 
 
@@ -88,71 +84,78 @@ public class LoadScreen extends Screen {
   }
 
 
-  public void okFunction() {
-    if (paramLocked == true)
-      return;
-
-    loadAvatarFile(selection);
-    
-    if (avatar != null) {
-      selectedIndex = 0;
-      selected = null;
-      partsList.setItems(avatar.getPartsNamePre());
-      //partsMenu
-      baseFilename = filename.substring(0, filename.length()-5);
-      showUI();
-      //accordion.hide(); // Whyyy ???
-    }
-
+  public void loadAllFn() {
+    loadJsonFile(selection);
     mustDestroy = true;
   }
 
 
-  private void loadAvatarFile(File file) {
-    boolean loadGeom = geomToggle.getValue() == 1.0f;
-    boolean loadAnim = animToggle.getValue() == 1.0f;
-    
-    Avatar newAvatar = Avatar.fromFile(file);
-    
-    if (newAvatar == null)
+  public void keepGeomFn() {
+    Avatar newAvatar = Avatar.fromFile(selection);
+
+    if (newAvatar == null) {
+      println("Error while loading file");
+      mustDestroy = true;
       return;
-    
-    if (loadGeom) {
-      avatar = newAvatar;
-      mainScreen.resetView();
     }
-    
-    // AnimationCollection is kept separated for simplicity
+
+    // postures are kept separated for simplicity
     // rather than storing and retrieving it from the Avatar class
     postureIndex = 0;
-    if (loadAnim && newAvatar.postures != null) {
-      postures = newAvatar.postures;
-      if (postures.size() > 0) {
-        avatar.postures = postures;
-        transport.postureName.setText(postures.getPosture(0).name);
-        transport.animDuration.setValue(postures.getPosture(0).duration);
-        transport.prevAnimDuration = postures.getPosture(0).duration;
-        avatar.loadPosture(0);
+    if (newAvatar.postures != null) {
+      postures = newAvatar.postures; // Creates problems if newAvatar has a different config than previous avatar
+      avatar.postures = postures;
+      transport.postureName.setText(postures.getPosture(0).name);
+      transport.animDuration.setValue(postures.getPosture(0).duration);
+      transport.prevAnimDuration = postures.getPosture(0).duration;
+      avatar.loadPosture(0);
+      setPostureCollectionDirty();
+    }
+
+    // Update pivots and transforms
+    for (ComplexShape cs : newAvatar.getPartsList()) {
+      ComplexShape backCs = avatar.getShape().getById(cs.getId());
+      if (backCs != null) {
+        backCs.setLocalOrigin(cs.getLocalOrigin());
+        backCs.setTransform(cs.getTransform());
       }
-    } else {
-      postures = new PostureCollection();
     }
     
-    surface.setTitle(appName + " - " + filename);
+    showUI();
+    
+    mustDestroy = true;
+  }
+
+
+  public void cancelFn() {
+    mustDestroy = true;
   }
 
 
   @Override
-  public void draw() {
+    public void draw() {
     if (backgroundImage != null) {
       image(backgroundImage, 0, 0);
-    } else  {
+    } else {
       background(255);
     }
 
     if (mustDestroy) {
       loadGroup.remove();
-      currentScreen = mainScreen;
+      currentScreen = previousScreen;
+    }
+
+    int textY = ceil((height + groupHeight)/2f + 48);
+    if (keepGeomBtn.isInside()) {
+      String s = "Keep current geometry and update transforms, pivot points and animations from this JSON file";
+      float w = textWidth(s);
+      text(s, (width-w)/2f, textY);
+    }
+
+    if (loadAllBtn.isInside()) {
+      String s = "Load new file";
+      float w = textWidth(s);
+      text(s, (width-w)/2f, textY);
     }
   }
 }

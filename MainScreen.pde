@@ -165,7 +165,7 @@ public class MainScreen extends Screen {
 
   void keyPressed(KeyEvent event) {
     if (avatar != null && key == CODED) {
-      if (keyCode == UP) {  // Select next part
+      /*if (keyCode == UP) {  // Select next part
         selectedIndex = (selectedIndex-1);
         if (selectedIndex < 0)
           selectedIndex += avatar.getPartsList().length;
@@ -173,14 +173,14 @@ public class MainScreen extends Screen {
       } else if (keyCode == DOWN) {  // Select previous part
         selectedIndex = (selectedIndex+1) % avatar.getPartsList().length;
         partsList.setValue(selectedIndex);
-      } else if (keyCode == LEFT) {
+      } else*/ if (keyCode == LEFT) {
         transport.prevPosture();
       } else if (keyCode == RIGHT) {
         transport.nextPosture();
-      } else if (keyCode == SHIFT && selected != null && !isNumberboxActive) {
+      } /*else if (keyCode == SHIFT && selected != null && !isNumberboxActive) {
         playing = false;
         avatar.resetAnimation();
-      }
+      }*/
     } else if (!transport.postureName.isActive() && !isNumberboxActive) {
       switch (key) {
       case 'p':  // Play/Pause animation
@@ -192,6 +192,10 @@ public class MainScreen extends Screen {
           avatar.resetAnimation();
           background(255);
         }
+        break;
+      case 'a':  // Select root node
+        if (avatar != null)
+          select(avatar.getShape());
         break;
       case 'd':  // Show/Hide UI
         if (avatar != null) {
@@ -219,16 +223,16 @@ public class MainScreen extends Screen {
         break;
       case 15:  // CTRL+o, load a new file
         selectInput("Select a file", "inputFileSelected");
-        loadScreen = new LoadScreen();
+        //loadScreen = new LoadScreen();
         break;
       case 19: // CTRL+s, save
         selectOutput("Select a file", "outputFileSelected");
         break;
       case 's':  // Save file
-        if (avatar != null && animationCollectionDirty) {
+        if (avatar != null && postureCollectionDirty) {
           savePosture();
           avatar.saveFile(baseFilename + ".json");
-          surface.setTitle(appName + " - " + baseFilename + ".json");
+          windowTitle(appName + " - " + baseFilename + ".json");
         }
         break;
       case 'b':  // Background clear, trail effect
@@ -252,7 +256,7 @@ public class MainScreen extends Screen {
     if (key == CODED && keyCode == SHIFT && selected != null && !isNumberboxActive) {
       //playing = true;
       mustUpdateUI = true;
-      setAnimationCollectionDirty();
+      setPostureCollectionDirty();
     }
   }
 
@@ -273,9 +277,9 @@ public class MainScreen extends Screen {
     mouseClickPos.set(mouseX, mouseY);
     if (transport.contains(mouseX, mouseY))
       transport.isMoving = true;
-    else if (timeline != null && timeline.contains(mouseX, mouseY))
+    else if (timeline != null && timeline.contains(mouseX, mouseY))  // Move timeline box
       timeline.isMoving = true;
-    else if (selected != null) {
+    else if (selected != null) {  // Scale or rotate part
       BoundingBox bb = selected.getBoundingBox();
       Vector2 mouseWorldPos = getWorldPos(mouseX, mouseY);
       if (Vector2.dst(mouseWorldPos.x, mouseWorldPos.y, bb.left, bb.top) < 10/transform.m00)
@@ -309,11 +313,12 @@ public class MainScreen extends Screen {
   void mouseClicked(MouseEvent event) {
     if (event.getButton() == LEFT) {
       if (setPivot && !controllerClicked) {
+        // Place new pivot
         Vector2 mouseWorldPos = getWorldPos(mouseX, mouseY);
         selected.getAbsoluteTransform().inv().applyTo(mouseWorldPos);
-        selected.setLocalOrigin(mouseWorldPos.x, mouseWorldPos.y);
+        selected.setLocalOrigin(mouseWorldPos);
         setPivot = false;
-        playing = true;
+        playing = true; // Is this necessary ?
       }
       else if (!controllerClicked) {
         // Select a part
@@ -334,7 +339,7 @@ public class MainScreen extends Screen {
     } else {
       // RIGHT CLICK opens context menu
       if (selected == null) {
-        contextMenu.display("importbtn");
+        //contextMenu.display("importbtn");
       } else {
         contextMenu.display("pivotbtn");
         contextMenu.display("resettr");
@@ -405,7 +410,7 @@ public class MainScreen extends Screen {
         tr.translate(center).rotateRad(angle).translate(-center.x, -center.y);
         selected.softTransform(tr);
       }
-      else {
+      else if (!controllerClicked) {
         if (selected != null && isInsideBox(mouseClickPos.x, mouseClickPos.y, bb_nw, bb_se) && drag_distance > 300) {
           avatar.paused = true;
           avatar.resetAnimation();
