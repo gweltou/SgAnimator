@@ -1,9 +1,10 @@
+ContextMenu contextMenu;
+//ContextMenu partsMenu;
+FunctionAccordion accordion;
+
 public class MainScreen extends Screen {
-  PImage selectpart;
-  Affine2 transform;
-  Affine2 hardTransform;
-  TimeFunction selectpartAnim;
-  private float[] selectedColorMod = new float[] {0.1f, 0.1f, 0.1f, 0.4f};
+  Affine2 transform; // Window view transform
+  //private float[] selectedColorMod = new float[] {0.1f, 0.1f, 0.1f, 0.4f};
   
   private float defaultFramerate = frameRate;
   private float recordingFramerate = 25f;
@@ -12,14 +13,36 @@ public class MainScreen extends Screen {
   private boolean clearBackground = true;
   private float timeScale = 1f;
   
-  private int mouse_button;
-
+  private int mouseClickBtn;
+  private Vector2 mouseClickPos = new Vector2();
+  private boolean partMoving = false;
+  private boolean partScalingNW = false;
+  private boolean partScalingSE = false;
+  private boolean partRotating = false;
+  private float partRotation = 0f;
+  
+  Vector2 bb_nw, bb_se; // Selection's bounding box
+  
 
   public MainScreen() {
-    selectpart = loadImage("selectpart.png");
-    selectpartAnim = new TFEaseFromTo(60, 0, 0.66f, 0.66f, "bounceOut", false, true);
     transform = new Affine2().setToTranslation(width/2, height/2);
-    hardTransform = new Affine2();
+    bb_nw = new Vector2();
+    bb_se = new Vector2();
+    
+    // CP5 UI
+    transport = new Transport();
+    accordion = new FunctionAccordion(cp5, "accordion"); 
+    contextMenu = new ContextMenu();
+        
+    //partsMenu = new ContextMenu();
+    
+    partsList = (PartsList) new PartsList(cp5, "partslist")
+      .setLabel("parts list")
+      .setPosition(margin, margin)
+      .setHeight(height-2*margin)
+      .setItemHeight(menuBarHeight)
+      .hide();
+    ;
   }
 
 
@@ -46,12 +69,6 @@ public class MainScreen extends Screen {
 
 
   public void draw() {
-    /*if (avatar == null) {
-      hideUI();
-      currentScreen = mainScreen;
-      return;
-    }*/
-
     if (clearBackground || showUI)
       background(255);
 
@@ -79,30 +96,43 @@ public class MainScreen extends Screen {
 
     if (showUI) {
       if (selected != null) {
-        if (!hardTransform.isIdt()) {
-          renderer.pushMatrix(hardTransform);
-          renderer.pushColorMod(selectedColorMod);
-          selected.draw(renderer);
-          renderer.popColorMod();
-          renderer.drawPivot();
-          renderer.popMatrix();
+        renderer.drawPivot();
+        
+        // Draw bounding box
+        noFill();
+        float green = (64 + 32 * MathUtils.sin(TWO_PI * (millis() % 600) / 600 ));
+        stroke(255, green, 0);
+        strokeWeight(2 + 0.6 * MathUtils.sin(TWO_PI * (millis() % 600) / 600 ));
+        pushMatrix();
+        if (!partRotating) {
+          BoundingBox bb = selected.getBoundingBox();
+          bb_nw.set(bb.left, bb.top);
+          bb_se.set(bb.right, bb.bottom);
+          transform.applyTo(bb_nw);
+          transform.applyTo(bb_se);
         } else {
-          renderer.drawPivot();
+          translate((bb_nw.x+bb_se.x)*0.5, (bb_nw.y+bb_se.y)*0.5);
+          rotate(partRotation);
+          translate(-(bb_nw.x+bb_se.x)*0.5, -(bb_nw.y+bb_se.y)*0.5);
         }
-      } else {
-        selectpartAnim.update(1/framerate);
-        if (selectpart != null)
-          image(selectpart, partsList.getPosition()[0] + partsList.getWidth() + 4 + selectpartAnim.getValue(), partsList.getPosition()[1] + selectpartAnim.getValue()/3);
+        rect(bb_nw.x, bb_nw.y, bb_se.x-bb_nw.x, bb_se.y-bb_nw.y);
+        line(bb_nw.x, bb_nw.y, bb_se.x, bb_se.y);
+        line(bb_nw.x, bb_se.y, bb_se.x, bb_nw.y);
+        circle(bb_se.x, bb_nw.y, 8);
+        square(bb_nw.x-4, bb_nw.y-4, 8);
+        square(bb_se.x-4, bb_se.y-4, 8);
+        popMatrix();
       }
+      
       renderer.drawMarker(0, 0);
       renderer.drawAxes();
     }
     renderer.popMatrix();
     
-    if (playing == false && (frameCount>>5)%2 == 0) {
+    if (playing == false && (frameCount>>5) % 2 == 0) {
       fill(255, 0, 0, 127);
       textSize(32);
-      text("PAUSED", -60+width/2, height-80);
+      text("PAUSED", -60 + width/2, height - 80);
     }
     if (timeline != null) {
       timeline.highlightSliders();
@@ -120,10 +150,22 @@ public class MainScreen extends Screen {
     }
   }
   
+  
+  Vector2 getWorldPos(Vector2 v) {
+    return getWorldPos(v.x, v.y);
+  }
+  
+  Vector2 getWorldPos(float x, float y) {
+    Vector2 pos = new Vector2(x, y);
+    Affine2 t = new Affine2(transform).inv();
+    t.applyTo(pos);
+    return pos;
+  }
+  
 
   void keyPressed(KeyEvent event) {
     if (avatar != null && key == CODED) {
-      if (keyCode == UP) {  // Select next part
+      /*if (keyCode == UP) {  // Select next part
         selectedIndex = (selectedIndex-1);
         if (selectedIndex < 0)
           selectedIndex += avatar.getPartsList().length;
@@ -131,14 +173,14 @@ public class MainScreen extends Screen {
       } else if (keyCode == DOWN) {  // Select previous part
         selectedIndex = (selectedIndex+1) % avatar.getPartsList().length;
         partsList.setValue(selectedIndex);
-      } else if (keyCode == LEFT) {
+      } else*/ if (keyCode == LEFT) {
         transport.prevPosture();
       } else if (keyCode == RIGHT) {
         transport.nextPosture();
-      } else if (keyCode == SHIFT && selected != null && !isNumberboxActive) {
+      } /*else if (keyCode == SHIFT && selected != null && !isNumberboxActive) {
         playing = false;
         avatar.resetAnimation();
-      }
+      }*/
     } else if (!transport.postureName.isActive() && !isNumberboxActive) {
       switch (key) {
       case 'p':  // Play/Pause animation
@@ -150,6 +192,10 @@ public class MainScreen extends Screen {
           avatar.resetAnimation();
           background(255);
         }
+        break;
+      case 'a':  // Select root node
+        if (avatar != null)
+          select(avatar.getShape());
         break;
       case 'd':  // Show/Hide UI
         if (avatar != null) {
@@ -177,16 +223,16 @@ public class MainScreen extends Screen {
         break;
       case 15:  // CTRL+o, load a new file
         selectInput("Select a file", "inputFileSelected");
-        loadScreen = new LoadScreen();
+        //loadScreen = new LoadScreen();
         break;
       case 19: // CTRL+s, save
         selectOutput("Select a file", "outputFileSelected");
         break;
       case 's':  // Save file
-        if (avatar != null && animationCollectionDirty) {
+        if (avatar != null && postureCollectionDirty) {
           savePosture();
           avatar.saveFile(baseFilename + ".json");
-          surface.setTitle(appName + " - " + baseFilename + ".json");
+          windowTitle(appName + " - " + baseFilename + ".json");
         }
         break;
       case 'b':  // Background clear, trail effect
@@ -208,47 +254,41 @@ public class MainScreen extends Screen {
 
   void keyReleased(KeyEvent event) {
     if (key == CODED && keyCode == SHIFT && selected != null && !isNumberboxActive) {
-      selected.hardTransform(hardTransform);
-      // Transform physics shell if necessary
-      if (selected == avatar.shape) {
-        for (Shape shape : avatar.physicsShapes)
-          shape.hardTransform(hardTransform);
-      }
-      hardTransform.idt();
       //playing = true;
       mustUpdateUI = true;
-      setAnimationCollectionDirty();
+      setPostureCollectionDirty();
     }
   }
 
 
+
   void mouseWheel(MouseEvent event) {
-    pivotButton.hide();
-    importButton.hide();
+    contextMenu.hide();
     if (!partsList.isInside()) {
-      float z = pow(1.1, -event.getCount());
-      Affine2 unproject = new Affine2(transform).inv();
-      Vector2 point = new Vector2(mouseX, mouseY);
-      unproject.applyTo(point);
-      if (keyPressed && keyCode == SHIFT && selected != null) {
-        // scale translation by the zoom factor
-        point = selected.getLocalOrigin();
-        z = 1 + (z-1) * 0.1f;
-        hardTransform.translate(point.x, point.y).scale(z, z).translate(-point.x, -point.y);
-      } else {
-        // scale translation by the zoom factor
-        transform.translate(point.x, point.y).scale(z, z).translate(-point.x, -point.y);
-      }
+      float z = pow(1.12, -event.getCount());
+      Vector2 point = getWorldPos(mouseX, mouseY);
+      transform.translate(point.x, point.y).scale(z, z).translate(-point.x, -point.y);  // scale translation by the zoom factor
     }
   }
   
   
   void mousePressed(MouseEvent event) {
-    mouse_button = event.getButton();
+    mouseClickBtn = event.getButton();
+    mouseClickPos.set(mouseX, mouseY);
     if (transport.contains(mouseX, mouseY))
       transport.isMoving = true;
-    else if (timeline != null && timeline.contains(mouseX, mouseY))
+    else if (timeline != null && timeline.contains(mouseX, mouseY))  // Move timeline box
       timeline.isMoving = true;
+    else if (selected != null) {  // Scale or rotate part
+      BoundingBox bb = selected.getBoundingBox();
+      Vector2 mouseWorldPos = getWorldPos(mouseX, mouseY);
+      if (Vector2.dst(mouseWorldPos.x, mouseWorldPos.y, bb.left, bb.top) < 10/transform.m00)
+        partScalingNW = true;
+      else if (Vector2.dst(mouseWorldPos.x, mouseWorldPos.y, bb.right, bb.bottom) < 10/transform.m00)
+        partScalingSE = true;
+      else if (Vector2.dst(mouseWorldPos.x, mouseWorldPos.y, bb.right, bb.top) < 10/transform.m00)
+        partRotating = true;
+    }
   }
   
   
@@ -257,53 +297,157 @@ public class MainScreen extends Screen {
     if (timeline != null)
       timeline.isMoving = false;
     
-    mouse_button = 0;
+    mouseClickBtn = 0;
+    
+    partMoving = false;
+    partScalingNW = false;
+    partScalingSE = false;
+    partRotating = false;
+    partRotation = 0f;
+    
+    if (avatar != null)
+      avatar.paused = false;
   }
 
 
   void mouseClicked(MouseEvent event) {
     if (event.getButton() == LEFT) {
-      if (setPivot && !cp5.getController("pivotbutton").isInside()) {
-        Vector2 point = new Vector2(mouseX, mouseY);
-        Affine2 t = new Affine2(transform).inv();
-        t.applyTo(point);
-        selected.setLocalOrigin(point.x, point.y);
-        ((Button) cp5.getController("pivotbutton")).setOff();
-        playing = true;
+      if (setPivot && !controllerClicked) {
+        // Place new pivot
+        Vector2 mouseWorldPos = getWorldPos(mouseX, mouseY);
+        selected.getAbsoluteTransform().inv().applyTo(mouseWorldPos);
+        selected.setLocalOrigin(mouseWorldPos);
+        setPivot = false;
+        playing = true; // Is this necessary ?
       }
-      pivotButton.hide();
-      importButton.hide();
+      else if (!controllerClicked) {
+        // Select a part
+        Vector2 mouseWorldPos = getWorldPos(mouseX, mouseY);
+        ComplexShape[] parts = avatar.getPartsList();
+        selectedIndex = 0;
+        ComplexShape clickedPart = null;
+
+        for (int i = parts.length-1; i >= 0; i--) {
+          if (parts[i].contains(mouseWorldPos)) {
+            clickedPart = parts[i];
+            break;
+          }
+        }
+        select(clickedPart);
+      }
+      contextMenu.hide();
     } else {
-      // RIGHT CLICK opens context menu (pivot button)
-      int btn_y = 0;
-      if (selected != null) {
-        pivotButton.setPosition(mouseX, mouseY+btn_y);
-        pivotButton.show();
-        btn_y += 20;
+      // RIGHT CLICK opens context menu
+      if (selected == null) {
+        //contextMenu.display("importbtn");
+      } else {
+        contextMenu.display("pivotbtn");
+        contextMenu.display("resettr");
       }
-      importButton.setPosition(mouseX, mouseY+btn_y);
-      importButton.show();
+      contextMenu.setPosition(mouseX, mouseY);
+      contextMenu.show();
     }
+    
+    controllerClicked = false;
   }
 
 
   void mouseDragged(MouseEvent event) {
-    pivotButton.hide();
-    importButton.hide();
+    contextMenu.hide();
+    
     int dx = mouseX-pmouseX;
     int dy = mouseY-pmouseY;
-    if (mouse_button == RIGHT) {
-      if (keyPressed && keyCode == SHIFT && selected != null) {
-        // scale translation by the zoom factor
-        hardTransform.translate(dx/transform.m00, dy/transform.m11);
-      } else {
+    float drag_distance = mouseClickPos.dst2(mouseX, mouseY);
+    
+    if (mouseClickBtn == LEFT) {      
+      if (partMoving) {
+        Affine2 tr = new Affine2();
+        tr.setToTranslation(dx/transform.m00, dy/transform.m11);    // scale translation by the zoom factor
+        selected.softTransform(tr);
+        
+        // Transform physics shell if necessary
+        /*
+        if (selected == avatar.shape) {
+          for (Shape shape : avatar.physicsShapes)
+            shape.hardTransform(tr);
+        }*/
+      }
+      else if (partScalingNW) {
+        avatar.paused = true;
+        avatar.resetAnimation();
+        Vector2 mouseWorldPos = getWorldPos(mouseX, mouseY);
+        BoundingBox bb = selected.getBoundingBox();
+        Vector2 dim = bb.getDimensions();
+        float sx = max(0.2f, bb.right - mouseWorldPos.x) / dim.x;
+        float sy = max(0.2f, bb.bottom - mouseWorldPos.y) / dim.y;
+        Affine2 tr = new Affine2();
+        tr.translate(bb.right, bb.bottom).scale(sx, sy).translate(-bb.right, -bb.bottom);
+        selected.softTransform(tr);
+      }
+      else if (partScalingSE) {
+        avatar.paused = true;
+        avatar.resetAnimation();
+        Vector2 mouseWorldPos = getWorldPos(mouseX, mouseY);
+        BoundingBox bb = selected.getBoundingBox();
+        Vector2 dim = bb.getDimensions();
+        float sx = max(0.2f, mouseWorldPos.x - bb.left) / dim.x;
+        float sy = max(0.2f, mouseWorldPos.y - bb.top) / dim.y;
+        Affine2 tr = new Affine2();
+        tr.translate(bb.left, bb.top).scale(sx, sy).translate(-bb.left, -bb.top);
+        selected.softTransform(tr);
+      }
+      else if (partRotating) {
+        avatar.paused = true;
+        avatar.resetAnimation();
+        Vector2 pMouseWorldPos = getWorldPos(pmouseX, pmouseY);
+        Vector2 mouseWorldPos = getWorldPos(mouseX, mouseY);
+        Vector2 center = getWorldPos((bb_nw.x+bb_se.x)*0.5, (bb_nw.y+bb_se.y)*0.5);
+        pMouseWorldPos.sub(center);
+        mouseWorldPos.sub(center);
+        float angle = mouseWorldPos.angleRad(pMouseWorldPos);
+        partRotation += angle;
+        Affine2 tr = new Affine2();
+        tr.translate(center).rotateRad(angle).translate(-center.x, -center.y);
+        selected.softTransform(tr);
+      }
+      else if (!controllerClicked) {
+        if (selected != null && isInsideBox(mouseClickPos.x, mouseClickPos.y, bb_nw, bb_se) && drag_distance > 300) {
+          avatar.paused = true;
+          avatar.resetAnimation();
+          partMoving = true;
+          Affine2 tr = new Affine2();
+          tr.setToTranslation((mouseX - mouseClickPos.x)/transform.m00,
+                              (mouseY - mouseClickPos.y)/transform.m11);    // scale translation by the zoom factor
+          selected.softTransform(tr);
+          
+          // Transform physics shell if necessary
+          /*
+          if (selected == avatar.shape) {
+            for (Shape shape : avatar.physicsShapes)
+              shape.hardTransform(tr);
+          }*/
+        }
+      }
+      
+      if (transport.isMoving) {
+        transport.move(dx, dy);
+      } else if (timeline != null && timeline.isMoving) {
+        timeline.move(dx, dy);
+      }
+    }
+    
+    else if (mouseClickBtn == RIGHT) {
         // scale translation by the zoom factor
         transform.translate(dx/transform.m00, dy/transform.m11);
-      }
-    } else if (transport.isMoving) {
-      transport.move(dx, dy);
-    } else if (timeline != null && timeline.isMoving) {
-      timeline.move(dx, dy);
     }
   }
+}
+
+
+boolean isInside(Vector2 pos, Vector2 nw, Vector2 se) {
+  return isInsideBox(pos.x, pos.y, nw, se);
+}
+
+boolean isInsideBox(float x, float y, Vector2 nw, Vector2 se) {
+  return x > nw.x && x < se.x && y > nw.y && y < se.y;
 }

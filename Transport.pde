@@ -16,7 +16,7 @@ public class Transport extends MoveableGroup {
 
 
   public Transport() {
-    x = 200;
+    x = margin;
     y = margin + barHeight;
     barHeight = 10;
     groupHeight = 20;
@@ -69,11 +69,13 @@ public class Transport extends MoveableGroup {
     animDuration = new NumberboxInput(cp5, "animduration")
       .setPosition(pos.x, pos.y)
       .setSize(40, groupHeight)
-      .setGroup(group);
+      .setGroup(group)
+    ;
+    
     animDuration.addCallback(new CallbackListener() {
       public void controlEvent(CallbackEvent theEvent) {
         if (theEvent.getAction() == ControlP5.ACTION_BROADCAST && animDuration.getValue() != prevAnimDuration) {
-          animationCollectionDirty = true;
+          setPostureCollectionDirty();
         }
       }
     }
@@ -117,7 +119,7 @@ public class Transport extends MoveableGroup {
   public void prevPosture() {
     if (postureIndex <= 0)
       return;
-    if (animationCollectionDirty) {
+    if (postureCollectionDirty) {
       // Save fullAnimation to animationCollection
       savePosture();
     }
@@ -132,8 +134,8 @@ public class Transport extends MoveableGroup {
 
 
   public void nextPosture() {
-    if (animationCollectionDirty) {
-      // Save posture to animationCollection
+    if (postureCollectionDirty) {
+      // Save posture to postureCollection
       savePosture();
     }
     postureIndex++;

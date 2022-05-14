@@ -1,10 +1,6 @@
 ControlP5 cp5; //<>//
-FunctionAccordion accordion;
-Button pivotButton;
-Button importButton;
 
 
-PFont defaultFont;
 int spacing = 4;
 int margin = spacing;
 int menuBarHeight = 18;
@@ -13,6 +9,89 @@ int keepsOpenAnimNum = -1;
 int axeWidth = 72;
 boolean isNumberboxActive = false;
 color backgroundColor = color(0, 100);
+
+
+
+public class ContextMenu {
+  List<Button> items = new ArrayList<>();
+  List<Boolean> visible;
+  int itemHeight = 20;
+  int menuWidth = 90;
+  Vector2 position;
+
+  public ContextMenu() {
+    position = new Vector2();
+    visible = new ArrayList<>();
+
+    addItem("Place pivot", "pivotbtn", "onPivot");
+    addItem("Reset transform", "resettr", "onReset");
+    addItem("Import", "importbtn", "onImport");
+  }
+
+  public void clear() {
+    items.clear();
+    visible.clear();
+  }
+
+  private void addItem(String label, String cp5name, String fn) {
+    Button newItem = cp5.addButton(cp5name)
+      .setSize(menuWidth, itemHeight)
+      //.setSwitch(true)
+      .activateBy(ControlP5.PRESS)
+      .setLabel(label)
+      .plugTo(this, fn)
+      .hide()
+      ;
+
+    items.add(newItem);
+    visible.add(false);
+  }
+
+  public void onPivot(boolean value) {
+    setPivot = true;
+    avatar.resetAnimation();
+    playing = false;
+  }
+  
+  public void onReset(boolean value) {
+    selected.resetTransform();
+  }
+  
+  public void onImport(boolean value) {
+    //hide();
+    selectInput("Select a file", "inputFileSelected");
+    //loadScreen = new LoadScreen();
+  }
+
+  public void setPosition(int x, int y) {
+    position.set(x, y);
+  }
+
+  public void display(String name) {
+    for (int i = 0; i < items.size(); i++) {
+      if (items.get(i).getName() == name)
+        visible.set(i, true);
+    }
+  }
+
+  public void hide() {
+    for (Button item : items)
+      item.hide();
+    Collections.fill(visible, false);
+  }
+
+  public void show() {
+    int y = 0;
+    for (int i = 0; i < items.size(); i++) {
+      Button item = items.get(i);
+      if (visible.get(i)) {
+        item.setPosition(position.x, position.y + y);
+        item.show();
+        y += itemHeight;
+      }
+    }
+  }
+}
 
 
 
@@ -25,13 +104,13 @@ public class MoveableGroup {
   protected int x;
   protected int y;
   public boolean isMoving = false;
-  
-  
+
+
   public boolean contains(int x, int y) {
     return (x >= this.x && x <= this.x+groupWidth
-            && y >= this.y-barHeight && y <= this.y);
+      && y >= this.y-barHeight && y <= this.y);
   }
-  
+
   public void move(int dx, int dy) {
     group.open();
     x += dx;
@@ -41,7 +120,7 @@ public class MoveableGroup {
     group.bringToFront();
     group.setPosition(x, y);
   }
-  
+
   public void setPosition(int x, int y) {
     this.x = x;
     this.y = y;
@@ -73,7 +152,7 @@ public class FunctionAccordion extends Accordion {
   // Stupid hack to fix a stupid bug
   // (groups used to collapse in wrong order after mouse hovered a scrollable list)
   @Override
-  public void controlEvent( ControlEvent theEvent ) {
+    public void controlEvent( ControlEvent theEvent ) {
     super.controlEvent(theEvent);
     String[] m = match(theEvent.getName(), "animation(\\d+)");
     keepsOpenAnimNum = parseInt(m[1]);
@@ -90,30 +169,32 @@ public class NumberboxInput extends Numberbox {
   NumberboxInput(ControlP5 theControlP5, String theName) {
     super(theControlP5, theName);
     setLabel("");
-    
-    // control the active-status of the input handler when releasing the mouse button inside 
+
+    // control the active-status of the input handler when releasing the mouse button inside
     // the numberbox. deactivate input handler when mouse leaves.
     onClick(new CallbackListener() {
       public void controlEvent(CallbackEvent theEvent) {
         setActive( true );
       }
-    });
-    
+    }
+    );
+
     onLeave(new CallbackListener() {
       public void controlEvent(CallbackEvent theEvent) {
         setActive( false );
         submit();
       }
-    });
+    }
+    );
   }
 
   public void keyEvent(KeyEvent k) {
-    // only process key event if input is active 
+    // only process key event if input is active
     if (k.getAction() == KeyEvent.PRESS && active) {
       if (k.getKey() == '\n') { // confirm input with enter
         submit();
         return;
-      } else if (k.getKeyCode() == BACKSPACE) { 
+      } else if (k.getKeyCode() == BACKSPACE) {
         text = text.isEmpty() ? "" : text.substring(0, text.length()-1);
       } else if (k.getKey() < 255) {
         // check if the input is a valid (decimal) number
@@ -153,45 +234,6 @@ public class NumberboxInput extends Numberbox {
 
 
 
-void setupUI() {
-  //printArray(PFont.list());
-  defaultFont = createFont("DejaVu Sans Mono", 12);
-
-  cp5 = new ControlP5(this);
-
-  partsList = (PartsList) new PartsList(cp5, "partslist")
-    .setLabel("parts list")
-    .setPosition(margin, margin)
-    .setHeight(height-2*margin)
-    .setItemHeight(menuBarHeight)
-    .hide();
-  ;
-
-  transport = new Transport();
-  accordion = new FunctionAccordion(cp5, "accordion");
-
-  pivotButton = cp5.addButton("pivotbutton")
-    //.setPosition(300, 10)
-    .setSize(70, 20)
-    .setSwitch(true)
-    .activateBy(ControlP5.PRESS)
-    .setLabel("Set pivot")
-    .hide()
-    ;
-  
-  importButton = cp5.addButton("importbutton")
-    //.setPosition(300, 30)
-    .setSize(70, 20)
-    .setSwitch(true)
-    .activateBy(ControlP5.PRESS)
-    .setLabel("Import")
-    .hide()
-    ;
-  
-}
-
-
-
 void updateUI() {
   paramLocked = true;
   boolean visible = true;
@@ -207,7 +249,7 @@ void updateUI() {
   }
   accordion = new FunctionAccordion(cp5, "accordion");
   accordion.setPosition(width-accordion.getWidth()-margin, 1);
-  
+
   if (timeline != null)
     timeline.remove();
 
@@ -258,7 +300,7 @@ void updateUI() {
     pos.add(cp5.getController("axe"+animNum).getWidth() + spacing, 0);
 
     // Delete animation button
-    cp5.addButton("deletebutton"+animNum)
+    cp5.addButton("delbtn"+animNum)
       .setLabel("x")
       .setColorBackground(0xffff0000)
       .setPosition(pos.x, pos.y)
@@ -483,14 +525,14 @@ void drawBottomButtons(Group g, int animNum, PVector pos) {
 
   if (animNum < selected.getAnimationList().length) {
     // Copy animation
-    cp5.addButton("copybutton"+animNum)
+    cp5.addButton("copybtn"+animNum)
       .setLabel("copy")
       .setPosition(pos.x, pos.y)
       .setSize(40, 20)
       .activateBy(ControlP5.PRESS)
       .setGroup(g)
       ;
-    pos.add(cp5.getController("copybutton"+animNum).getWidth()+spacing, 0);
+    pos.add(cp5.getController("copybtn"+animNum).getWidth()+spacing, 0);
 
     // Swap position buttons
     cp5.addButton("swapup"+animNum)
@@ -518,7 +560,7 @@ void drawBottomButtons(Group g, int animNum, PVector pos) {
 
   if (animationClipboard != null) {
     // Paste animation
-    cp5.addButton("pastebutton"+animNum)
+    cp5.addButton("pastebtn"+animNum)
       .setLabel("paste")
       .setPosition(pos.x, pos.y)
       .setSize(42, 20)
@@ -536,8 +578,9 @@ void drawBottomButtons(Group g, int animNum, PVector pos) {
 
 void showUI() {
   showUI = true;
-  accordion.show();
-  partsList.open().show();
+  if (accordion != null)
+    accordion.show();
+  //partsList.open().show();
   transport.show();
   renderer.setSelected(selected);
   if (timeline != null)
@@ -546,10 +589,10 @@ void showUI() {
 
 void hideUI() {
   showUI = false;
-  accordion.hide();
-  partsList.hide();
-  pivotButton.hide();
-  importButton.hide();
+  if (accordion != null)
+    accordion.hide();
+  //partsList.hide();
+  contextMenu.hide();
   transport.hide();
   renderer.setSelected(null);
   if (timeline != null)

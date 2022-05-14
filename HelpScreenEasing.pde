@@ -42,7 +42,7 @@ public class HelpScreenEasing extends Screen {
   @Override
   public void draw() {
     background(255);
-    fill(127);
+    fill(64);
     textSize(32);
     int offset = floor(textWidth("Easing functions"));
     text("Easing functions", (width/2)-offset/2, -20+height/6);
@@ -62,15 +62,21 @@ public class HelpScreenEasing extends Screen {
 
   @Override
   void keyPressed(KeyEvent event) {
-    if (avatar != null)
+    if (avatar != null) {
       showUI();
-    currentScreen = mainScreen;
+      currentScreen = mainScreen;
+    } else {
+      currentScreen = welcomeScreen;
+    }
   }
   
   @Override
   void mouseClicked(MouseEvent event) {
-    if (avatar != null)
+    if (avatar != null) {
       showUI();
-    currentScreen = mainScreen;
+      currentScreen = mainScreen;
+    } else {
+      currentScreen = welcomeScreen;
+    }
   }
 }
