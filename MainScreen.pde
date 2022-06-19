@@ -364,6 +364,7 @@ public class MainScreen extends Screen {
         Affine2 tr = new Affine2();
         tr.setToTranslation(dx/transform.m00, dy/transform.m11);    // scale translation by the zoom factor
         selected.softTransform(tr);
+        setPostureCollectionDirty();
         
         // Transform physics shell if necessary
         /*
@@ -383,6 +384,7 @@ public class MainScreen extends Screen {
         Affine2 tr = new Affine2();
         tr.translate(bb.right, bb.bottom).scale(sx, sy).translate(-bb.right, -bb.bottom);
         selected.softTransform(tr);
+        setPostureCollectionDirty();
       }
       else if (partScalingSE) {
         avatar.paused = true;
@@ -395,6 +397,7 @@ public class MainScreen extends Screen {
         Affine2 tr = new Affine2();
         tr.translate(bb.left, bb.top).scale(sx, sy).translate(-bb.left, -bb.top);
         selected.softTransform(tr);
+        setPostureCollectionDirty();
       }
       else if (partRotating) {
         avatar.paused = true;
@@ -409,6 +412,7 @@ public class MainScreen extends Screen {
         Affine2 tr = new Affine2();
         tr.translate(center).rotateRad(angle).translate(-center.x, -center.y);
         selected.softTransform(tr);
+        setPostureCollectionDirty();
       }
       else if (!controllerClicked) {
         if (selected != null && isInsideBox(mouseClickPos.x, mouseClickPos.y, bb_nw, bb_se) && drag_distance > 300) {

@@ -66,7 +66,6 @@ public class HelpScreen1 extends Screen {
       "Wireframe\n"+
       "Context menu\n"+
       "Exit program\n", width/2, height/4);
-    text("Ver. "+version, width-110, height-20);
   }
   
   void keyPressed(KeyEvent event) {

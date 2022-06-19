@@ -1,9 +1,8 @@
 // programme python "key-mon" pour afficher les touches du clavier
 
 // TODO:
-// Revoir la fenêtre de sur-chargement de fichier (pour la version 1.8)
+// Revoir la fenêtre de sur-chargement de fichier (pour la version 0.8)
 // Editor : Part selection menu when click on many overlaping parts
-// Lib : Points de pivots différents par postures
 // Lib : Part affine transform per posture
 // Display bones (connected pivots)
 // Option to reset control values (by double clicking on them ?)
@@ -15,13 +14,16 @@
 // Librairie d'Avatars à l'ouverture d'un fichier
 // Add a chart for every Animation to show function progression over time
 
+/* IDÉES ABANDONNÉES :
+ * Lib : Points de pivots différents par postures
+*/
+
 /*
   BUGS:
    * controllerClicked is not reseted after a mouse drag on a controller (eg. timeline sliders)
    * Check physics shapes after soft-transforming
    * fullscreen 
    * Resize window doesn't resize UI immediately (click on displaced controls are missed)
-   * Part list disapearing (Remove part list header Bar)
  */
 
 

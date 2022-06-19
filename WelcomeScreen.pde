@@ -66,8 +66,8 @@ public class WelcomeScreen extends Screen {
     text("to show help", (width/2) - 50, 60 + height/2);
     drawKey((width/2) - 90, 36 + height/2, "H", 32);
     
-    text("Ver. " + version, width-100, height-40);
-    text("Lib. " + MyRenderer.version(), width-100, height-20);
+    text("Ver. " + version, width-80, height-40);
+    text("Lib. " + MyRenderer.version(), width-80, height-20);
   }
   
   @Override
