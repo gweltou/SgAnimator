@@ -1,4 +1,8 @@
-0.8
+0.8.1
+  * Bugfixes
+
+
+0.8     2022-05-14
   * Selection by directly clicking on parts
   * Left mouse button is used instead of MAJ + right mouse button to move parts
   * Resizing/scale parts with North-West and South-East selection handles
