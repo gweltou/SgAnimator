@@ -13,6 +13,18 @@ public class MainScreen extends Screen {
   private boolean clearBackground = true;
   private float timeScale = 1f;
   
+  // Camera
+  private boolean showCamera = false;
+  private int camPPU = 1; // Pixels per unit
+  private Vector2 camNW, camSE;
+  private Vector2 camScreenNW, camScreenSE;
+  private boolean camMoving = false;
+  private Affine2 camTransform = new Affine2();
+  private boolean camResizeNW = false;
+  private boolean camResizeSE = false;
+  
+  private PShader pixelate = loadShader("pixelate.glsl");
+  
   private int mouseClickBtn;
   private Vector2 mouseClickPos = new Vector2();
   private boolean partMoving = false;
@@ -21,13 +33,13 @@ public class MainScreen extends Screen {
   private boolean partRotating = false;
   private float partRotation = 0f;
   
-  Vector2 bb_nw, bb_se; // Selection's bounding box
+  private Vector2 bbNW, bbSE; // Selection's bounding box
   
 
   public MainScreen() {
     transform = new Affine2().setToTranslation(width/2, height/2);
-    bb_nw = new Vector2();
-    bb_se = new Vector2();
+    bbNW = new Vector2();
+    bbSE = new Vector2();
     
     // CP5 UI
     transport = new Transport();
@@ -57,21 +69,21 @@ public class MainScreen extends Screen {
     framerate = recordingFramerate;
     remainingFrames = floor(transport.animDuration.getValue() * framerate);
     avatar.resetAnimation();
-    renderer.setBackgroundColor(1, 1, 1, 1);
-    renderer.startRecording(transport.getCounter());
+    bufferedRenderer.setBackgroundColor(1, 1, 1, 1);
+    bufferedRenderer.startRecording(transport.getCounter());
   }
   
   
   public void stopRecording() {
-    renderer.stopRecording();
+    bufferedRenderer.stopRecording();
     framerate = defaultFramerate;
   }
-
-
+  
+  
   public void draw() {
     if (clearBackground || showUI)
       background(255);
-
+    
     renderer.pushMatrix(transform);
     
     if (avatar != null) {
@@ -79,8 +91,8 @@ public class MainScreen extends Screen {
         avatar.update(1f/framerate);
       avatar.draw(renderer);
       
-      if (renderer.isRecording() && playing) {
-        renderer.flush();
+      if (bufferedRenderer.isRecording() && playing) {
+        bufferedRenderer.flush();
         if (remainingFrames > 0) {
           remainingFrames--;
           transport.increaseCounter();
@@ -106,26 +118,71 @@ public class MainScreen extends Screen {
         pushMatrix();
         if (!partRotating) {
           BoundingBox bb = selected.getBoundingBox();
-          bb_nw.set(bb.left, bb.top);
-          bb_se.set(bb.right, bb.bottom);
-          transform.applyTo(bb_nw);
-          transform.applyTo(bb_se);
+          bbNW.set(bb.left, bb.top);
+          bbSE.set(bb.right, bb.bottom);
+          transform.applyTo(bbNW);
+          transform.applyTo(bbSE);
         } else {
-          translate((bb_nw.x+bb_se.x)*0.5, (bb_nw.y+bb_se.y)*0.5);
+          translate((bbNW.x+bbSE.x)*0.5, (bbNW.y+bbSE.y)*0.5);
           rotate(partRotation);
-          translate(-(bb_nw.x+bb_se.x)*0.5, -(bb_nw.y+bb_se.y)*0.5);
+          translate(-(bbNW.x+bbSE.x)*0.5, -(bbNW.y+bbSE.y)*0.5);
         }
-        rect(bb_nw.x, bb_nw.y, bb_se.x-bb_nw.x, bb_se.y-bb_nw.y);
-        line(bb_nw.x, bb_nw.y, bb_se.x, bb_se.y);
-        line(bb_nw.x, bb_se.y, bb_se.x, bb_nw.y);
-        circle(bb_se.x, bb_nw.y, 8);
-        square(bb_nw.x-4, bb_nw.y-4, 8);
-        square(bb_se.x-4, bb_se.y-4, 8);
+        rect(bbNW.x, bbNW.y, bbSE.x-bbNW.x, bbSE.y-bbNW.y);
+        line(bbNW.x, bbNW.y, bbSE.x, bbSE.y);
+        line(bbNW.x, bbSE.y, bbSE.x, bbNW.y);
+        circle(bbSE.x, bbNW.y, 8);
+        square(bbNW.x-4, bbNW.y-4, 8);
+        square(bbSE.x-4, bbSE.y-4, 8);
         popMatrix();
       }
       
-      renderer.drawMarker(0, 0);
-      renderer.drawAxes();
+      if (showCamera) {
+        /*Affine2 unproject = new Affine2(transform).inv();
+        Vector2 screenTopLeft = new Vector2(0, 0);
+        unproject.applyTo(screenTopLeft);
+        screenTopLeft.sub(camNW);*/
+        
+        Vector2 translation = new Vector2(-camNW.x, -camNW.y);
+        camTransform.setToTranslation(translation);
+        
+        bufferedRenderer.pushMatrix(camTransform);
+        bufferedRenderer.beginDraw();
+        bufferedRenderer.clear();
+        avatar.draw(bufferedRenderer); //<>//
+        bufferedRenderer.endDraw();
+        bufferedRenderer.popMatrix();
+        
+        //int w = round(se.x-nw.x);
+        //int h = round(se.y-nw.y);
+        //pixelate.set("resolution", w, h);
+        //pixelate.set("aspect_ratio", h/float(w));
+        //pixelate.set("amount", 32f);
+        //PImage imgBuffer = get(round(nw.x), round(nw.y), w, h);
+        //pixelate.set("tex", imgBuffer);
+        //shader(pixelate);
+        //noStroke();
+        //rect(nw.x, nw.y, se.x-nw.x, se.y-nw.y);
+        //resetShader();
+        
+        camScreenNW.set(camNW);
+        transform.applyTo(camScreenNW);
+        camScreenSE.set(camSE);
+        transform.applyTo(camScreenSE);
+        //image(bufferedRenderer.getBuffer(), camScreenNW.x, camScreenNW.y);
+        int camHeight = ceil((camSE.y - camNW.y) * camPPU);
+        image(bufferedRenderer.getBuffer(), 0, height-camHeight);
+        
+        noFill();
+        stroke(0, 64, 255);
+        strokeWeight(2);
+        rect(camScreenNW.x, camScreenNW.y, camScreenSE.x-camScreenNW.x, camScreenSE.y-camScreenNW.y);
+        // Resize handles
+        square(camScreenNW.x-4, camScreenNW.y-4, 8);
+        square(camScreenSE.x-4, camScreenSE.y-4, 8);
+      } else {
+        renderer.drawMarker(0, 0);
+        renderer.drawAxes();
+      }
     }
     renderer.popMatrix();
     
@@ -177,10 +234,7 @@ public class MainScreen extends Screen {
         transport.prevPosture();
       } else if (keyCode == RIGHT) {
         transport.nextPosture();
-      } /*else if (keyCode == SHIFT && selected != null && !isNumberboxActive) {
-        playing = false;
-        avatar.resetAnimation();
-      }*/
+      }
     } else if (!transport.postureName.isActive() && !isNumberboxActive) {
       switch (key) {
       case 'p':  // Play/Pause animation
@@ -220,6 +274,24 @@ public class MainScreen extends Screen {
         break;
       case 'w':  // Wireframe
         renderer.toggleWireframe();
+        break;
+      case 'k':  // Camera
+        if (showCamera == false) {
+          if (camNW == null) {
+            BoundingBox bb = avatar.getShape().getBoundingBox();
+            camNW = new Vector2(bb.left, bb.top);
+            camSE = new Vector2(bb.right, bb.bottom);
+            camScreenNW = new Vector2();
+            camScreenSE = new Vector2();
+            int bufferWidth = ceil((camSE.x - camNW.x) * camPPU);
+            int bufferHeight = ceil((camSE.y - camNW.y) * camPPU);
+            println(bufferWidth, bufferHeight);
+            bufferedRenderer.setBufferSize(bufferWidth, bufferHeight);
+          }
+          showCamera = true;
+        } else {
+          showCamera = false;
+        }
         break;
       case 15:  // CTRL+o, load a new file
         selectInput("Select a file", "inputFileSelected");
@@ -275,13 +347,21 @@ public class MainScreen extends Screen {
   void mousePressed(MouseEvent event) {
     mouseClickBtn = event.getButton();
     mouseClickPos.set(mouseX, mouseY);
+    Vector2 mouseWorldPos = getWorldPos(mouseX, mouseY);
     if (transport.contains(mouseX, mouseY))
       transport.isMoving = true;
     else if (timeline != null && timeline.contains(mouseX, mouseY))  // Move timeline box
       timeline.isMoving = true;
+    else if (showCamera) {
+      if (Vector2.dst(mouseWorldPos.x, mouseWorldPos.y, camNW.x, camNW.y) < 10/transform.m00)
+        camResizeNW = true;
+      else if (Vector2.dst(mouseWorldPos.x, mouseWorldPos.y, camSE.x, camSE.y) < 10/transform.m00)
+        camResizeSE = true;
+      else if (isInsideBox(mouseX, mouseY, camScreenNW, camScreenSE))
+        camMoving = true;
+    }
     else if (selected != null) {  // Scale or rotate part
       BoundingBox bb = selected.getBoundingBox();
-      Vector2 mouseWorldPos = getWorldPos(mouseX, mouseY);
       if (Vector2.dst(mouseWorldPos.x, mouseWorldPos.y, bb.left, bb.top) < 10/transform.m00)
         partScalingNW = true;
       else if (Vector2.dst(mouseWorldPos.x, mouseWorldPos.y, bb.right, bb.bottom) < 10/transform.m00)
@@ -300,10 +380,20 @@ public class MainScreen extends Screen {
     mouseClickBtn = 0;
     
     partMoving = false;
+    camMoving = false;
     partScalingNW = false;
     partScalingSE = false;
     partRotating = false;
     partRotation = 0f;
+    
+    if (camResizeNW || camResizeSE) {
+      int bufferWidth = ceil((camSE.x - camNW.x) * camPPU);
+      int bufferHeight = ceil((camSE.y - camNW.y) * camPPU);
+      println(bufferWidth, bufferHeight);
+      bufferedRenderer.setBufferSize(bufferWidth, bufferHeight);
+      camResizeNW = false;
+      camResizeSE = false;
+    }
     
     if (avatar != null)
       avatar.paused = false;
@@ -358,6 +448,7 @@ public class MainScreen extends Screen {
     int dx = mouseX-pmouseX;
     int dy = mouseY-pmouseY;
     float drag_distance = mouseClickPos.dst2(mouseX, mouseY);
+    Vector2 mouseWorldPos = getWorldPos(mouseX, mouseY);
     
     if (mouseClickBtn == LEFT) {      
       if (partMoving) {
@@ -376,7 +467,6 @@ public class MainScreen extends Screen {
       else if (partScalingNW) {
         avatar.paused = true;
         avatar.resetAnimation();
-        Vector2 mouseWorldPos = getWorldPos(mouseX, mouseY);
         BoundingBox bb = selected.getBoundingBox();
         Vector2 dim = bb.getDimensions();
         float sx = max(0.2f, bb.right - mouseWorldPos.x) / dim.x;
@@ -389,7 +479,6 @@ public class MainScreen extends Screen {
       else if (partScalingSE) {
         avatar.paused = true;
         avatar.resetAnimation();
-        Vector2 mouseWorldPos = getWorldPos(mouseX, mouseY);
         BoundingBox bb = selected.getBoundingBox();
         Vector2 dim = bb.getDimensions();
         float sx = max(0.2f, mouseWorldPos.x - bb.left) / dim.x;
@@ -403,8 +492,7 @@ public class MainScreen extends Screen {
         avatar.paused = true;
         avatar.resetAnimation();
         Vector2 pMouseWorldPos = getWorldPos(pmouseX, pmouseY);
-        Vector2 mouseWorldPos = getWorldPos(mouseX, mouseY);
-        Vector2 center = getWorldPos((bb_nw.x+bb_se.x)*0.5, (bb_nw.y+bb_se.y)*0.5);
+        Vector2 center = getWorldPos((bbNW.x+bbSE.x)*0.5, (bbNW.y+bbSE.y)*0.5);
         pMouseWorldPos.sub(center);
         mouseWorldPos.sub(center);
         float angle = mouseWorldPos.angleRad(pMouseWorldPos);
@@ -414,8 +502,19 @@ public class MainScreen extends Screen {
         selected.softTransform(tr);
         setPostureCollectionDirty();
       }
+      else if (camMoving) {
+        camNW.add(dx/transform.m00, dy/transform.m11);
+        camSE.add(dx/transform.m00, dy/transform.m11);
+      }
+      else if (camResizeNW) {
+        camNW.add(dx/transform.m00, dy/transform.m11);
+      }
+      else if (camResizeSE) {
+        camSE.add(dx/transform.m00, dy/transform.m11);
+      }
       else if (!controllerClicked) {
-        if (selected != null && isInsideBox(mouseClickPos.x, mouseClickPos.y, bb_nw, bb_se) && drag_distance > 300) {
+        if (selected != null && isInsideBox(mouseClickPos.x, mouseClickPos.y, bbNW, bbSE) && drag_distance > 300) {
+          // Move part
           avatar.paused = true;
           avatar.resetAnimation();
           partMoving = true;

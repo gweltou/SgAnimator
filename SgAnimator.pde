@@ -22,7 +22,6 @@
   BUGS:
    * controllerClicked is not reseted after a mouse drag on a controller (eg. timeline sliders)
    * Check physics shapes after soft-transforming
-   * fullscreen 
    * Resize window doesn't resize UI immediately (click on displaced controls are missed)
  */
 
@@ -55,7 +54,8 @@ Screen helpScreenEasing;
 Screen currentScreen;
 Screen previousScreen;
 
-MyRenderer renderer;
+PRenderer renderer;
+PGraphicsRenderer bufferedRenderer;
 Avatar avatar;
 String baseFilename;  // Used for window title and to save file (independent of its source format)
 
@@ -80,8 +80,9 @@ PFont defaultFont;
 
 void settings() {
   //fullScreen();
-  size(1024, 700);
+  size(1024, 700, P2D);
   //size(800, 600, P2D);
+  noSmooth();
 }
 
 
@@ -98,7 +99,8 @@ void setup() {
   helpScreenEasing = new HelpScreenEasing();
   currentScreen = welcomeScreen;
 
-  renderer = new MyRenderer(this);
+  renderer = new PRenderer(this);
+  bufferedRenderer = new PGraphicsRenderer(this);
 
   int numFn = Animation.timeFunctions.length;
   functionsName = new String[numFn];
@@ -106,6 +108,9 @@ void setup() {
     int idx = Animation.timeFunctions[i].getName().lastIndexOf('.');
     functionsName[i] = Animation.timeFunctions[i].getName().substring(idx+3);
   }
+  
+  File toLoad = new File("/home/gweltaz/Bureau/svg/tete.json");
+  loadJsonFile(toLoad); 
 }
 
 
