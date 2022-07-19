@@ -1,4 +1,4 @@
-ControlP5 cp5; //<>//
+ControlP5 cp5;
 
 
 int spacing = 4;
@@ -573,6 +573,32 @@ void drawBottomButtons(Group g, int animNum, PVector pos) {
   if (bottomButtons == true)
     pos.add(0, 20+2*spacing);
 }
+
+
+
+void showUI() {
+  showUI = true;
+  if (accordion != null)
+    accordion.show();
+  //partsList.open().show();
+  transport.show();
+  renderer.setSelected(selected);
+  if (timeline != null)
+    timeline.show();
+}
+
+void hideUI() {
+  showUI = false;
+  if (accordion != null)
+    accordion.hide();
+  //partsList.hide();
+  contextMenu.hide();
+  transport.hide();
+  renderer.setSelected(null);
+  if (timeline != null)
+    timeline.hide();
+}
+
 
 
 CallbackListener toFront = new CallbackListener() {

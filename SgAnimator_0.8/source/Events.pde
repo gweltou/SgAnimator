@@ -31,7 +31,7 @@ void controlEvent(ControlEvent event) throws InstantiationException, IllegalAcce
 
     if (name.equals("posturename")) {
       // Change fullAnim name
-      setFileDirty();
+      setPostureCollectionDirty();
     } else if (name.startsWith("function")) {
       String[] m = match(name, "function(\\d+)");
       int animNum = parseInt(m[1]);
@@ -57,7 +57,7 @@ void controlEvent(ControlEvent event) throws InstantiationException, IllegalAcce
        }*/
       mustUpdateUI = true;
       playing = true;
-      setFileDirty();
+      setPostureCollectionDirty();
     } else if (name.startsWith("axe")) {
       String[] m = match(name, "axe(\\d+)");
       int animNum = parseInt(m[1]);
@@ -70,18 +70,18 @@ void controlEvent(ControlEvent event) throws InstantiationException, IllegalAcce
         selected.getAnimation(animNum).setAxe((int) value);
         mustUpdateUI = true;
         playing = true;
-        setFileDirty();
+        setPostureCollectionDirty();
       }
     } else if (name.startsWith("animamp")) {
       String[] m = match(name, "animamp(\\d+)");
       int animNum = parseInt(m[1]);
       selected.getAnimation(animNum).setAmp(int(value*100f) / 100f);
-      setFileDirty();
+      setPostureCollectionDirty();
     } else if (name.startsWith("animinv")) {
       String[] m = match(name, "animinv(\\d+)");
       int animNum = parseInt(m[1]);
       selected.getAnimation(animNum).setInv(value == 0 ? true : false);
-      setFileDirty();
+      setPostureCollectionDirty();
     } else if (name.startsWith("copybtn")) {
       String[] m = match(name, "copybtn(\\d+)");
       int animNum = parseInt(m[1]);
@@ -98,7 +98,7 @@ void controlEvent(ControlEvent event) throws InstantiationException, IllegalAcce
           selected.addAnimation(animationClipboard.copy());
         }
         mustUpdateUI = true;
-        setFileDirty();
+        setPostureCollectionDirty();
       }
     } else if (name.startsWith("delbtn")) {
       String[] m = match(name, "delbtn(\\d+)");
@@ -106,7 +106,7 @@ void controlEvent(ControlEvent event) throws InstantiationException, IllegalAcce
       //selected.reset(); // So transform matrix is set to identity
       selected.removeAnimation(animNum);
       mustUpdateUI = true;
-      setFileDirty();
+      setPostureCollectionDirty();
     } else if (name.startsWith("swapup")) {
       String[] m = match(name, "swapup(\\d+)");
       int animNum = parseInt(m[1]);
@@ -116,7 +116,7 @@ void controlEvent(ControlEvent event) throws InstantiationException, IllegalAcce
       //updateUI();
       keepsOpenAnimNum = animNum-1;
       mustUpdateUI = true;
-      setFileDirty();
+      setPostureCollectionDirty();
     } else if (name.startsWith("swapdown")) {
       String[] m = match(name, "swapdown(\\d+)");
       int animNum = parseInt(m[1]);
@@ -126,7 +126,7 @@ void controlEvent(ControlEvent event) throws InstantiationException, IllegalAcce
       //updateUI();
       keepsOpenAnimNum = animNum+1;
       mustUpdateUI = true;
-      setFileDirty();
+      setPostureCollectionDirty();
     } else if (name.startsWith("showtimeline")) {
       String[] m = match(name, "([a-z]+)(\\d+)");
       if (m != null) {
@@ -154,7 +154,7 @@ void controlEvent(ControlEvent event) throws InstantiationException, IllegalAcce
         }
       }
       //timeline.show();
-      setFileDirty();
+      setPostureCollectionDirty();
     } else {
       String[] m = match(name, "([a-z]+)(\\d+)");
       if (m != null) {
@@ -171,7 +171,7 @@ void controlEvent(ControlEvent event) throws InstantiationException, IllegalAcce
           fn.setParam(paramName, value);
         }
         playing = true;
-        setFileDirty();
+        setPostureCollectionDirty();
         //if (timeline != null && timeline.getFunction() == fn)
         //  timeline.show();
       }
@@ -181,7 +181,7 @@ void controlEvent(ControlEvent event) throws InstantiationException, IllegalAcce
 
 
 
-void setFileDirty() {
+void setPostureCollectionDirty() {
   postureCollectionDirty = true;
   surface.setTitle(appName + " - *" + baseFilename + ".json");
 }
@@ -218,8 +218,8 @@ void inputFileSelected(File selection) throws IOException {
       currentScreen = mainScreen;
       transport.postureName.setText("posture0");
       mainScreen.resetView();
-      mainScreen.showUI();
-      setFileDirty();
+      showUI();
+      setPostureCollectionDirty();
     } else if (filename.endsWith("json")) {
       if (avatar == null) {
         loadJsonFile(selection);
@@ -288,5 +288,5 @@ void loadJsonFile(File file) {
   baseFilename = filename.substring(0, filename.length()-5);
   surface.setTitle(appName + " - " + filename);
   mainScreen.resetView();
-  mainScreen.showUI();
+  showUI();
 }

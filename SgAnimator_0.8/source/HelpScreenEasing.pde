@@ -63,7 +63,7 @@ public class HelpScreenEasing extends Screen {
   @Override
   void keyPressed(KeyEvent event) {
     if (avatar != null) {
-      mainScreen.showUI();
+      showUI();
       currentScreen = mainScreen;
     } else {
       currentScreen = welcomeScreen;
@@ -73,7 +73,7 @@ public class HelpScreenEasing extends Screen {
   @Override
   void mouseClicked(MouseEvent event) {
     if (avatar != null) {
-      mainScreen.showUI();
+      showUI();
       currentScreen = mainScreen;
     } else {
       currentScreen = welcomeScreen;

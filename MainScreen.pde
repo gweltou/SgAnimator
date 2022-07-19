@@ -13,17 +13,7 @@ public class MainScreen extends Screen {
   private boolean clearBackground = true;
   private float timeScale = 1f;
   
-  // Camera
-  private boolean showCamera = false;
-  private int camPPU = 1; // Pixels per unit
-  private Vector2 camNW, camSE;
-  private Vector2 camScreenNW, camScreenSE;
-  private boolean camMoving = false;
-  private Affine2 camTransform = new Affine2();
-  private boolean camResizeNW = false;
-  private boolean camResizeSE = false;
-  
-  private PShader pixelate = loadShader("pixelate.glsl");
+  private Camera camera = new Camera();
   
   private int mouseClickBtn;
   private Vector2 mouseClickPos = new Vector2();
@@ -35,6 +25,103 @@ public class MainScreen extends Screen {
   
   private Vector2 bbNW, bbSE; // Selection's bounding box
   
+  
+  private class Camera {
+    private boolean isVisible = false;
+    private float PPU = 0.5; // Pixels per unit
+    private Vector2 NW, SE;
+    private Vector2 screenNW, screenSE;
+    private boolean isMoving = false;
+    private Affine2 transform = new Affine2();
+    private boolean resizeNW = false;
+    private boolean resizeSE = false;
+    private int bufferWidth, bufferHeight;
+    private Slider pixelate;
+    public boolean isRecording = false;
+    
+    public Camera() {
+      pixelate = cp5.addSlider("campixelate")
+        .setCaptionLabel("")
+        .setPosition(100,50)
+        .setSize(0, 12)
+        .setRange(0.1, 2)
+        .setValue(PPU)
+        .plugTo(this, "setPPU")
+        .hide()
+        ;
+    }
+    
+    public void resize() {
+      bufferWidth = ceil((SE.x - NW.x) * PPU);
+      bufferHeight = ceil((SE.y - NW.y) * PPU);
+      bufferedRenderer.setBufferSize(bufferWidth, bufferHeight);
+    }
+    
+    public void hide() {
+      isVisible = false;
+      pixelate.hide();
+    }
+    
+    public void show() {
+      isVisible = true;
+      pixelate.show();
+    }
+    
+    public void draw(Affine2 transform) {
+      screenNW.set(NW);
+      transform.applyTo(screenNW);
+      camera.screenSE.set(SE);
+      transform.applyTo(screenSE);
+        
+      if (!(resizeNW || resizeSE)) {
+        Vector2 translation = new Vector2(-NW.x, -NW.y);
+        this.transform.idt();
+        this.transform.scale(PPU, PPU);
+        this.transform.translate(translation);
+          
+        bufferedRenderer.pushMatrix(this.transform);
+        bufferedRenderer.beginDraw();
+        bufferedRenderer.clear();
+        avatar.draw(bufferedRenderer);
+        bufferedRenderer.endDraw();
+        bufferedRenderer.popMatrix();
+        
+        fill(255);
+        noStroke();
+        rect(screenNW.x, screenNW.y, screenSE.x-screenNW.x, screenSE.y-screenNW.y);
+        // Sets the texture filtering to NEAREST sampling
+        ((PGraphicsOpenGL)g).textureSampling(2);
+        image(bufferedRenderer.getBuffer(), screenNW.x, screenNW.y, bufferWidth*transform.m00/PPU, bufferHeight*transform.m11/PPU);
+      }
+      
+      noFill();
+      stroke(0, 64, 255);
+      strokeWeight(2);
+      rect(screenNW.x, screenNW.y, screenSE.x-screenNW.x, screenSE.y-screenNW.y);
+      // Resize handles
+      square(screenNW.x-4, screenNW.y-4, 8);
+      square(screenSE.x-4, screenSE.y-4, 8);
+      
+      int w = ceil((SE.x - NW.x) * PPU);
+      int h = ceil((SE.y - NW.y) * PPU);
+      String strBufSize = str(w) + " × " + str(h);
+      fill(0);
+      textSize(14);
+      text(strBufSize, screenSE.x + 12, screenSE.y + 16);
+      
+      pixelate.setPosition(screenNW.x, screenSE.y + 4)
+        .setSize(floor(screenSE.x - screenNW.x), 12);
+    }
+    
+    public void setPPU() {
+      float newVal = pixelate.getValue();
+      // event keeps getting fired
+      if (newVal != PPU) {
+        PPU = newVal;
+        resize();
+      }
+    }
+  }
 
   public MainScreen() {
     transform = new Affine2().setToTranslation(width/2, height/2);
@@ -47,7 +134,7 @@ public class MainScreen extends Screen {
     contextMenu = new ContextMenu();
         
     //partsMenu = new ContextMenu();
-    
+    /*
     partsList = (PartsList) new PartsList(cp5, "partslist")
       .setLabel("parts list")
       .setPosition(margin, margin)
@@ -55,6 +142,7 @@ public class MainScreen extends Screen {
       .setItemHeight(menuBarHeight)
       .hide();
     ;
+    */
   }
 
 
@@ -69,14 +157,17 @@ public class MainScreen extends Screen {
     framerate = recordingFramerate;
     remainingFrames = floor(transport.animDuration.getValue() * framerate);
     avatar.resetAnimation();
-    bufferedRenderer.setBackgroundColor(1, 1, 1, 1);
-    bufferedRenderer.startRecording(transport.getCounter());
+    //bufferedRenderer.setBackgroundColor(1, 1, 1, 1);
+    camera.show();
+    camera.isRecording = true;
+    //bufferedRenderer.startRecording(transport.getCounter());
   }
   
   
   public void stopRecording() {
-    bufferedRenderer.stopRecording();
+    //bufferedRenderer.stopRecording();
     framerate = defaultFramerate;
+    camera.isRecording = false;
   }
   
   
@@ -89,21 +180,9 @@ public class MainScreen extends Screen {
     if (avatar != null) {
       if (playing)
         avatar.update(1f/framerate);
-      avatar.draw(renderer);
       
-      if (bufferedRenderer.isRecording() && playing) {
-        bufferedRenderer.flush();
-        if (remainingFrames > 0) {
-          remainingFrames--;
-          transport.increaseCounter();
-          if (remainingFrames == 0) {
-            stopRecording();
-            transport.buttonRec.setOff();
-          }
-        }
-      } else {
-        avatar.drawSelectedOnly(renderer);
-      }
+      avatar.draw(renderer);
+      avatar.drawSelectedOnly(renderer);
     }
 
     if (showUI) {
@@ -136,49 +215,22 @@ public class MainScreen extends Screen {
         popMatrix();
       }
       
-      if (showCamera) {
-        /*Affine2 unproject = new Affine2(transform).inv();
-        Vector2 screenTopLeft = new Vector2(0, 0);
-        unproject.applyTo(screenTopLeft);
-        screenTopLeft.sub(camNW);*/
+      if (camera.isVisible) {
+        camera.draw(transform); //<>//
         
-        Vector2 translation = new Vector2(-camNW.x, -camNW.y);
-        camTransform.setToTranslation(translation);
-        
-        bufferedRenderer.pushMatrix(camTransform);
-        bufferedRenderer.beginDraw();
-        bufferedRenderer.clear();
-        avatar.draw(bufferedRenderer); //<>//
-        bufferedRenderer.endDraw();
-        bufferedRenderer.popMatrix();
-        
-        //int w = round(se.x-nw.x);
-        //int h = round(se.y-nw.y);
-        //pixelate.set("resolution", w, h);
-        //pixelate.set("aspect_ratio", h/float(w));
-        //pixelate.set("amount", 32f);
-        //PImage imgBuffer = get(round(nw.x), round(nw.y), w, h);
-        //pixelate.set("tex", imgBuffer);
-        //shader(pixelate);
-        //noStroke();
-        //rect(nw.x, nw.y, se.x-nw.x, se.y-nw.y);
-        //resetShader();
-        
-        camScreenNW.set(camNW);
-        transform.applyTo(camScreenNW);
-        camScreenSE.set(camSE);
-        transform.applyTo(camScreenSE);
-        //image(bufferedRenderer.getBuffer(), camScreenNW.x, camScreenNW.y);
-        int camHeight = ceil((camSE.y - camNW.y) * camPPU);
-        image(bufferedRenderer.getBuffer(), 0, height-camHeight);
-        
-        noFill();
-        stroke(0, 64, 255);
-        strokeWeight(2);
-        rect(camScreenNW.x, camScreenNW.y, camScreenSE.x-camScreenNW.x, camScreenSE.y-camScreenNW.y);
-        // Resize handles
-        square(camScreenNW.x-4, camScreenNW.y-4, 8);
-        square(camScreenSE.x-4, camScreenSE.y-4, 8);
+        if (camera.isRecording && playing) {
+          println("rec");
+          if (remainingFrames > 0) {
+            PImage buffer = bufferedRenderer.getBuffer();
+            buffer.save(String.format("frames/frame-%03d.png", transport.getCounter()));
+            remainingFrames--;
+            transport.increaseCounter();
+            if (remainingFrames == 0) {
+              stopRecording();
+              transport.buttonRec.setOff();
+            }
+          }
+        }
       } else {
         renderer.drawMarker(0, 0);
         renderer.drawAxes();
@@ -219,105 +271,125 @@ public class MainScreen extends Screen {
     return pos;
   }
   
+  
+  public void showUI() {
+    showUI = true;
+    if (accordion != null)
+      accordion.show();
+    //partsList.open().show();
+    transport.show();
+    renderer.setSelected(selected);
+    if (timeline != null)
+      timeline.show();
+  }
+  
+  public void hideUI() {
+    showUI = false;
+    if (accordion != null)
+      accordion.hide();
+    //partsList.hide();
+    camera.hide();
+    contextMenu.hide();
+    transport.hide();
+    renderer.setSelected(null);
+    if (timeline != null)
+      timeline.hide();
+  }
 
   void keyPressed(KeyEvent event) {
-    if (avatar != null && key == CODED) {
-      /*if (keyCode == UP) {  // Select next part
-        selectedIndex = (selectedIndex-1);
-        if (selectedIndex < 0)
-          selectedIndex += avatar.getPartsList().length;
-        partsList.setValue(selectedIndex);
-      } else if (keyCode == DOWN) {  // Select previous part
-        selectedIndex = (selectedIndex+1) % avatar.getPartsList().length;
-        partsList.setValue(selectedIndex);
-      } else*/ if (keyCode == LEFT) {
-        transport.prevPosture();
-      } else if (keyCode == RIGHT) {
-        transport.nextPosture();
-      }
-    } else if (!transport.postureName.isActive() && !isNumberboxActive) {
-      switch (key) {
-      case 'p':  // Play/Pause animation
-        if (avatar != null)
-          playing = !playing;
-        break;
-      case 'r':  // Reset animation
-        if (avatar != null) {
-          avatar.resetAnimation();
-          background(255);
+    if (!transport.postureName.isActive() && !isNumberboxActive) {
+      if (event.isControlDown()) {
+        switch (event.getKeyCode()) {
+          case 79:  // CTRL+o, load a new file
+            selectInput("Select a file", "inputFileSelected");
+            loadScreen = new LoadScreen();
+            break;
+          case 83: // CTRL+s, save
+            selectOutput("Select a file", "outputFileSelected");
+            break;
         }
-        break;
-      case 'a':  // Select root node
-        if (avatar != null)
-          select(avatar.getShape());
-        break;
-      case 'd':  // Show/Hide UI
-        if (avatar != null) {
-          if (showUI) {
-            hideUI();
+      }
+      else if (avatar != null && key == CODED) {
+        if (keyCode == LEFT) {
+          transport.prevPosture();
+        } else if (keyCode == RIGHT) {
+          transport.nextPosture();
+        }
+      }
+      else {
+        switch (key) {
+        case 'p':  // Play/Pause animation
+          if (avatar != null)
+            playing = !playing;
+          break;
+        case 'r':  // Reset animation
+          if (avatar != null) {
+            avatar.resetAnimation();
             background(255);
+          }
+          break;
+        case 'a':  // Select root node
+          if (avatar != null)
+            select(avatar.getShape());
+          break;
+        case 'd':  // Show/Hide UI
+          if (avatar != null) {
+            if (showUI) {
+              hideUI();
+              background(255);
+              avatar.timeScale(timeScale);
+              avatar.resetAnimation();
+            } else {
+              showUI();
+              avatar.timeScale(1.0f);
+            }
+          }
+          break;
+        case 'x':  // Physics scren
+          hideUI();
+          currentScreen = new PhysicsScreen(transform);
+          break;
+        case 'h':  // Help screens
+          hideUI();
+          currentScreen = helpScreen1;
+          break;
+        case 'w':  // Wireframe
+          renderer.toggleWireframe();
+          break;
+        case 'k':  // Camera
+          if (!camera.isVisible) {
+            if (camera.NW == null) {
+              BoundingBox bb = avatar.getShape().getBoundingBox();
+              camera.NW = new Vector2(bb.left, bb.top);
+              camera.SE = new Vector2(bb.right, bb.bottom);
+              camera.screenNW = new Vector2();
+              camera.screenSE = new Vector2();
+              camera.resize();
+            }
+            camera.show();
+          } else {
+            camera.hide();
+          }
+          break;
+        case 's':  // Save file
+          if (avatar != null && postureCollectionDirty) {
+            savePosture();
+            avatar.saveFile(baseFilename + ".json");
+            windowTitle(appName + " - " + baseFilename + ".json");
+          }
+          break;
+        case 'b':  // Background clear, trail effect
+          if (!showUI) {
+            if (clearBackground ) {
+              timeScale = 0.16f;
+            } else {
+              timeScale = 1.0f;
+            }
             avatar.timeScale(timeScale);
             avatar.resetAnimation();
-          } else {
-            showUI();
-            avatar.timeScale(1.0f);
+            background(255);
+            clearBackground = !clearBackground;
           }
-        }
-        break;
-      case 'x':  // Physics scren
-        hideUI();
-        currentScreen = new PhysicsScreen(transform);
-        break;
-      case 'h':  // Help screens
-        hideUI();
-        currentScreen = helpScreen1;
-        break;
-      case 'w':  // Wireframe
-        renderer.toggleWireframe();
-        break;
-      case 'k':  // Camera
-        if (showCamera == false) {
-          if (camNW == null) {
-            BoundingBox bb = avatar.getShape().getBoundingBox();
-            camNW = new Vector2(bb.left, bb.top);
-            camSE = new Vector2(bb.right, bb.bottom);
-            camScreenNW = new Vector2();
-            camScreenSE = new Vector2();
-            int bufferWidth = ceil((camSE.x - camNW.x) * camPPU);
-            int bufferHeight = ceil((camSE.y - camNW.y) * camPPU);
-            println(bufferWidth, bufferHeight);
-            bufferedRenderer.setBufferSize(bufferWidth, bufferHeight);
-          }
-          showCamera = true;
-        } else {
-          showCamera = false;
-        }
-        break;
-      case 15:  // CTRL+o, load a new file
-        selectInput("Select a file", "inputFileSelected");
-        //loadScreen = new LoadScreen();
-        break;
-      case 19: // CTRL+s, save
-        selectOutput("Select a file", "outputFileSelected");
-        break;
-      case 's':  // Save file
-        if (avatar != null && postureCollectionDirty) {
-          savePosture();
-          avatar.saveFile(baseFilename + ".json");
-          windowTitle(appName + " - " + baseFilename + ".json");
-        }
-        break;
-      case 'b':  // Background clear, trail effect
-        if (!showUI) {
-          if (clearBackground ) {
-            timeScale = 0.16f;
-          } else {
-            timeScale = 1.0f;
-          }
-          avatar.timeScale(timeScale);
-          avatar.resetAnimation();
-          background(255);
-          clearBackground = !clearBackground;
         }
       }
     }
@@ -328,7 +400,7 @@ public class MainScreen extends Screen {
     if (key == CODED && keyCode == SHIFT && selected != null && !isNumberboxActive) {
       //playing = true;
       mustUpdateUI = true;
-      setPostureCollectionDirty();
+      setFileDirty();
     }
   }
 
@@ -336,11 +408,11 @@ public class MainScreen extends Screen {
 
   void mouseWheel(MouseEvent event) {
     contextMenu.hide();
-    if (!partsList.isInside()) {
+    //if (!partsList.isInside()) {
       float z = pow(1.12, -event.getCount());
       Vector2 point = getWorldPos(mouseX, mouseY);
       transform.translate(point.x, point.y).scale(z, z).translate(-point.x, -point.y);  // scale translation by the zoom factor
-    }
+    //}
   }
   
   
@@ -352,13 +424,13 @@ public class MainScreen extends Screen {
       transport.isMoving = true;
     else if (timeline != null && timeline.contains(mouseX, mouseY))  // Move timeline box
       timeline.isMoving = true;
-    else if (showCamera) {
-      if (Vector2.dst(mouseWorldPos.x, mouseWorldPos.y, camNW.x, camNW.y) < 10/transform.m00)
-        camResizeNW = true;
-      else if (Vector2.dst(mouseWorldPos.x, mouseWorldPos.y, camSE.x, camSE.y) < 10/transform.m00)
-        camResizeSE = true;
-      else if (isInsideBox(mouseX, mouseY, camScreenNW, camScreenSE))
-        camMoving = true;
+    else if (camera.isVisible) {
+      if (Vector2.dst(mouseWorldPos.x, mouseWorldPos.y, camera.NW.x, camera.NW.y) < 10/transform.m00)
+        camera.resizeNW = true;
+      else if (Vector2.dst(mouseWorldPos.x, mouseWorldPos.y, camera.SE.x, camera.SE.y) < 10/transform.m00)
+        camera.resizeSE = true;
+      else if (isInsideBox(mouseX, mouseY, camera.screenNW, camera.screenSE))
+        camera.isMoving = true;
     }
     else if (selected != null) {  // Scale or rotate part
       BoundingBox bb = selected.getBoundingBox();
@@ -380,19 +452,16 @@ public class MainScreen extends Screen {
     mouseClickBtn = 0;
     
     partMoving = false;
-    camMoving = false;
+    camera.isMoving = false;
     partScalingNW = false;
     partScalingSE = false;
     partRotating = false;
     partRotation = 0f;
     
-    if (camResizeNW || camResizeSE) {
-      int bufferWidth = ceil((camSE.x - camNW.x) * camPPU);
-      int bufferHeight = ceil((camSE.y - camNW.y) * camPPU);
-      println(bufferWidth, bufferHeight);
-      bufferedRenderer.setBufferSize(bufferWidth, bufferHeight);
-      camResizeNW = false;
-      camResizeSE = false;
+    if (camera.resizeNW || camera.resizeSE) {
+      camera.resize();
+      camera.resizeNW = false;
+      camera.resizeSE = false;
     }
     
     if (avatar != null)
@@ -455,7 +524,7 @@ public class MainScreen extends Screen {
         Affine2 tr = new Affine2();
         tr.setToTranslation(dx/transform.m00, dy/transform.m11);    // scale translation by the zoom factor
         selected.softTransform(tr);
-        setPostureCollectionDirty();
+        setFileDirty();
         
         // Transform physics shell if necessary
         /*
@@ -474,7 +543,7 @@ public class MainScreen extends Screen {
         Affine2 tr = new Affine2();
         tr.translate(bb.right, bb.bottom).scale(sx, sy).translate(-bb.right, -bb.bottom);
         selected.softTransform(tr);
-        setPostureCollectionDirty();
+        setFileDirty();
       }
       else if (partScalingSE) {
         avatar.paused = true;
@@ -486,7 +555,7 @@ public class MainScreen extends Screen {
         Affine2 tr = new Affine2();
         tr.translate(bb.left, bb.top).scale(sx, sy).translate(-bb.left, -bb.top);
         selected.softTransform(tr);
-        setPostureCollectionDirty();
+        setFileDirty();
       }
       else if (partRotating) {
         avatar.paused = true;
@@ -500,17 +569,23 @@ public class MainScreen extends Screen {
         Affine2 tr = new Affine2();
         tr.translate(center).rotateRad(angle).translate(-center.x, -center.y);
         selected.softTransform(tr);
-        setPostureCollectionDirty();
+        setFileDirty();
       }
-      else if (camMoving) {
-        camNW.add(dx/transform.m00, dy/transform.m11);
-        camSE.add(dx/transform.m00, dy/transform.m11);
+      else if (camera.isMoving) {
+        camera.NW.add(dx/transform.m00, dy/transform.m11);
+        camera.SE.add(dx/transform.m00, dy/transform.m11);
       }
-      else if (camResizeNW) {
-        camNW.add(dx/transform.m00, dy/transform.m11);
+      else if (camera.resizeNW) {
+        if (keyPressed && keyCode == 16)
+          println("keypressed", keyCode);
+        camera.NW.add(dx/transform.m00, dy/transform.m11);
+        camera.NW.x = min(camera.NW.x, camera.SE.x - 1);
+        camera.NW.y = min(camera.NW.y, camera.SE.y - 1);
       }
-      else if (camResizeSE) {
-        camSE.add(dx/transform.m00, dy/transform.m11);
+      else if (camera.resizeSE) {
+        camera.SE.add(dx/transform.m00, dy/transform.m11);
+        camera.SE.x = max(camera.SE.x, camera.NW.x + 1);
+        camera.SE.y = max(camera.SE.y, camera.NW.y + 1);
       }
       else if (!controllerClicked) {
         if (selected != null && isInsideBox(mouseClickPos.x, mouseClickPos.y, bbNW, bbSE) && drag_distance > 300) {

@@ -137,8 +137,8 @@ public class PhysicsScreen extends Screen {
 
     switch (key) {
     case 'q':
+      showUI();
       currentScreen = mainScreen;
-      mainScreen.showUI();
       break;
     case 'p':
       // New polygon shape

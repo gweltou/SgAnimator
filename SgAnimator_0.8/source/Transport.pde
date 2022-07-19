@@ -75,7 +75,7 @@ public class Transport extends MoveableGroup {
     animDuration.addCallback(new CallbackListener() {
       public void controlEvent(CallbackEvent theEvent) {
         if (theEvent.getAction() == ControlP5.ACTION_BROADCAST && animDuration.getValue() != prevAnimDuration) {
-          setFileDirty();
+          setPostureCollectionDirty();
         }
       }
     }
