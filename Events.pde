@@ -171,7 +171,7 @@ void controlEvent(ControlEvent event) throws InstantiationException, IllegalAcce
           fn.setParam(paramName, value);
         }
         playing = true;
-        setFileDirty();
+        setFileDirty(); //<>//
         //if (timeline != null && timeline.getFunction() == fn)
         //  timeline.show();
       }
@@ -219,6 +219,9 @@ void inputFileSelected(File selection) throws IOException {
       transport.postureName.setText("posture0");
       mainScreen.resetView();
       mainScreen.showUI();
+      BoundingBox bb = avatar.getShape().getBoundingBox();
+      float margin = min((bb.right-bb.left), (bb.bottom-bb.top)) / 20f;
+      mainScreen.camera.set(bb.left - margin, bb.top - margin, bb.right + margin, bb.bottom + margin);
       setFileDirty();
     } else if (filename.endsWith("json")) {
       if (avatar == null) {
@@ -289,4 +292,7 @@ void loadJsonFile(File file) {
   surface.setTitle(appName + " - " + filename);
   mainScreen.resetView();
   mainScreen.showUI();
+  BoundingBox bb = avatar.getShape().getBoundingBox();
+  float margin = min((bb.right-bb.left), (bb.bottom-bb.top)) / 20f;
+  mainScreen.camera.set(bb.left - margin, bb.top - margin, bb.right + margin, bb.bottom + margin);
 }

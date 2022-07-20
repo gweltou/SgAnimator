@@ -23,9 +23,9 @@ public class ContextMenu {
     position = new Vector2();
     visible = new ArrayList<>();
 
-    addItem("Place pivot", "pivotbtn", "onPivot");
-    addItem("Reset transform", "resettr", "onReset");
-    addItem("Import", "importbtn", "onImport");
+    addItem("Place pivot", "pivotbtn", "onPivot", "");
+    addItem("Reset transform", "resettr", "onReset", "");
+    addItem("Import", "importbtn", "onImport", "");
   }
 
   public void clear() {
@@ -33,7 +33,7 @@ public class ContextMenu {
     visible.clear();
   }
 
-  private void addItem(String label, String cp5name, String fn) {
+  private void addItem(String label, String cp5name, String fn, String tip) {
     Button newItem = cp5.addButton(cp5name)
       .setSize(menuWidth, itemHeight)
       //.setSwitch(true)
@@ -42,6 +42,14 @@ public class ContextMenu {
       .plugTo(this, fn)
       .hide()
       ;
+    if (!tip.isEmpty()) {
+      newItem.onEnter(new CallbackListener() {
+        public void controlEvent(CallbackEvent theEvent) {
+          tooltip.say(tip);
+        }
+      }
+      );
+    }
 
     items.add(newItem);
     visible.add(false);
@@ -52,11 +60,11 @@ public class ContextMenu {
     avatar.resetAnimation();
     playing = false;
   }
-  
+
   public void onReset(boolean value) {
     selected.resetTransform();
   }
-  
+
   public void onImport(boolean value) {
     //hide();
     selectInput("Select a file", "inputFileSelected");
@@ -164,6 +172,7 @@ public class FunctionAccordion extends Accordion {
 
 public class NumberboxInput extends Numberbox {
   private String text = "";
+  private String unit = "";
   private boolean active;
 
   NumberboxInput(ControlP5 theControlP5, String theName) {
@@ -186,6 +195,13 @@ public class NumberboxInput extends Numberbox {
       }
     }
     );
+
+    onChange(new CallbackListener() {
+      public void controlEvent(CallbackEvent theEvent) {
+        getValueLabel().setText("" + adjustValue(getValue()) + unit);
+      }
+    }
+    );
   }
 
   public void keyEvent(KeyEvent k) {
@@ -204,8 +220,13 @@ public class NumberboxInput extends Numberbox {
           text += k.getKey();
         }
       }
-      getValueLabel().setText(this.text);
+      getValueLabel().setText(this.text + unit);
     }
+  }
+
+  public NumberboxInput setUnit(String unit) {
+    this.unit = unit;
+    return this;
   }
 
   public void setActive(boolean b) {
@@ -221,14 +242,13 @@ public class NumberboxInput extends Numberbox {
     if (!text.isEmpty()) {
       final String regex = "-?\\d+(.\\d{0,3})?";
       if (java.util.regex.Pattern.matches(regex, text)) {
-        setValue( float( text ) );
+        setValue(float(text));
       } else {
         setValue(0f);
       }
       text = "";
-    } else {
-      getValueLabel().setText("" + getValue());
     }
+    getValueLabel().setText("" + adjustValue(getValue()) + unit);
   }
 }
 
@@ -307,7 +327,13 @@ void updateUI() {
       .setSize(menuBarHeight, menuBarHeight)
       .activateBy(ControlP5.PRESS)
       .setGroup(g)
-      ;
+      .onEnter(new CallbackListener() {
+      public void controlEvent(CallbackEvent theEvent) {
+        tooltip.say("Delete this animation");
+      }
+    }
+    )
+    ;
     pos.set(spacing, 2*spacing + cp5.getController("axe"+animNum).getHeight());
     pos.add(0.f, spacing);
 
@@ -338,7 +364,13 @@ void updateUI() {
       .setRadius(20)
       .setDragDirection(Knob.VERTICAL)
       .setGroup(g)
-      ;
+      .onEnter(new CallbackListener() {
+      public void controlEvent(CallbackEvent theEvent) {
+        tooltip.say("Amplify the output value of the function");
+      }
+    }
+    )
+    ;
     cp5.addTextlabel("amp"+animNum+"label")
       .setPosition(pos.x + 35 + spacing, pos.y + 16)
       .setText("amp".toUpperCase())
@@ -353,7 +385,13 @@ void updateUI() {
       .setMode(ControlP5.SWITCH)
       .setValue(!anim.getInv())
       .setGroup(g)
-      ;
+      .onEnter(new CallbackListener() {
+      public void controlEvent(CallbackEvent theEvent) {
+        tooltip.say("Invert the output value of the function");
+      }
+    }
+    )
+    ;
     cp5.addTextlabel("inv"+animNum+"label")
       .setPosition(pos.x + 38 + spacing, pos.y + 15)
       .setText("invert".toUpperCase())
@@ -541,7 +579,13 @@ void drawBottomButtons(Group g, int animNum, PVector pos) {
       .setSize(20, 20)
       .activateBy(ControlP5.PRESS)
       .setGroup(g)
-      ;
+      .onEnter(new CallbackListener() {
+      public void controlEvent(CallbackEvent theEvent) {
+        tooltip.say("Move the function up (can change the resulting animation, especially with rotations)");
+      }
+    }
+    )
+    ;
     if (animNum < 1)
       cp5.getController("swapup"+animNum).hide();
 
@@ -551,6 +595,12 @@ void drawBottomButtons(Group g, int animNum, PVector pos) {
       .setSize(20, 20)
       .activateBy(ControlP5.PRESS)
       .setGroup(g)
+      .onEnter(new CallbackListener() {
+      public void controlEvent(CallbackEvent theEvent) {
+        tooltip.say("Move the function down (can change the resulting animation, especially with rotations)");
+      }
+    }
+    )
       ;
     if (animNum == selected.getAnimationList().length-1)
       cp5.getController("swapdown"+animNum).hide();
