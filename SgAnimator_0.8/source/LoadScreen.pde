@@ -20,7 +20,7 @@ public class LoadScreen extends Screen {
     this.selection = selection;
     filename = selection.getAbsolutePath();
 
-    mainScreen.hideUI();
+    hideUI();
 
     paramLocked = true;
     loadGroup = new Group(cp5, "loadfilegroup")
@@ -109,7 +109,7 @@ public class LoadScreen extends Screen {
       transport.animDuration.setValue(postures.getPosture(0).duration);
       transport.prevAnimDuration = postures.getPosture(0).duration;
       avatar.loadPosture(0);
-      setFileDirty();
+      setPostureCollectionDirty();
     }
 
     // Update pivots and transforms
@@ -121,7 +121,7 @@ public class LoadScreen extends Screen {
       }
     }
     
-    mainScreen.showUI();
+    showUI();
     
     mustDestroy = true;
   }

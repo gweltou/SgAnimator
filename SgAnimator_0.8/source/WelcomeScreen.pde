@@ -40,8 +40,8 @@ public class WelcomeScreen extends Screen {
   @Override
   public void draw() {
     if (avatar != null) {
+      showUI();
       currentScreen = mainScreen;
-      mainScreen.showUI();
       return;
     }
 
@@ -56,22 +56,18 @@ public class WelcomeScreen extends Screen {
     popMatrix();
     
     fill(127);
-    textFont(titleFont);
-    textSize(48);
-    String s = "Press     +     to load a file";
-    int margin = floor((width - textWidth(s)) * 0.5f);
-    text(s, margin, height/2);
-    drawKey(margin + 116, height/2 - 36, "Ctrl", 40);
-    drawKey(margin + 196, height/2 - 36, "O", 40);
+    textSize(32);
+    text("Press           +          to load a file", width/3, height/2);
+    drawKey(width/3 + 85, height/2 - 32, "Ctrl", 40);
+    drawKey(width/3 + 168, height/2 - 32, "O", 40);
     
     fill(63);
-    textSize(24);
+    textSize(20);
     text("to show help", (width/2) - 50, 60 + height/2);
     drawKey((width/2) - 90, 36 + height/2, "H", 32);
     
-    textFont(defaultFont);
     text("Ver. " + version, width-80, height-40);
-    text("Lib. " + PRenderer.version(), width-80, height-20);
+    text("Lib. " + MyRenderer.version(), width-80, height-20);
   }
   
   @Override
@@ -82,13 +78,13 @@ public class WelcomeScreen extends Screen {
 
   @Override
   void keyPressed(KeyEvent event) {
-    if (event.isControlDown() && event.getKeyCode() == 79) {
-      // CTRL+o, load a new file
-      selectInput("Select a file", "inputFileSelected");
-    }
-    else if (key == 'h') {
-      // Help screens
+    switch (key) {
+    case 'h':  // Help screens
       currentScreen = helpScreen1;
+      break;
+    case 15:  // CTRL+o, load a new file
+      selectInput("Select a file", "inputFileSelected");
+      break;
     }
   }
 }

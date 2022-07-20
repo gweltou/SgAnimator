@@ -1,4 +1,3 @@
-/*
 PartsList partsList;
 
 
@@ -55,4 +54,3 @@ class PartsList extends ScrollableList {
     highlightPart();
   }
 }
-*/

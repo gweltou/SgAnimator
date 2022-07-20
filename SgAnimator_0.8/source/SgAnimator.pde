@@ -1,8 +1,9 @@
 // programme python "key-mon" pour afficher les touches du clavier
 
 // TODO:
-// Revoir la fenêtre de sur-chargement de fichier (pour la version 0.8)
+// Revoir la fenêtre de sur-chargement de fichier (pour la version 1.8)
 // Editor : Part selection menu when click on many overlaping parts
+// Lib : Points de pivots différents par postures
 // Lib : Part affine transform per posture
 // Display bones (connected pivots)
 // Option to reset control values (by double clicking on them ?)
@@ -14,15 +15,13 @@
 // Librairie d'Avatars à l'ouverture d'un fichier
 // Add a chart for every Animation to show function progression over time
 
-/* IDÉES ABANDONNÉES :
- * Lib : Points de pivots différents par postures
-*/
-
 /*
   BUGS:
    * controllerClicked is not reseted after a mouse drag on a controller (eg. timeline sliders)
    * Check physics shapes after soft-transforming
+   * fullscreen 
    * Resize window doesn't resize UI immediately (click on displaced controls are missed)
+   * Part list disapearing (Remove part list header Bar)
  */
 
 
@@ -53,10 +52,8 @@ Screen helpScreen1;
 Screen helpScreenEasing;
 Screen currentScreen;
 Screen previousScreen;
-Tooltip tooltip;
 
-PRenderer renderer;
-PGraphicsRenderer bufferedRenderer;
+MyRenderer renderer;
 Avatar avatar;
 String baseFilename;  // Used for window title and to save file (independent of its source format)
 
@@ -77,17 +74,12 @@ boolean mustUpdateUI = false;
 File fileToLoad = null; // Change current screen to loadScreen
 
 PFont defaultFont;
-PFont titleFont;
-PFont tooltipFont;
-PFont iconFont;
-PImage checkboard;
 
 
 void settings() {
   //fullScreen();
-  size(1024, 700, P2D);
+  size(1024, 700);
   //size(800, 600, P2D);
-  noSmooth();
 }
 
 
@@ -95,29 +87,16 @@ void setup() {
   windowResizable(true);
   windowTitle(appName);
   
-  // Sets the texture filtering to NEAREST sampling
-  // Used by camera pixelisation
-  ((PGraphicsOpenGL) g).textureSampling(2);
-  
-  // Used for checkboard pattern
-  textureWrap(REPEAT);
-  
   cp5 = new ControlP5(this);
   defaultFont = createFont("DejaVu Sans Mono", 12);
-  titleFont = createFont("PrintBold-J5o.ttf", 48);
-  tooltipFont = createFont("PrintClearly-GGP.ttf", 32);
-  iconFont = createFont("fa-solid-900.ttf", 20);
-  checkboard = loadImage("checkboard.png");
-  
-  renderer = new PRenderer(this);
-  bufferedRenderer = new PGraphicsRenderer(this);
 
-  tooltip = new Tooltip();
   mainScreen = new MainScreen();
   welcomeScreen = new WelcomeScreen();
   helpScreen1 = new HelpScreen1();
   helpScreenEasing = new HelpScreenEasing();
   currentScreen = welcomeScreen;
+
+  renderer = new MyRenderer(this);
 
   int numFn = Animation.timeFunctions.length;
   functionsName = new String[numFn];
@@ -125,9 +104,6 @@ void setup() {
     int idx = Animation.timeFunctions[i].getName().lastIndexOf('.');
     functionsName[i] = Animation.timeFunctions[i].getName().substring(idx+3);
   }
-      
-  //File toLoad = new File("/home/gweltaz/Bureau/svg/tete.json");
-  //loadJsonFile(toLoad);
 }
 
 
@@ -193,8 +169,6 @@ void drawKey(int x, int y, String k, float height) {
 }
 
 
-
-
 void draw() {
   if (fileToLoad != null) {
     loadScreen.createModalBox(fileToLoad);
@@ -203,7 +177,6 @@ void draw() {
     fileToLoad = null;
   }
   currentScreen.draw();
-  tooltip.update(17); // 17ms steps
 }
 
 
@@ -246,51 +219,5 @@ public abstract class Screen {
   public void mouseWheel(MouseEvent event) {
   }
   public void mouseDragged(MouseEvent event) {
-  }
-}
-
-
-public class Tooltip {
-  private String tip;
-  private int textOffset;
-  private int timer;
-  private int duration;
-  private final int fadeout = 600;
-  private boolean error = false;
-  
-  public Tooltip() {
-    timer = 0;
-    duration = -999;
-  }
-  
-  public void update(int timedelta) {
-    timer += timedelta;
-    int fadetime = max(0, duration+fadeout - timer);
-    
-    if (timer < duration) {
-      fill(error ? #ff0000 : 0);
-      textFont(tooltipFont);
-      text(tip, textOffset, height-20);
-    } else if (fadetime > 0) {
-      int alpha = round(map(fadetime, 0, fadeout, 0, 255));
-      fill(error ? #ff0000 : 0, alpha);
-      textFont(tooltipFont);
-      text(tip, textOffset, height-20);
-    }
-  }
-  
-  public void say(String s) {
-    tip = s;
-    timer = 0;
-    duration = s.length() * 60;
-    textFont(tooltipFont);
-    int textWidth = floor(textWidth(s));
-    textOffset = floor((width-textWidth) / 2);
-    error = false;
-  }
-  
-  public void warn(String s) {
-    say(s);
-    error = true;
   }
 }

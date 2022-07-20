@@ -8,7 +8,6 @@ public class Transport extends MoveableGroup {
   ButtonRec buttonRec;
   Numberbox animDuration;
   Textlabel frameCounter;
-  Icon cameraToggle;
 
   public int frameNumber = 0;
   private int textfieldWidth = 100;
@@ -39,12 +38,6 @@ public class Transport extends MoveableGroup {
       .plugTo(this, "prevPosture")
       .setGroup(group)
       ;
-    prevPostureButton.onEnter(new CallbackListener() {
-      public void controlEvent(CallbackEvent theEvent) {
-        tooltip.say("Load previous posture");
-      }
-    }
-    );
     pos.add(buttonSize + spacing, 0);
 
 
@@ -60,12 +53,6 @@ public class Transport extends MoveableGroup {
       .setAutoClear(false)
       .setGroup(group)
       ;
-    postureName.onEnter(new CallbackListener() {
-      public void controlEvent(CallbackEvent theEvent) {
-        tooltip.say("Change posture name");
-      }
-    }
-    );
     pos.add(textfieldWidth + spacing, 0);
 
 
@@ -76,33 +63,20 @@ public class Transport extends MoveableGroup {
       .plugTo(this, "nextPosture")
       .setGroup(group)
       ;
-    nextPostureButton.onEnter(new CallbackListener() {
-      public void controlEvent(CallbackEvent theEvent) {
-        tooltip.say("Load next posture");
-      }
-    }
-    );
     pos.add(buttonSize + 2*spacing, 0);
 
 
     animDuration = new NumberboxInput(cp5, "animduration")
-      .setUnit(" s")
       .setPosition(pos.x, pos.y)
       .setSize(40, groupHeight)
-      .setRange(-1, 999)
       .setGroup(group)
-      ;
+    ;
+    
     animDuration.addCallback(new CallbackListener() {
       public void controlEvent(CallbackEvent theEvent) {
         if (theEvent.getAction() == ControlP5.ACTION_BROADCAST && animDuration.getValue() != prevAnimDuration) {
-          setFileDirty();
+          setPostureCollectionDirty();
         }
-      }
-    }
-    );
-    animDuration.onEnter(new CallbackListener() {
-      public void controlEvent(CallbackEvent theEvent) {
-        tooltip.say("Set this posture's total duration (in seconds)");
       }
     }
     );
@@ -118,12 +92,6 @@ public class Transport extends MoveableGroup {
       .setColor(color(255, 255, 255))
       .setGroup(group)
       ;
-    frameCounter.onEnter(new CallbackListener() {
-      public void controlEvent(CallbackEvent theEvent) {
-        tooltip.say("Frame counter");
-      }
-    }
-    );
     pos.add(30 + spacing, 0);
 
 
@@ -133,43 +101,12 @@ public class Transport extends MoveableGroup {
       .setPosition(pos.x, pos.y)
       .setGroup(group)
       .plugTo(this, "resetCounter")
-      .onEnter(new CallbackListener() {
-      public void controlEvent(CallbackEvent theEvent) {
-        tooltip.say("Reset frame counter");
-      }
-    }
-    );
-    pos.add(buttonSize + spacing, 0);
-
-
-    cameraToggle = cp5.addIcon("cameratoggle", 1)
-      .setPosition(pos.x, pos.y)
-      .setSize(buttonSize, groupHeight)
-      .setFont(iconFont)
-      .setFontIcons(#00f030, #00f030)
-      .setFontIconSize(18)
-      .setSwitch(true)
-      .showBackground()
-      .setGroup(group)
-      .plugTo(this, "onToggleCamera")
       ;
-    cameraToggle.onEnter(new CallbackListener() {
-      public void controlEvent(CallbackEvent theEvent) {
-        tooltip.say("Show / Hide camera (key 'k')");
-      }
-    }
-    );
     pos.add(buttonSize + spacing, 0);
 
 
     buttonRec = new ButtonRec(cp5, "buttonrec", pos);
     buttonRec.setGroup(group);
-    buttonRec.onEnter(new CallbackListener() {
-      public void controlEvent(CallbackEvent theEvent) {
-        tooltip.say("Record frames to disk");
-      }
-    }
-    );
     pos.add(buttonSize, 0);
 
 
@@ -232,13 +169,6 @@ public class Transport extends MoveableGroup {
     frameNumber = 0;
     frameCounter.setText("0");
   }
-  
-  public void onToggleCamera(boolean val) {
-    if (val)
-      mainScreen.camera.show();
-    else
-      mainScreen.camera.hide();
-  }
 
 
   private class ButtonRec extends Button {
@@ -257,12 +187,7 @@ public class Transport extends MoveableGroup {
       if (isOn()) {
         mainScreen.stopRecording();
       } else {
-        if (animDuration.getValue() > 0f) {
-          mainScreen.startRecording();
-        } else {
-          tooltip.warn("Can't record. Choose the posture's duration first !");
-          buttonRec.setOff();
-        }
+        mainScreen.startRecording();
       }
     }
   }
