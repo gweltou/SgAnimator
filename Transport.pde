@@ -1,5 +1,3 @@
-Transport transport;
-
 
 public class Transport extends MoveableGroup {
   Textfield postureName;
@@ -9,6 +7,7 @@ public class Transport extends MoveableGroup {
   Numberbox animDuration;
   Textlabel frameCounter;
   Icon cameraToggle;
+  Icon playToggle;
 
   public int frameNumber = 0;
   private int textfieldWidth = 100;
@@ -54,7 +53,7 @@ public class Transport extends MoveableGroup {
       .setText("posture0")
       .setPosition(pos.x, pos.y)
       .setSize(textfieldWidth, groupHeight)
-      .setFont(defaultFont)
+      .setFont(defaultFontSmall)
       .setFocus(false)
       .setColor(color(255, 255, 255))
       .setAutoClear(false)
@@ -114,7 +113,7 @@ public class Transport extends MoveableGroup {
       .setText(String.valueOf(frameNumber))
       .setPosition(pos.x, pos.y)
       .setSize(30, groupHeight)
-      .setFont(defaultFont)
+      .setFont(defaultFontSmall)
       .setColor(color(255, 255, 255))
       .setGroup(group)
       ;
@@ -142,7 +141,18 @@ public class Transport extends MoveableGroup {
     pos.add(buttonSize + spacing, 0);
 
 
-    cameraToggle = cp5.addIcon("cameratoggle", 1)
+    buttonRec = new ButtonRec(cp5, "buttonrec", pos);
+    buttonRec.setGroup(group);
+    buttonRec.onEnter(new CallbackListener() {
+      public void controlEvent(CallbackEvent theEvent) {
+        tooltip.say("Record frames to disk");
+      }
+    }
+    );
+    pos.add(buttonSize + spacing, 0);
+
+
+    cameraToggle = cp5.addIcon("cameratoggle", 0)
       .setPosition(pos.x, pos.y)
       .setSize(buttonSize, groupHeight)
       .setFont(iconFont)
@@ -152,8 +162,7 @@ public class Transport extends MoveableGroup {
       .showBackground()
       .setGroup(group)
       .plugTo(this, "onToggleCamera")
-      ;
-    cameraToggle.onEnter(new CallbackListener() {
+      .onEnter(new CallbackListener() {
       public void controlEvent(CallbackEvent theEvent) {
         tooltip.say("Show / Hide camera (key 'k')");
       }
@@ -162,11 +171,20 @@ public class Transport extends MoveableGroup {
     pos.add(buttonSize + spacing, 0);
 
 
-    buttonRec = new ButtonRec(cp5, "buttonrec", pos);
-    buttonRec.setGroup(group);
-    buttonRec.onEnter(new CallbackListener() {
+    playToggle = cp5.addIcon("playtoggle", 0)
+      .setPosition(pos.x, pos.y)
+      .setSize(buttonSize, groupHeight)
+      .setFont(iconFont)
+      .setFontIcons(#00f04b, #00f04d)
+      .setFontIconSize(18)
+      .setSwitch(true)
+      .showBackground()
+      .setGroup(group)
+      .setOn()
+      .plugTo(this, "onTogglePlay")
+      .onEnter(new CallbackListener() {
       public void controlEvent(CallbackEvent theEvent) {
-        tooltip.say("Record frames to disk");
+        tooltip.say("Play / Pause animation (key 'p')");
       }
     }
     );
@@ -192,9 +210,9 @@ public class Transport extends MoveableGroup {
     postureName.setText(prevPosture.name);
     animDuration.setValue(prevPosture.duration);
     prevAnimDuration = prevPosture.duration;
+    avatar.resetAnimation();
     mustUpdateUI = true;
   }
-
 
   public void nextPosture() {
     if (postureCollectionDirty) {
@@ -219,25 +237,31 @@ public class Transport extends MoveableGroup {
     mustUpdateUI = true;
   }
 
-
   public void increaseCounter() {
     frameCounter.setText(String.valueOf(++frameNumber));
   }
-
+  
   public int getCounter() {
     return frameNumber;
   }
-
+  
   public void resetCounter() {
     frameNumber = 0;
     frameCounter.setText("0");
   }
-  
+
   public void onToggleCamera(boolean val) {
     if (val)
       mainScreen.camera.show();
     else
       mainScreen.camera.hide();
+  }
+
+  public void onTogglePlay(boolean val) {
+    if (avatar != null) {
+      avatar.resetAnimation();
+      mainScreen.playing = val;
+    }
   }
 
 

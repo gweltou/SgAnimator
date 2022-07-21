@@ -33,7 +33,7 @@ public class LoadScreen extends Screen {
 
     cp5.addTextlabel("filenamelabel")
       .setPosition(4, 10)
-      .setFont(defaultFont)
+      .setFont(defaultFontSmall)
       .setText(selection.getName())
       .setGroup(loadGroup)
       ;
@@ -46,7 +46,13 @@ public class LoadScreen extends Screen {
       .setLabel("Load all")
       .setGroup(loadGroup)
       .plugTo(this, "loadAllFn")
-      ;
+      .onEnter(new CallbackListener() {
+      public void controlEvent(CallbackEvent theEvent) {
+        tooltip.say("Load new file");
+      }
+    }
+    )
+    ;
     w += 80 + 10;
 
     keepGeomBtn = cp5.addButton("keepgeombtn")
@@ -56,7 +62,13 @@ public class LoadScreen extends Screen {
       .setLabel("Keep Geometry")
       .setGroup(loadGroup)
       .plugTo(this, "keepGeomFn")
-      ;
+      .onEnter(new CallbackListener() {
+      public void controlEvent(CallbackEvent theEvent) {
+        tooltip.say("Keep current geometry and update transforms, pivot points and animations from this JSON file");
+      }
+    }
+    )
+    ;
     w += 100 + 10;
 
     cp5.addButton("cancelbtn")
@@ -68,7 +80,7 @@ public class LoadScreen extends Screen {
       .plugTo(this, "cancelFn")
       ;
     paramLocked = false;
-    
+
     fill(64);
     textSize(18);
   }
@@ -105,9 +117,9 @@ public class LoadScreen extends Screen {
     if (newAvatar.postures != null) {
       postures = newAvatar.postures; // Creates problems if newAvatar has a different config than previous avatar
       avatar.postures = postures;
-      transport.postureName.setText(postures.getPosture(0).name);
-      transport.animDuration.setValue(postures.getPosture(0).duration);
-      transport.prevAnimDuration = postures.getPosture(0).duration;
+      mainScreen.transport.postureName.setText(postures.getPosture(0).name);
+      mainScreen.transport.animDuration.setValue(postures.getPosture(0).duration);
+      mainScreen.transport.prevAnimDuration = postures.getPosture(0).duration;
       avatar.loadPosture(0);
       setFileDirty();
     }
@@ -120,9 +132,9 @@ public class LoadScreen extends Screen {
         backCs.setTransform(cs.getTransform());
       }
     }
-    
+
     mainScreen.showUI();
-    
+
     mustDestroy = true;
   }
 
@@ -143,19 +155,6 @@ public class LoadScreen extends Screen {
     if (mustDestroy) {
       loadGroup.remove();
       currentScreen = previousScreen;
-    }
-
-    int textY = ceil((height + groupHeight)/2f + 48);
-    if (keepGeomBtn.isInside()) {
-      String s = "Keep current geometry and update transforms, pivot points and animations from this JSON file";
-      float w = textWidth(s);
-      text(s, (width-w)/2f, textY);
-    }
-
-    if (loadAllBtn.isInside()) {
-      String s = "Load new file";
-      float w = textWidth(s);
-      text(s, (width-w)/2f, textY);
     }
   }
 }

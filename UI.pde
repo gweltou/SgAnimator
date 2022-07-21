@@ -56,9 +56,9 @@ public class ContextMenu {
   }
 
   public void onPivot(boolean value) {
-    setPivot = true;
+    mainScreen.setPivot = true;
     avatar.resetAnimation();
-    playing = false;
+    mainScreen.playing = false;
   }
 
   public void onReset(boolean value) {
@@ -136,10 +136,12 @@ public class MoveableGroup {
   }
 
   public void show() {
+    group.open();
     group.show();
   }
 
   public void hide() {
+    group.close();
     group.hide();
   }
 }
@@ -290,7 +292,7 @@ void updateUI() {
 
     cp5.addScrollableList("function"+animNum)
       .setLabel("function")
-      .setFont(defaultFont)
+      .setFont(defaultFontSmall)
       .setPosition(pos.x, pos.y)
       .setBarHeight(menuBarHeight)
       .setItemHeight(menuBarHeight)
@@ -305,7 +307,7 @@ void updateUI() {
 
     cp5.addScrollableList("axe"+animNum)
       .setLabel("axe")
-      .setFont(defaultFont)
+      .setFont(defaultFontSmall)
       .setPosition(pos.x, pos.y)
       .setWidth(axeWidth)
       .setBarHeight(menuBarHeight)
@@ -418,7 +420,7 @@ void updateUI() {
 
   cp5.addScrollableList("function"+animNum)
     .setLabel("function")
-    .setFont(defaultFont)
+    .setFont(defaultFontSmall)
     .setPosition(pos.x, pos.y)
     .setBarHeight(menuBarHeight)
     .setItemHeight(menuBarHeight)
@@ -432,7 +434,7 @@ void updateUI() {
 
   cp5.addScrollableList("axe"+animNum)
     .setLabel("axe")
-    .setFont(defaultFont)
+    .setFont(defaultFontSmall)
     .setPosition(pos.x, pos.y)
     .setWidth(axeWidth)
     .setBarHeight(menuBarHeight)
