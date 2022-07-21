@@ -194,10 +194,7 @@ void inputFileSelected(File selection) throws IOException {
     println("User selected " + selection.getAbsolutePath());
     String filename = selection.getAbsolutePath();
     if (filename.endsWith("svg")) {
-      println("loading");
-      PShape svg = loadShape(filename);
-      ComplexShape shape = ComplexShape.fromPShape(svg); //<>//
-      println("loaded");
+      ComplexShape shape = ComplexShape.fromPShape(loadShape(filename)); //<>//
       
       if (shape == null) {
         println("Could not load SVG file");

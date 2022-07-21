@@ -82,10 +82,8 @@ PImage checkboard;
 
 
 void settings() {
-  //fullScreen();
-  size(1024, 700, P2D);
-  //size(800, 600, P2D);
-  noSmooth();
+  size(1024, 700);  // P2D renderer is needed to draw the chessboard texture under the camera, but it breaks SVG imports
+  noSmooth();  // Needed for the camera view
 }
 
 
@@ -94,8 +92,8 @@ void setup() {
   windowTitle(appName);
   
   // Sets the texture filtering to NEAREST sampling
-  // Used by camera pixelisation
-  ((PGraphicsOpenGL) g).textureSampling(2);
+  // Used by camera pixelisation with P2D renderer
+  //((PGraphicsOpenGL) g).textureSampling(2);
   
   // Used for checkboard pattern
   textureWrap(REPEAT);
