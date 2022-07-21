@@ -20,20 +20,21 @@ public class HelpScreenEasing extends Screen {
     PGraphics pg = createGraphics(w, h);
     pg.beginDraw();
     pg.background(#FFC500);
-    float prev = h * fn.apply(0f);
+    float prev = h * (0.8f * fn.apply(0f) + 0.1f);
     float val;
     float penX;
     float stepX = 2f;
     pg.stroke(0);
     for (penX=stepX; penX<w; penX+=stepX) {
-      val = h * fn.apply(penX/w);
+      val = h * (0.8f * fn.apply(penX/w) + 0.1f);
       pg.line(penX-stepX, h-prev, penX, h-val);
       prev = val;
     }
-    val = h * fn.apply(1f);
+    val = h * (0.8f * fn.apply(1f) + 0.1f);
     pg.line(penX-stepX, h-prev, w, h-val);
     pg.fill(0, 127);
-    pg.text(name, w-textWidth(name)-4, h-4);
+    pg.textFont(defaultFontSmall);
+    pg.text(name, w-pg.textWidth(name)-4, h-4);
     pg.endDraw();
     return pg;
   }
@@ -42,8 +43,8 @@ public class HelpScreenEasing extends Screen {
   @Override
   public void draw() {
     background(255);
-    fill(64);
-    textSize(32);
+    fill(100);
+    textFont(titleFont);
     int offset = floor(textWidth("Easing functions"));
     text("Easing functions", (width/2)-offset/2, -20+height/6);
 

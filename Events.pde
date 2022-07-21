@@ -56,7 +56,7 @@ void controlEvent(ControlEvent event) throws InstantiationException, IllegalAcce
        //timeline.show();
        }*/
       mustUpdateUI = true;
-      playing = true;
+      mainScreen.playing = true;
       setFileDirty();
     } else if (name.startsWith("axe")) {
       String[] m = match(name, "axe(\\d+)");
@@ -69,7 +69,7 @@ void controlEvent(ControlEvent event) throws InstantiationException, IllegalAcce
       } else {
         selected.getAnimation(animNum).setAxe((int) value);
         mustUpdateUI = true;
-        playing = true;
+        mainScreen.playing = true;
         setFileDirty();
       }
     } else if (name.startsWith("animamp")) {
@@ -170,8 +170,8 @@ void controlEvent(ControlEvent event) throws InstantiationException, IllegalAcce
           value = int(value*100f) / 100f;
           fn.setParam(paramName, value);
         }
-        playing = true;
-        setFileDirty(); //<>//
+        mainScreen.playing = true;
+        setFileDirty(); //<>// //<>//
         //if (timeline != null && timeline.getFunction() == fn)
         //  timeline.show();
       }
@@ -194,7 +194,11 @@ void inputFileSelected(File selection) throws IOException {
     println("User selected " + selection.getAbsolutePath());
     String filename = selection.getAbsolutePath();
     if (filename.endsWith("svg")) {
-      ComplexShape shape = ComplexShape.fromPShape(loadShape(filename));
+      println("loading");
+      PShape svg = loadShape(filename);
+      ComplexShape shape = ComplexShape.fromPShape(svg); //<>//
+      println("loaded");
+      
       if (shape == null) {
         println("Could not load SVG file");
         return;
@@ -216,7 +220,7 @@ void inputFileSelected(File selection) throws IOException {
       baseFilename = filename.substring(0, filename.length()-4);
 
       currentScreen = mainScreen;
-      transport.postureName.setText("posture0");
+      mainScreen.transport.postureName.setText("posture0");
       mainScreen.resetView();
       mainScreen.showUI();
       BoundingBox bb = avatar.getShape().getBoundingBox();
@@ -274,13 +278,13 @@ void loadJsonFile(File file) {
   postureIndex = 0;
   if (newAvatar.postures != null) {
     postures = avatar.postures;
-    transport.postureName.setText(postures.getPosture(0).name);
-    transport.animDuration.setValue(postures.getPosture(0).duration);
-    transport.prevAnimDuration = postures.getPosture(0).duration;
+    mainScreen.transport.postureName.setText(postures.getPosture(0).name);
+    mainScreen.transport.animDuration.setValue(postures.getPosture(0).duration);
+    mainScreen.transport.prevAnimDuration = postures.getPosture(0).duration;
     avatar.loadPosture(0);
   } else {
     postures = new PostureCollection();
-    transport.postureName.setText("posture0");
+    mainScreen.transport.postureName.setText("posture0");
     println("no postures in loaded file");
   }
 

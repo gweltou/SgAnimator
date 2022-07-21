@@ -42,7 +42,7 @@ import java.util.*;
 import java.lang.reflect.Field;
 
 
-String version = "0.8";
+String version = "0.9 alpha";
 String appName = "SgAnimator " + version;
 
 
@@ -71,14 +71,12 @@ Animation animationClipboard;
 
 boolean showUI = false;
 boolean paramLocked = false;
-boolean setPivot = false;
-boolean playing = true;
 boolean mustUpdateUI = false;
 File fileToLoad = null; // Change current screen to loadScreen
 
-PFont defaultFont;
+PFont defaultFont, defaultFontSmall;
 PFont titleFont;
-PFont tooltipFont;
+PFont tooltipFont, tooltipFontSmall;
 PFont iconFont;
 PImage checkboard;
 
@@ -103,9 +101,11 @@ void setup() {
   textureWrap(REPEAT);
   
   cp5 = new ControlP5(this);
-  defaultFont = createFont("DejaVu Sans Mono", 12);
+  defaultFont = createFont("DejaVu Sans Mono", 24);
+  defaultFontSmall = createFont("DejaVu Sans Mono", 12);
   titleFont = createFont("PrintBold-J5o.ttf", 48);
   tooltipFont = createFont("PrintClearly-GGP.ttf", 32);
+  tooltipFontSmall = createFont("PrintClearly-GGP.ttf", 25);
   iconFont = createFont("fa-solid-900.ttf", 20);
   checkboard = loadImage("checkboard.png");
   
@@ -114,6 +114,7 @@ void setup() {
 
   tooltip = new Tooltip();
   mainScreen = new MainScreen();
+  mainScreen.hideUI();
   welcomeScreen = new WelcomeScreen();
   helpScreen1 = new HelpScreen1();
   helpScreenEasing = new HelpScreenEasing();
@@ -139,7 +140,7 @@ void select(ComplexShape part) {
     cp5.remove("accordion");
     accordion = null;
   } else {
-    avatar.getShape().invalidateBoundingBox(); // Fixes bb not updated between parts selection (which moves when playing)
+    //avatar.getShape().invalidateBoundingBox(); // Fixes bb not updated between parts selection (which moves when playing)
     updateUI();
   }
 }
@@ -148,12 +149,12 @@ void select(ComplexShape part) {
 void savePosture() {
   Posture posture = new Posture();
 
-  String postureName = transport.postureName.getText();
+  String postureName = mainScreen.transport.postureName.getText();
   if (postureName == null || postureName.trim().isEmpty())
     postureName = "posture" + postureIndex;
   posture.name = postureName;
 
-  posture.duration = transport.animDuration.getValue();
+  posture.duration = mainScreen.transport.animDuration.getValue();
 
   Animation[][] groups = new Animation[avatar.getPartsList().length][];
   Arrays.fill(groups, null);
@@ -173,26 +174,6 @@ void savePosture() {
   avatar.postures = postures;
   postureCollectionDirty = false;
 }
-
-
-void drawKey(int x, int y, String k, float height) {
-  textSize(floor(height * 0.5f));
-  float margin = 0.1f * height;
-  float wi = max(height - 2*margin, textWidth(k) + 10);
-  float w = wi + 2*margin;
-  fill(180);
-  stroke(63);
-  rect(x, y, w, height, 0.15f * height);
-  fill(220);
-  stroke(240);
-  float hi = height * 0.8f;
-  rect(x + margin, y + 0.8f*margin, wi, hi, 0.15f * hi);
-
-  fill(0);
-  text(k, x + 2*margin, y + hi - 1.5f*margin);
-}
-
-
 
 
 void draw() {
@@ -250,6 +231,29 @@ public abstract class Screen {
 }
 
 
+void drawKey(int x, int y, String k, float height) {
+  int fontSize = floor(height * 0.5f);
+  if (fontSize <= 12)
+    textFont(defaultFontSmall);
+  else
+    textFont(defaultFont);
+  textSize(fontSize);
+  float margin = 0.1f * height;
+  float wi = max(height - 2*margin, textWidth(k) + 10);
+  float w = wi + 2*margin;
+  fill(180);
+  stroke(63);
+  rect(x, y, w, height, 0.15f * height);
+  fill(220);
+  stroke(240);
+  float hi = height * 0.8f;
+  rect(x + margin, y + 0.8f*margin, wi, hi, 0.15f * hi);
+
+  fill(0);
+  text(k, x + 2*margin, y + hi - 1.5f*margin);
+}
+
+
 public class Tooltip {
   private String tip;
   private int textOffset;
@@ -257,6 +261,7 @@ public class Tooltip {
   private int duration;
   private final int fadeout = 600;
   private boolean error = false;
+  private boolean small = false;
   
   public Tooltip() {
     timer = 0;
@@ -269,12 +274,18 @@ public class Tooltip {
     
     if (timer < duration) {
       fill(error ? #ff0000 : 0);
-      textFont(tooltipFont);
+      if (small)
+        textFont(tooltipFontSmall);
+      else
+        textFont(tooltipFont);
       text(tip, textOffset, height-20);
     } else if (fadetime > 0) {
       int alpha = round(map(fadetime, 0, fadeout, 0, 255));
       fill(error ? #ff0000 : 0, alpha);
-      textFont(tooltipFont);
+      if (small)
+        textFont(tooltipFontSmall);
+      else
+        textFont(tooltipFont);
       text(tip, textOffset, height-20);
     }
   }
@@ -286,7 +297,14 @@ public class Tooltip {
     textFont(tooltipFont);
     int textWidth = floor(textWidth(s));
     textOffset = floor((width-textWidth) / 2);
+    small = false;
     error = false;
+    if (textOffset < 0) {
+      small = true;
+      textFont(tooltipFontSmall);
+      textWidth = floor(textWidth(s));
+      textOffset = floor((width-textWidth) / 2);
+    }
   }
   
   public void warn(String s) {

@@ -1,3 +1,10 @@
+0.9
+  * Camera (key 'k')
+  * Tooltips
+  * Scale camera view and parts while preserving ratio (key 'MAJ')
+  * Bugfixes
+
+
 0.8.1
   * Bugfixes
 

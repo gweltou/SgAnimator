@@ -8,7 +8,7 @@ class PartsList extends ScrollableList {
   public PartsList(ControlP5 theControlP5, String theName) {
     super(theControlP5, theName);
     setType(ScrollableList.LIST);
-    setFont(defaultFont);
+    setFont(defaultFontSmall);
     setBarHeight(0);
     setBarVisible(false);
   }

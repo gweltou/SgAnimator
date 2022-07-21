@@ -58,18 +58,18 @@ public class WelcomeScreen extends Screen {
     fill(127);
     textFont(titleFont);
     textSize(48);
-    String s = "Press     +     to load a file";
+    String s = "Press       +     to load a file";
     int margin = floor((width - textWidth(s)) * 0.5f);
     text(s, margin, height/2);
-    drawKey(margin + 116, height/2 - 36, "Ctrl", 40);
-    drawKey(margin + 196, height/2 - 36, "O", 40);
+    drawKey(margin + 120, height/2 - 34, "Ctrl", 40);
+    drawKey(margin + 224, height/2 - 34, "O", 40);
     
     fill(63);
-    textSize(24);
+    textFont(tooltipFont);
     text("to show help", (width/2) - 50, 60 + height/2);
     drawKey((width/2) - 90, 36 + height/2, "H", 32);
     
-    textFont(defaultFont);
+    textFont(defaultFontSmall);
     text("Ver. " + version, width-80, height-40);
     text("Lib. " + PRenderer.version(), width-80, height-20);
   }

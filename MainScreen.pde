@@ -6,12 +6,16 @@ public class MainScreen extends Screen {
   Affine2 transform; // Window view transform
   //private float[] selectedColorMod = new float[] {0.1f, 0.1f, 0.1f, 0.4f};
 
+  private boolean setPivot = false;
+  private boolean playing = true;
   private float defaultFramerate = frameRate;
   //private float recordingFramerate = 25f;
   private float framerate = defaultFramerate;
   private int remainingFrames = 0;
   private boolean clearBackground = true;
   private float timeScale = 1f;
+
+  private Transport transport;
 
   private Camera camera = new Camera();
   private PGraphics spritesheetBuffer;
@@ -227,15 +231,17 @@ public class MainScreen extends Screen {
       stroke(0, 64, 255);
       strokeWeight(2);
       rect(screenNW.x, screenNW.y, screenSE.x-screenNW.x, screenSE.y-screenNW.y);
+
       // Resize handles
-      square(screenNW.x-4, screenNW.y-4, 8);
-      square(screenSE.x-4, screenSE.y-4, 8);
+      strokeWeight(2.4f + 0.6 * MathUtils.sin(TWO_PI * (millis() % 600) / 600 ));
+      square(screenNW.x-5, screenNW.y-5, 10);
+      square(screenSE.x-5, screenSE.y-5, 10);
 
       int w = ceil((SE.x - NW.x) * PPU);
       int h = ceil((SE.y - NW.y) * PPU);
       String strBufSize = str(w) + " × " + str(h) + " px";
       fill(0);
-      textFont(defaultFont);
+      textFont(defaultFontSmall);
       text(strBufSize, screenSE.x + 12, screenSE.y + 15);
 
       if (hasMoved) {
@@ -353,30 +359,35 @@ public class MainScreen extends Screen {
       if (selected != null) {
         renderer.drawPivot();
 
-        // Draw bounding box
-        noFill();
-        float green = (64 + 32 * MathUtils.sin(TWO_PI * (millis() % 600) / 600 ));
-        stroke(255, green, 0);
-        strokeWeight(2 + 0.6 * MathUtils.sin(TWO_PI * (millis() % 600) / 600 ));
-        pushMatrix();
-        if (!partRotating) {
-          BoundingBox bb = selected.getBoundingBox();
-          bbNW.set(bb.left, bb.top);
-          bbSE.set(bb.right, bb.bottom);
-          transform.applyTo(bbNW);
-          transform.applyTo(bbSE);
-        } else {
-          translate((bbNW.x+bbSE.x)*0.5, (bbNW.y+bbSE.y)*0.5);
-          rotate(partRotation);
-          translate(-(bbNW.x+bbSE.x)*0.5, -(bbNW.y+bbSE.y)*0.5);
+        if (!playing) {
+          // Draw bounding box
+          noFill();
+          stroke(255, 127, 0);
+          strokeWeight(2);
+          pushMatrix();
+          if (!partRotating) {
+            BoundingBox bb = selected.getBoundingBox();
+            bbNW.set(bb.left, bb.top);
+            bbSE.set(bb.right, bb.bottom);
+            transform.applyTo(bbNW);
+            transform.applyTo(bbSE);
+          } else {
+            translate((bbNW.x+bbSE.x)*0.5, (bbNW.y+bbSE.y)*0.5);
+            rotate(partRotation);
+            translate(-(bbNW.x+bbSE.x)*0.5, -(bbNW.y+bbSE.y)*0.5);
+          }
+          rect(bbNW.x, bbNW.y, bbSE.x-bbNW.x, bbSE.y-bbNW.y);
+          line(bbNW.x, bbNW.y, bbSE.x, bbSE.y);
+          line(bbNW.x, bbSE.y, bbSE.x, bbNW.y);
+
+          // Handles
+          stroke(255, 63, 0);
+          strokeWeight(2.4f + 0.6 * MathUtils.sin(TWO_PI * (millis() % 600) / 600 ));
+          circle(bbSE.x, bbNW.y, 10);
+          square(bbNW.x-5, bbNW.y-5, 10);
+          square(bbSE.x-5, bbSE.y-5, 10);
+          popMatrix();
         }
-        rect(bbNW.x, bbNW.y, bbSE.x-bbNW.x, bbSE.y-bbNW.y);
-        line(bbNW.x, bbNW.y, bbSE.x, bbSE.y);
-        line(bbNW.x, bbSE.y, bbSE.x, bbNW.y);
-        circle(bbSE.x, bbNW.y, 8);
-        square(bbNW.x-4, bbNW.y-4, 8);
-        square(bbSE.x-4, bbSE.y-4, 8);
-        popMatrix();
       }
 
       if (camera.isVisible) {
@@ -409,20 +420,15 @@ public class MainScreen extends Screen {
         strokeWeight(1);
         line(origin.x-6, origin.y, origin.x+6, origin.y);
         line(origin.x, origin.y-6, origin.x, origin.y+6);
-        textFont(defaultFont);
+        textFont(defaultFontSmall);
         text("0,0", origin.x + 4, origin.y + 12);
-        
+
         renderer.drawAxes();
       }
     }
 
     renderer.popMatrix();
 
-    if (playing == false && (frameCount>>5) % 2 == 0) {
-      fill(255, 0, 0, 127);
-      textSize(32);
-      text("PAUSED", -60 + width/2, height - 80);
-    }
     if (timeline != null) {
       timeline.highlightSliders();
     }
@@ -476,7 +482,7 @@ public class MainScreen extends Screen {
     renderer.setSelected(null);
     if (timeline != null)
       timeline.hide();
-    
+
     controllerClicked = false;
   }
 
@@ -501,8 +507,11 @@ public class MainScreen extends Screen {
       } else {
         switch (key) {
         case 'p':  // Play/Pause animation
-          if (avatar != null)
-            playing = !playing;
+          if (playing) {
+            transport.playToggle.setOff();
+          } else {
+            transport.playToggle.setOn();
+          }
           break;
         case 'r':  // Reset animation
           if (avatar != null) {
@@ -566,6 +575,7 @@ public class MainScreen extends Screen {
           }
         }
       }
+      controllerClicked = false;
     }
   }
 
@@ -606,25 +616,31 @@ public class MainScreen extends Screen {
     if (camera.isVisible) {
       if (Vector2.dst(mouseWorldPos.x, mouseWorldPos.y, camera.NW.x, camera.NW.y) < 10/transform.m00) {
         camera.resizeNW = true;
+        tooltip.say("Resize camera (hold MAJ key to preserve ratio)");
         return;
       } else if (Vector2.dst(mouseWorldPos.x, mouseWorldPos.y, camera.SE.x, camera.SE.y) < 10/transform.m00) {
         camera.resizeSE = true;
+        tooltip.say("Resize camera (hold MAJ key to preserve ratio)");
         return;
       } else if (isInsideBox(mouseX, mouseY, camera.screenNW, camera.screenSE)) {
         camera.isMoving = true;
+        tooltip.say("Drag mouse to move camera");
         return;
       }
     }
-    if (selected != null) {  // Scale or rotate part
+    if (selected != null && !playing) {  // Scale or rotate part only when animation is stopped
       BoundingBox bb = selected.getBoundingBox();
       if (Vector2.dst(mouseWorldPos.x, mouseWorldPos.y, bb.left, bb.top) < 10/transform.m00) {
         partScalingNW = true;
+        tooltip.say("Resize geometry (hold MAJ key to preserve ratio)");
         return;
       } else if (Vector2.dst(mouseWorldPos.x, mouseWorldPos.y, bb.right, bb.bottom) < 10/transform.m00) {
         partScalingSE = true;
+        tooltip.say("Resize geometry (hold MAJ key to preserve ratio)");
         return;
       } else if (Vector2.dst(mouseWorldPos.x, mouseWorldPos.y, bb.right, bb.top) < 10/transform.m00) {
         partRotating = true;
+        tooltip.say("Rotate geometry");
         return;
       }
     }
@@ -652,7 +668,7 @@ public class MainScreen extends Screen {
     }
 
     if (avatar != null)
-      avatar.paused = false;
+      avatar.paused = false; // ???
   }
 
 
@@ -674,6 +690,7 @@ public class MainScreen extends Screen {
         ComplexShape[] parts = avatar.getPartsList();
         selectedIndex = 0;
         ComplexShape clickedPart = null;
+        avatar.getShape().invalidateBoundingBox();
 
         for (int i = parts.length-1; i >= 0; i--) {
           if (parts[i].contains(mouseWorldPos)) {
@@ -705,13 +722,15 @@ public class MainScreen extends Screen {
 
     int dx = mouseX-pmouseX;
     int dy = mouseY-pmouseY;
+    float wdx = dx/transform.m00;
+    float wdy = dy/transform.m11;
     float drag_distance = mouseClickPos.dst2(mouseX, mouseY);
     Vector2 mouseWorldPos = getWorldPos(mouseX, mouseY);
 
     if (mouseClickBtn == LEFT) {
       if (partMoving) {
         Affine2 tr = new Affine2();
-        tr.setToTranslation(dx/transform.m00, dy/transform.m11);    // scale translation by the zoom factor
+        tr.setToTranslation(wdx, wdy);
         selected.softTransform(tr);
         setFileDirty();
 
@@ -722,12 +741,16 @@ public class MainScreen extends Screen {
          shape.hardTransform(tr);
          }*/
       } else if (partScalingNW) {
-        avatar.paused = true;
-        avatar.resetAnimation();
+        //avatar.paused = true;
+        //avatar.resetAnimation();
         BoundingBox bb = selected.getBoundingBox();
         Vector2 dim = bb.getDimensions();
         float sx = max(0.2f, bb.right - mouseWorldPos.x) / dim.x;
         float sy = max(0.2f, bb.bottom - mouseWorldPos.y) / dim.y;
+        if (keyPressed && keyCode == 16) {
+          sx = max(sx, sy);
+          sy = sx;
+        }
         Affine2 tr = new Affine2();
         tr.translate(bb.right, bb.bottom).scale(sx, sy).translate(-bb.right, -bb.bottom);
         selected.softTransform(tr);
@@ -739,6 +762,10 @@ public class MainScreen extends Screen {
         Vector2 dim = bb.getDimensions();
         float sx = max(0.2f, mouseWorldPos.x - bb.left) / dim.x;
         float sy = max(0.2f, mouseWorldPos.y - bb.top) / dim.y;
+        if (keyPressed && keyCode == 16) {
+          sx = max(sx, sy);
+          sy = sx;
+        }
         Affine2 tr = new Affine2();
         tr.translate(bb.left, bb.top).scale(sx, sy).translate(-bb.left, -bb.top);
         selected.softTransform(tr);
@@ -757,20 +784,40 @@ public class MainScreen extends Screen {
         selected.softTransform(tr);
         setFileDirty();
       } else if (camera.isMoving) {
-        camera.NW.add(dx/transform.m00, dy/transform.m11);
-        camera.SE.add(dx/transform.m00, dy/transform.m11);
+        camera.NW.add(wdx, wdy);
+        camera.SE.add(wdx, wdy);
       } else if (camera.resizeNW) {
-        if (keyPressed && keyCode == 16)
-          println("keypressed", keyCode);
-        camera.NW.add(dx/transform.m00, dy/transform.m11);
+        camera.NW.set(mouseWorldPos);
+        if (keyPressed && keyCode == 16) {
+          // "MAJ" to preserve ratio
+          float desiredRatio = camera.bufferWidth / float(camera.bufferHeight);
+          float camWidth = camera.SE.x-camera.NW.x;
+          float camHeight = camera.SE.y-camera.NW.y;
+          float currentRatio = camWidth / camHeight;
+          if (currentRatio >= desiredRatio)
+            camera.NW.y = camera.SE.y - camWidth / desiredRatio;
+          else
+            camera.NW.x = camera.SE.x - camHeight * desiredRatio;
+        }
         camera.NW.x = min(camera.NW.x, camera.SE.x - 1);
         camera.NW.y = min(camera.NW.y, camera.SE.y - 1);
       } else if (camera.resizeSE) {
-        camera.SE.add(dx/transform.m00, dy/transform.m11);
+        camera.SE.set(mouseWorldPos);
+        if (keyPressed && keyCode == 16) {
+          // "MAJ" to preserve ratio
+          float desiredRatio = camera.bufferWidth / float(camera.bufferHeight);
+          float camWidth = camera.SE.x-camera.NW.x;
+          float camHeight = camera.SE.y-camera.NW.y;
+          float currentRatio = camWidth / camHeight;
+          if (currentRatio >= desiredRatio)
+            camera.SE.y = camera.NW.y + camWidth / desiredRatio;
+          else
+            camera.SE.x = camera.NW.x + camHeight * desiredRatio;
+        }
         camera.SE.x = max(camera.SE.x, camera.NW.x + 1);
         camera.SE.y = max(camera.SE.y, camera.NW.y + 1);
       } else if (!controllerClicked) {
-        if (selected != null && isInsideBox(mouseClickPos.x, mouseClickPos.y, bbNW, bbSE) && drag_distance > 300) {
+        if (selected != null && !playing && isInsideBox(mouseClickPos.x, mouseClickPos.y, bbNW, bbSE) && drag_distance > 300) {
           // Move part
           avatar.paused = true;
           avatar.resetAnimation();
@@ -795,8 +842,7 @@ public class MainScreen extends Screen {
         timeline.move(dx, dy);
       }
     } else if (mouseClickBtn == RIGHT) {
-      // scale translation by the zoom factor
-      transform.translate(dx/transform.m00, dy/transform.m11);
+      transform.translate(wdx, wdy);
     }
   }
 }
