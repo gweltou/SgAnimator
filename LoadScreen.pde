@@ -1,6 +1,3 @@
-//import java.io.FileInputStream;
-
-
 public class LoadScreen extends Screen {
   private PImage backgroundImage;
   Group loadGroup;

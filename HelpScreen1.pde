@@ -47,6 +47,9 @@ public class HelpScreen1 extends Screen {
     drawKey(w, round(h - 2*keySize/3), "D", keySize);
     h += hStep;
     
+    drawKey(w, round(h - 2*keySize/3), "G", keySize);
+    h += hStep;
+    
     drawKey(w, round(h - 2*keySize/3), "H", keySize);
     h += hStep;
     
@@ -68,6 +71,7 @@ public class HelpScreen1 extends Screen {
       "Play / Pause animation\n"+
       "Reset animation\n"+
       "Show / Hide UI\n"+
+      "Show / Hide parts list\n"+
       "Help screen\n"+
       "Wireframe\n"+
       "Camera\n"+

@@ -1,13 +1,13 @@
-ContextMenu contextMenu; //<>// //<>// //<>//
+ContextMenu contextMenu; //<>//
 //ContextMenu partsMenu;
 FunctionAccordion accordion;
 
+
 public class MainScreen extends Screen {
   Affine2 transform; // Window view transform
-  //private float[] selectedColorMod = new float[] {0.1f, 0.1f, 0.1f, 0.4f};
-
+  
   private boolean setPivot = false;
-  private boolean playing = true;
+  private boolean playing = false;
   private float defaultFramerate = frameRate;
   //private float recordingFramerate = 25f;
   private float framerate = defaultFramerate;
@@ -20,6 +20,8 @@ public class MainScreen extends Screen {
   private Camera camera = new Camera();
   private PGraphics spritesheetBuffer;
   private int spritesheetWidth, spritesheetHeight;
+  
+  private PartsList partsList;
 
   private int mouseClickBtn;
   private Vector2 mouseClickPos = new Vector2();
@@ -290,17 +292,10 @@ public class MainScreen extends Screen {
     transport = new Transport();
     accordion = new FunctionAccordion(cp5, "accordion");
     contextMenu = new ContextMenu();
+    partsList = new PartsList();
+    partsList.setPosition(margin, margin + 44);
 
     //partsMenu = new ContextMenu();
-    /*
-    partsList = (PartsList) new PartsList(cp5, "partslist")
-     .setLabel("parts list")
-     .setPosition(margin, margin)
-     .setHeight(height-2*margin)
-     .setItemHeight(menuBarHeight)
-     .hide();
-     ;
-     */
   }
 
 
@@ -357,7 +352,7 @@ public class MainScreen extends Screen {
 
     if (showUI) {
       if (selected != null) {
-        renderer.drawPivot();
+        selected.drawPivot(renderer);
 
         if (!playing) {
           // Draw bounding box
@@ -462,7 +457,7 @@ public class MainScreen extends Screen {
     showUI = true;
     if (accordion != null)
       accordion.show();
-    //partsList.open().show();
+    partsList.show();
     transport.show();
     renderer.setSelected(selected);
     if (timeline != null)
@@ -475,7 +470,7 @@ public class MainScreen extends Screen {
     showUI = false;
     if (accordion != null)
       accordion.hide();
-    //partsList.hide();
+    partsList.hide();
     camera.hide();
     contextMenu.hide();
     transport.hide();
@@ -520,8 +515,10 @@ public class MainScreen extends Screen {
           }
           break;
         case 'a':  // Select root node
-          if (avatar != null)
+          if (avatar != null) {
             select(avatar.getShape());
+            partsList.selectItem(0);
+          }
           break;
         case 'd':  // Show/Hide UI
           if (avatar != null) {
@@ -536,14 +533,6 @@ public class MainScreen extends Screen {
             }
           }
           break;
-        case 'x':  // Physics scren
-          hideUI();
-          currentScreen = new PhysicsScreen(transform);
-          break;
-        case 'h':  // Help screens
-          hideUI();
-          currentScreen = helpScreen1;
-          break;
         case 'w':  // Wireframe
           renderer.toggleWireframe();
           break;
@@ -554,8 +543,22 @@ public class MainScreen extends Screen {
             transport.cameraToggle.setOff();
           }
           break;
+        case 'g':
+          if (partsList.isVisible)
+            partsList.hide();
+          else
+            partsList.show();
+          break;
+        case 'x':  // Physics scren
+          hideUI();
+          currentScreen = new PhysicsScreen(transform);
+          break;
+        case 'h':  // Help screens
+          hideUI();
+          currentScreen = helpScreen1;
+          break;
         case 's':  // Save file
-          if (avatar != null && postureCollectionDirty) {
+          if (avatar != null && fileDirty) {
             savePosture();
             avatar.saveFile(baseFilename + ".json");
             windowTitle(appName + " - " + baseFilename + ".json");
@@ -589,14 +592,13 @@ public class MainScreen extends Screen {
   }
 
 
-
   void mouseWheel(MouseEvent event) {
     contextMenu.hide();
-    //if (!partsList.isInside()) {
-    float z = pow(1.12, -event.getCount());
-    Vector2 point = getWorldPos(mouseX, mouseY);
-    transform.translate(point.x, point.y).scale(z, z).translate(-point.x, -point.y);  // scale translation by the zoom factor
-    //}
+    if (!partsList.list.isInside()) {
+      float z = pow(1.12, -event.getCount());
+      Vector2 point = getWorldPos(mouseX, mouseY);
+      transform.translate(point.x, point.y).scale(z, z).translate(-point.x, -point.y);  // scale translation by the zoom factor
+    }
   }
 
 
@@ -606,6 +608,10 @@ public class MainScreen extends Screen {
     Vector2 mouseWorldPos = getWorldPos(mouseX, mouseY);
     if (transport.contains(mouseX, mouseY)) {
       transport.isMoving = true;
+      return;
+    }
+    if (partsList.isVisible && partsList.contains(mouseX, mouseY)) {
+      partsList.isMoving = true;
       return;
     }
     if (timeline != null && timeline.contains(mouseX, mouseY)) {
@@ -649,6 +655,7 @@ public class MainScreen extends Screen {
 
   void mouseReleased(MouseEvent event) {
     transport.isMoving = false;
+    partsList.isMoving = false;
     if (timeline != null)
       timeline.isMoving = false;
 
@@ -680,7 +687,7 @@ public class MainScreen extends Screen {
         selected.getAbsoluteTransform().inv().applyTo(mouseWorldPos);
         selected.setLocalOrigin(mouseWorldPos);
         setPivot = false;
-        playing = true; // Is this necessary ?
+        setFileDirty();
       } else if (camera.isVisible && isInsideBox(mouseX, mouseY, camera.screenNW, camera.screenSE)) {
         // Nothing happens when clicking inside the camera window
         return;
@@ -688,17 +695,18 @@ public class MainScreen extends Screen {
         // Select a part
         Vector2 mouseWorldPos = getWorldPos(mouseX, mouseY);
         ComplexShape[] parts = avatar.getPartsList();
-        selectedIndex = 0;
         ComplexShape clickedPart = null;
-        avatar.getShape().invalidateBoundingBox();
-
-        for (int i = parts.length-1; i >= 0; i--) {
+        //avatar.getShape().invalidateBoundingBox();
+        int i;
+        for (i = parts.length-1; i >= 0; i--) {
           if (parts[i].contains(mouseWorldPos)) {
             clickedPart = parts[i];
             break;
           }
         }
         select(clickedPart);
+        if (clickedPart != null)
+          partsList.selectItem(i);
       }
       contextMenu.hide();
     } else {
@@ -817,7 +825,7 @@ public class MainScreen extends Screen {
         camera.SE.x = max(camera.SE.x, camera.NW.x + 1);
         camera.SE.y = max(camera.SE.y, camera.NW.y + 1);
       } else if (!controllerClicked) {
-        if (selected != null && !playing && isInsideBox(mouseClickPos.x, mouseClickPos.y, bbNW, bbSE) && drag_distance > 300) {
+        if (selected != null && !playing && isInsideBox(mouseClickPos.x, mouseClickPos.y, bbNW, bbSE) && drag_distance > 200) {
           // Move part
           avatar.paused = true;
           avatar.resetAnimation();
@@ -838,6 +846,9 @@ public class MainScreen extends Screen {
 
       if (transport.isMoving) {
         transport.move(dx, dy);
+      } else if (partsList.isMoving) {
+        println("move");
+        partsList.move(dx, dy);
       } else if (timeline != null && timeline.isMoving) {
         timeline.move(dx, dy);
       }

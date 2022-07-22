@@ -10,7 +10,7 @@ public class WelcomeScreen extends Screen {
 
     // Single wing shape
     float[] verts = new float[] {0f, 10f, 100f, 18f, 106f, 6f, 110f, 0f, 106f, -6f, 100f, -18f, 0f, -10f};
-    ComplexShape wing = new ComplexShape();
+    ComplexShape wing = new ComplexShape("");
     DrawablePolygon shape = new DrawablePolygon(verts);
     colorMode(HSB, 1f);
     color c = color(random(1), 0.3f, 1f);
@@ -22,7 +22,7 @@ public class WelcomeScreen extends Screen {
     TimeFunction translate = new TFConstant(innerRadius);
     wing.addAnimation(new Animation(translate, Animation.AXE_X));
 
-    mill = new ComplexShape();
+    mill = new ComplexShape("");
     for (int i=0; i<numWings; i++) {
       ComplexShape newWing = wing.copy();
       //newWing.setColorMod(random(0.9, 1.1), random(0.9, 1.1), random(0.9, 1.1), 1f);

@@ -20,15 +20,7 @@ void controlEvent(ControlEvent event) throws InstantiationException, IllegalAcce
     String name = event.getName();
     float value = event.getValue();
     //println("event", event);
-
-    /*if (name.equals("partslist")) {
-     select(avatar.getPartsList()[int(value)]);
-     selectedIndex = int(partsList.getValue());
-     return;
-     } else if (avatar != null) {  // Don't reset animation when selecting parts
-     avatar.resetAnimation();
-     }*/
-
+    
     if (name.equals("posturename")) {
       // Change fullAnim name
       setFileDirty();
@@ -182,7 +174,7 @@ void controlEvent(ControlEvent event) throws InstantiationException, IllegalAcce
 
 
 void setFileDirty() {
-  postureCollectionDirty = true;
+  fileDirty = true;
   surface.setTitle(appName + " - *" + baseFilename + ".json");
 }
 
@@ -209,11 +201,10 @@ void inputFileSelected(File selection) throws IOException {
       shape.hardTranslate(-shape.getBoundingBox().getCenter().x, -shape.getBoundingBox().bottom);
 
       selected = null;
-      selectedIndex = 0;
       postures = new PostureCollection();
       avatar = new Avatar();
       avatar.setShape(shape);
-      //partsList.setItems(avatar.getPartsNamePre());
+      mainScreen.partsList.setItems(avatar.getPartsNamePre());
       baseFilename = filename.substring(0, filename.length()-4);
 
       currentScreen = mainScreen;
@@ -243,7 +234,7 @@ void outputFileSelected(File selection) {
     println("Window was closed or the user hit cancel.");
   } else {
     if (avatar != null) {
-      if (postureCollectionDirty)
+      if (fileDirty)
         savePosture();
 
       String filename = selection.getAbsolutePath();
@@ -268,7 +259,7 @@ void loadJsonFile(File file) {
 
   avatar = newAvatar;
 
-  //partsList.setItems(avatar.getPartsNamePre());
+  mainScreen.partsList.setItems(avatar.getPartsNamePre());
 
   // postures are kept separated for simplicity
   // rather than storing and retrieving it from the Avatar class
@@ -286,7 +277,6 @@ void loadJsonFile(File file) {
   }
 
   selected = null;
-  selectedIndex = 0;
 
   String filename = file.getAbsolutePath();
   baseFilename = filename.substring(0, filename.length()-5);

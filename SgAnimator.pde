@@ -42,7 +42,7 @@ import java.util.*;
 import java.lang.reflect.Field;
 
 
-String version = "0.9 alpha";
+String version = "0.9.1";
 String appName = "SgAnimator " + version;
 
 
@@ -61,12 +61,11 @@ Avatar avatar;
 String baseFilename;  // Used for window title and to save file (independent of its source format)
 
 ComplexShape selected = null;
-int selectedIndex = 0;
 String[] functionsName;
 
 PostureCollection postures;
 int postureIndex = 0;
-boolean postureCollectionDirty = false;  // When true, postures in editor are yet to be saved in avatar
+boolean fileDirty = false;  // When true, postures in editor are yet to be saved in avatar
 Animation animationClipboard;
 
 boolean showUI = false;
@@ -82,7 +81,8 @@ PImage checkboard;
 
 
 void settings() {
-  size(1024, 700);  // P2D renderer is needed to draw the chessboard texture under the camera, but it breaks SVG imports
+  fullScreen();
+  //size(1024, 700);  // P2D renderer is needed to draw the chessboard texture under the camera, but it breaks SVG imports
   noSmooth();  // Needed for the camera view
 }
 
@@ -99,9 +99,9 @@ void setup() {
   textureWrap(REPEAT);
   
   cp5 = new ControlP5(this);
+  titleFont = createFont("PrintBold-J5o.ttf", 48);
   defaultFont = createFont("DejaVu Sans Mono", 24);
   defaultFontSmall = createFont("DejaVu Sans Mono", 12);
-  titleFont = createFont("PrintBold-J5o.ttf", 48);
   tooltipFont = createFont("PrintClearly-GGP.ttf", 32);
   tooltipFontSmall = createFont("PrintClearly-GGP.ttf", 25);
   iconFont = createFont("fa-solid-900.ttf", 20);
@@ -109,7 +109,7 @@ void setup() {
   
   renderer = new PRenderer(this);
   bufferedRenderer = new PGraphicsRenderer(this);
-
+  
   tooltip = new Tooltip();
   mainScreen = new MainScreen();
   mainScreen.hideUI();
@@ -117,15 +117,15 @@ void setup() {
   helpScreen1 = new HelpScreen1();
   helpScreenEasing = new HelpScreenEasing();
   currentScreen = welcomeScreen;
-
+  
   int numFn = Animation.timeFunctions.length;
   functionsName = new String[numFn];
   for (int i=0; i<numFn; i++) {
     int idx = Animation.timeFunctions[i].getName().lastIndexOf('.');
     functionsName[i] = Animation.timeFunctions[i].getName().substring(idx+3);
   }
-      
-  //File toLoad = new File("/home/gweltaz/Bureau/svg/tete.json");
+  
+  //File toLoad = new File("/home/gweltaz/Bureau/svg/bois.json");
   //loadJsonFile(toLoad);
 }
 
@@ -170,7 +170,7 @@ void savePosture() {
   }
 
   avatar.postures = postures;
-  postureCollectionDirty = false;
+  fileDirty = false;
 }
 
 
