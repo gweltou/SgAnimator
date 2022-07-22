@@ -1,4 +1,3 @@
-
 public class Transport extends MoveableGroup {
   Textfield postureName;
   Button prevPostureButton;
@@ -88,7 +87,8 @@ public class Transport extends MoveableGroup {
       .setUnit(" s")
       .setPosition(pos.x, pos.y)
       .setSize(40, groupHeight)
-      .setRange(-1, 999)
+      .setRange(0, 999)
+      .setDirection(Controller.HORIZONTAL) // change the control direction to left/right
       .setGroup(group)
       ;
     animDuration.addCallback(new CallbackListener() {
@@ -180,7 +180,7 @@ public class Transport extends MoveableGroup {
       .setSwitch(true)
       .showBackground()
       .setGroup(group)
-      .setOn()
+      .setOff()
       .plugTo(this, "onTogglePlay")
       .onEnter(new CallbackListener() {
       public void controlEvent(CallbackEvent theEvent) {
@@ -200,7 +200,7 @@ public class Transport extends MoveableGroup {
   public void prevPosture() {
     if (postureIndex <= 0)
       return;
-    if (postureCollectionDirty) {
+    if (fileDirty) {
       // Save fullAnimation to animationCollection
       savePosture();
     }
@@ -215,7 +215,7 @@ public class Transport extends MoveableGroup {
   }
 
   public void nextPosture() {
-    if (postureCollectionDirty) {
+    if (fileDirty) {
       // Save posture to postureCollection
       savePosture();
     }

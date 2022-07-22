@@ -11,7 +11,6 @@ boolean isNumberboxActive = false;
 color backgroundColor = color(0, 100);
 
 
-
 public class ContextMenu {
   List<Button> items = new ArrayList<>();
   List<Boolean> visible;
@@ -112,10 +111,11 @@ public class MoveableGroup {
   protected int x;
   protected int y;
   public boolean isMoving = false;
+  public boolean isVisible = false;
 
 
   public boolean contains(int x, int y) {
-    return (x >= this.x && x <= this.x+groupWidth
+    return (x >= this.x && x <= this.x+group.getWidth()
       && y >= this.y-barHeight && y <= this.y);
   }
 
@@ -136,13 +136,13 @@ public class MoveableGroup {
   }
 
   public void show() {
-    group.open();
-    group.show();
+    group.open().show();
+    isVisible = true;
   }
 
   public void hide() {
-    group.close();
-    group.hide();
+    group.close().hide();
+    isVisible = false;
   }
 }
 
@@ -259,8 +259,6 @@ public class NumberboxInput extends Numberbox {
 void updateUI() {
   paramLocked = true;
   boolean visible = true;
-
-  //partsList.open().show();
 
   // Remove accordion and create new one
   if (accordion != null) {
