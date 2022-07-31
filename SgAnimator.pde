@@ -56,7 +56,7 @@ Screen previousScreen;
 Tooltip tooltip;
 
 PRenderer renderer;
-PGraphicsRenderer bufferedRenderer;
+PGraphicsRenderer cameraRenderer;
 Avatar avatar;
 String baseFilename;  // Used for window title and to save file (independent of its source format)
 
@@ -81,8 +81,8 @@ PImage checkboard;
 
 
 void settings() {
-  fullScreen();
-  //size(1024, 700);  // P2D renderer is needed to draw the chessboard texture under the camera, but it breaks SVG imports
+  //fullScreen();
+  size(1024, 700);  // P2D renderer is needed to draw the chessboard texture under the camera, but it breaks SVG imports
   noSmooth();  // Needed for the camera view
 }
 
@@ -108,7 +108,7 @@ void setup() {
   checkboard = loadImage("checkboard.png");
   
   renderer = new PRenderer(this);
-  bufferedRenderer = new PGraphicsRenderer(this);
+  cameraRenderer = new PGraphicsRenderer(this);
   
   tooltip = new Tooltip();
   mainScreen = new MainScreen();

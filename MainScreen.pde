@@ -69,8 +69,8 @@ public class MainScreen extends Screen {
         float g = _myArrayValue[1] / 255.0;
         float b = _myArrayValue[2] / 255.0;
         float a = _myArrayValue[3] / 255.0;
-        if (bufferedRenderer != null)
-          bufferedRenderer.setBackgroundColor(r, g, b, a);
+        if (cameraRenderer != null)
+          cameraRenderer.setBackgroundColor(r, g, b, a);
       }
     }
 
@@ -171,7 +171,7 @@ public class MainScreen extends Screen {
     public void resizeBuffer() {
       bufferWidth = ceil((SE.x - NW.x) * PPU);
       bufferHeight = ceil((SE.y - NW.y) * PPU);
-      bufferedRenderer.setBufferSize(bufferWidth, bufferHeight);
+      cameraRenderer.setBufferSize(bufferWidth, bufferHeight);
     }
 
     public void hide() {
@@ -211,12 +211,12 @@ public class MainScreen extends Screen {
         this.transform.scale(PPU, PPU);
         this.transform.translate(translation);
 
-        bufferedRenderer.pushMatrix(this.transform);
-        bufferedRenderer.beginDraw();
-        bufferedRenderer.clear();
-        avatar.draw(bufferedRenderer);
-        bufferedRenderer.endDraw();
-        bufferedRenderer.popMatrix();
+        cameraRenderer.pushMatrix(this.transform);
+        cameraRenderer.beginDraw();
+        cameraRenderer.clear();
+        avatar.draw(cameraRenderer);
+        cameraRenderer.endDraw();
+        cameraRenderer.popMatrix();
 
         noStroke();
         beginShape();
@@ -226,7 +226,7 @@ public class MainScreen extends Screen {
         vertex(screenSE.x, screenSE.y, screenSE.x-screenNW.x, screenSE.y-screenNW.y);
         vertex(screenNW.x, screenSE.y, 0, screenSE.y-screenNW.y);
         endShape();
-        image(bufferedRenderer.getBuffer(), screenNW.x, screenNW.y, bufferWidth*transform.m00/PPU, bufferHeight*transform.m11/PPU);
+        image(cameraRenderer.getBuffer(), screenNW.x, screenNW.y, bufferWidth*transform.m00/PPU, bufferHeight*transform.m11/PPU);
       }
 
       noFill();
@@ -315,7 +315,7 @@ public class MainScreen extends Screen {
       println("Spritesheet cells :", spritesheetWidth, "×", spritesheetHeight);
       spritesheetBuffer = createGraphics(spritesheetWidth * camera.bufferWidth, spritesheetHeight * camera.bufferHeight);
       spritesheetBuffer.beginDraw();
-      spritesheetBuffer.background(bufferedRenderer.getBackgroundColor());
+      spritesheetBuffer.background(cameraRenderer.getBackgroundColor());
     }
 
     avatar.resetAnimation();
@@ -390,7 +390,7 @@ public class MainScreen extends Screen {
 
         if (camera.isRecording && playing) {
           if (remainingFrames > 0) {
-            PImage buffer = bufferedRenderer.getBuffer();
+            PImage buffer = cameraRenderer.getBuffer();
             if (camera.isSpritesheet) {
               int nFrame = floor(transport.animDuration.getValue() * framerate) - remainingFrames;
               int cellX = nFrame % spritesheetWidth;
