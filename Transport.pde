@@ -11,7 +11,7 @@ public class Transport extends MoveableGroup {
   public int frameNumber = 0;
   private int textfieldWidth = 100;
   private int buttonSize = 24;
-  private float prevAnimDuration = 0f;
+  private float pAnimDuration = 0f;
 
 
   public Transport() {
@@ -93,7 +93,7 @@ public class Transport extends MoveableGroup {
       ;
     animDuration.addCallback(new CallbackListener() {
       public void controlEvent(CallbackEvent theEvent) {
-        if (theEvent.getAction() == ControlP5.ACTION_BROADCAST && animDuration.getValue() != prevAnimDuration) {
+        if (theEvent.getAction() == ControlP5.ACTION_BROADCAST && animDuration.getValue() != pAnimDuration) {
           setFileDirty();
         }
       }
@@ -205,11 +205,11 @@ public class Transport extends MoveableGroup {
       savePosture();
     }
     postureIndex--;
-    Posture prevPosture = postures.getPosture(postureIndex);
-    avatar.loadPosture(prevPosture);
-    postureName.setText(prevPosture.name);
-    animDuration.setValue(prevPosture.duration);
-    prevAnimDuration = prevPosture.duration;
+    //Posture prevPosture = postures.getPosture(postureIndex);
+    avatar.loadPosture(postureIndex);
+    postureName.setText(avatar.getCurrentPosture().getName());
+    animDuration.setValue(avatar.getCurrentPosture().getDuration());
+    pAnimDuration = avatar.getCurrentPosture().getDuration();
     avatar.resetAnimation();
     mustUpdateUI = true;
   }
@@ -220,18 +220,17 @@ public class Transport extends MoveableGroup {
       savePosture();
     }
     postureIndex++;
-    if (postureIndex >= postures.size()) {
-      postureIndex = postures.size();
-      avatar.clearAnimation();
+    if (postureIndex >= avatar.getPostures().size()) {
+      postureIndex = avatar.getPostures().size();
       postureName.setText("posture" + postureIndex);
       animDuration.setValue(0f);
-      prevAnimDuration = 0f;
+      pAnimDuration = 0f;
     } else {
-      Posture nextPosture = postures.getPosture(postureIndex);
-      avatar.loadPosture(nextPosture);
-      postureName.setText(nextPosture.name);
-      animDuration.setValue(nextPosture.duration);
-      prevAnimDuration = nextPosture.duration;
+      //Posture nextPosture = postures.getPosture(postureIndex);
+      avatar.loadPosture(postureIndex);
+      postureName.setText(avatar.getCurrentPosture().getName());
+      animDuration.setValue(avatar.getCurrentPosture().getDuration());
+      pAnimDuration = avatar.getCurrentPosture().getDuration();
       avatar.resetAnimation();
     }
     mustUpdateUI = true;
@@ -240,11 +239,11 @@ public class Transport extends MoveableGroup {
   public void increaseCounter() {
     frameCounter.setText(String.valueOf(++frameNumber));
   }
-  
+
   public int getCounter() {
     return frameNumber;
   }
-  
+
   public void resetCounter() {
     frameNumber = 0;
     frameCounter.setText("0");

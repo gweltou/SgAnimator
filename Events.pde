@@ -22,24 +22,25 @@ void controlEvent(ControlEvent event) throws InstantiationException, IllegalAcce
     //println("event", event);
     
     if (name.equals("posturename")) {
-      // Change fullAnim name
+      // Posture name has changed
       setFileDirty();
     } else if (name.startsWith("function")) {
+      // Change the animations's function or add a new animation with the given function
       String[] m = match(name, "function(\\d+)");
       int animNum = parseInt(m[1]);
-      Class<TimeFunction> tfclass = Animation.timeFunctions[(int) event.getValue()];
+      Class<TimeFunction> tfclass = TimeFunction.functionClasses[(int) event.getValue()];
       Constructor<TimeFunction> ctor = tfclass.getConstructor();
       TimeFunction tf = ctor.newInstance();
-      int numberOfAnimations = selected.getAnimationList().length;
-      if (animNum < numberOfAnimations) {
-        selected.getAnimation(animNum).setFunction(tf);
+      ArrayList<Animation> animations = selectedPostureTree.getAnimations();
+      if (animNum < animations.size()) {
+        animations.get(animNum).setFunction(tf);
       } else {
-        Animation a = new Animation(tf);
+        Animation newAnimation = new Animation(tf);
         if (axeSetFirst && parseInt(match(axeSetFirstName, "axe(\\d+)")[1]) == animNum) {
           int axeVal = (int) cp5.getController(axeSetFirstName).getValue();
-          a.setAxe(axeVal);
+          newAnimation.setAxe(axeVal);
         }
-        selected.addAnimation(a);
+        animations.add(newAnimation);
       }
       //selected.reset();
       /*if (tf instanceof TFTimetable) {
@@ -54,12 +55,12 @@ void controlEvent(ControlEvent event) throws InstantiationException, IllegalAcce
       String[] m = match(name, "axe(\\d+)");
       int animNum = parseInt(m[1]);
       // Should check if an function is set first
-      if (animNum == selected.getAnimationList().length) {
+      if (animNum == selectedPostureTree.getAnimations().size()) {
         // No function set yet
         axeSetFirst = true;
         axeSetFirstName = name;
       } else {
-        selected.getAnimation(animNum).setAxe((int) value);
+        selectedPostureTree.getAnimations().get(animNum).setAxe((int) value);
         mustUpdateUI = true;
         mainScreen.playing = true;
         setFileDirty();
@@ -67,27 +68,28 @@ void controlEvent(ControlEvent event) throws InstantiationException, IllegalAcce
     } else if (name.startsWith("animamp")) {
       String[] m = match(name, "animamp(\\d+)");
       int animNum = parseInt(m[1]);
-      selected.getAnimation(animNum).setAmp(int(value*100f) / 100f);
+      selectedPostureTree.getAnimations().get(animNum).setAmp(int(value*100f) / 100f);
       setFileDirty();
     } else if (name.startsWith("animinv")) {
       String[] m = match(name, "animinv(\\d+)");
       int animNum = parseInt(m[1]);
-      selected.getAnimation(animNum).setInv(value == 0 ? true : false);
+      selectedPostureTree.getAnimations().get(animNum).setInv(value == 0 ? true : false);
       setFileDirty();
     } else if (name.startsWith("copybtn")) {
       String[] m = match(name, "copybtn(\\d+)");
       int animNum = parseInt(m[1]);
-      animationClipboard = selected.getAnimation(animNum).copy();
+      animationClipboard = selectedPostureTree.getAnimations().get(animNum).copy();
       mustUpdateUI = true;
     } else if (name.startsWith("pastebtn")) {
       String[] m = match(name, "pastebtn(\\d+)");
       int animNum = parseInt(m[1]);
       if (animationClipboard != null) {
         //selected.reset();
-        if (animNum < selected.getAnimationList().length) {
-          selected.setAnimation(animNum, animationClipboard.copy());
+        ArrayList<Animation> animations = selectedPostureTree.getAnimations();
+        if (animNum < animations.size()) {
+          animations.set(animNum, animationClipboard.copy());
         } else {
-          selected.addAnimation(animationClipboard.copy());
+          animations.add(animationClipboard.copy());
         }
         mustUpdateUI = true;
         setFileDirty();
@@ -96,15 +98,16 @@ void controlEvent(ControlEvent event) throws InstantiationException, IllegalAcce
       String[] m = match(name, "delbtn(\\d+)");
       int animNum = parseInt(m[1]);
       //selected.reset(); // So transform matrix is set to identity
-      selected.removeAnimation(animNum);
+      selectedPostureTree.getAnimations().remove(animNum);
       mustUpdateUI = true;
       setFileDirty();
     } else if (name.startsWith("swapup")) {
       String[] m = match(name, "swapup(\\d+)");
       int animNum = parseInt(m[1]);
-      Animation moveup = selected.getAnimation(animNum);
-      selected.setAnimation(animNum, selected.getAnimation(animNum-1));
-      selected.setAnimation(animNum-1, moveup);
+      ArrayList<Animation> animations = selectedPostureTree.getAnimations();
+      Animation moveup = animations.get(animNum);
+      animations.set(animNum, animations.get(animNum-1));
+      animations.set(animNum-1, moveup);
       //updateUI();
       keepsOpenAnimNum = animNum-1;
       mustUpdateUI = true;
@@ -112,9 +115,10 @@ void controlEvent(ControlEvent event) throws InstantiationException, IllegalAcce
     } else if (name.startsWith("swapdown")) {
       String[] m = match(name, "swapdown(\\d+)");
       int animNum = parseInt(m[1]);
-      Animation moveup = selected.getAnimation(animNum+1);
-      selected.setAnimation(animNum+1, selected.getAnimation(animNum));
-      selected.setAnimation(animNum, moveup);
+      ArrayList<Animation> animations = selectedPostureTree.getAnimations();
+      Animation moveup = animations.get(animNum+1);
+      animations.set(animNum+1, animations.get(animNum));
+      animations.set(animNum, moveup);
       //updateUI();
       keepsOpenAnimNum = animNum+1;
       mustUpdateUI = true;
@@ -152,14 +156,14 @@ void controlEvent(ControlEvent event) throws InstantiationException, IllegalAcce
       if (m != null) {
         String paramName = m[1];
         int animNum = parseInt(m[2]);
-        TimeFunction fn = selected.getAnimation(animNum).getFunction();
+        TimeFunction fn = selectedPostureTree.getAnimations().get(animNum).getFunction();
         if (paramName.equals("easing")) {
           // Send value as a string (name of the easing function)
           int idx = floor(value);
           fn.setParam(paramName, Animation.interpolationNamesSimp[idx]);
         } else {
           // Round to 2 decimals
-          value = int(value*100f) / 100f;
+          value = int(value*100f) / 100f; //<>//
           fn.setParam(paramName, value);
         }
         mainScreen.playing = true;
@@ -182,11 +186,11 @@ void setFileDirty() {
 void inputFileSelected(File selection) throws IOException {
   if (selection == null) {
     println("Window was closed or the user hit cancel.");
-  } else {
+  } else { //<>//
     println("User selected " + selection.getAbsolutePath());
     String filename = selection.getAbsolutePath();
     if (filename.endsWith("svg")) {
-      ComplexShape shape = ComplexShape.fromPShape(loadShape(filename)); //<>//
+      ComplexShape shape = ComplexShape.fromPShape(loadShape(filename));
       
       if (shape == null) {
         println("Could not load SVG file");
@@ -201,7 +205,6 @@ void inputFileSelected(File selection) throws IOException {
       shape.hardTranslate(-shape.getBoundingBox().getCenter().x, -shape.getBoundingBox().bottom);
 
       selected = null;
-      postures = new PostureCollection();
       avatar = new Avatar();
       avatar.setShape(shape);
       mainScreen.partsList.setItems(avatar.getPartsNamePre());
@@ -264,14 +267,11 @@ void loadJsonFile(File file) {
   // postures are kept separated for simplicity
   // rather than storing and retrieving it from the Avatar class
   postureIndex = 0;
-  if (newAvatar.postures != null) {
-    postures = avatar.postures;
-    mainScreen.transport.postureName.setText(postures.getPosture(0).name);
-    mainScreen.transport.animDuration.setValue(postures.getPosture(0).duration);
-    mainScreen.transport.prevAnimDuration = postures.getPosture(0).duration;
-    avatar.loadPosture(0);
+  if (avatar.getCurrentPosture() != null) {
+    mainScreen.transport.postureName.setText(avatar.getCurrentPosture().getName());
+    mainScreen.transport.animDuration.setValue(avatar.getCurrentPosture().getDuration());
+    mainScreen.transport.pAnimDuration = avatar.getCurrentPosture().getDuration();
   } else {
-    postures = new PostureCollection();
     mainScreen.transport.postureName.setText("posture0");
     println("no postures in loaded file");
   }

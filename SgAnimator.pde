@@ -42,7 +42,7 @@ import java.util.*;
 import java.lang.reflect.Field;
 
 
-String version = "0.9.1";
+String version = "1.0_a";
 String appName = "SgAnimator " + version;
 
 
@@ -61,9 +61,10 @@ Avatar avatar;
 String baseFilename;  // Used for window title and to save file (independent of its source format)
 
 ComplexShape selected = null;
+PostureTree selectedPostureTree;
 String[] functionsName;
 
-PostureCollection postures;
+//PostureCollection postures;
 int postureIndex = 0;
 boolean fileDirty = false;  // When true, postures in editor are yet to be saved in avatar
 Animation animationClipboard;
@@ -118,11 +119,11 @@ void setup() {
   helpScreenEasing = new HelpScreenEasing();
   currentScreen = welcomeScreen;
   
-  int numFn = Animation.timeFunctions.length;
+  int numFn = TimeFunction.functionClasses.length;
   functionsName = new String[numFn];
   for (int i=0; i<numFn; i++) {
-    int idx = Animation.timeFunctions[i].getName().lastIndexOf('.');
-    functionsName[i] = Animation.timeFunctions[i].getName().substring(idx+3);
+    int idx = TimeFunction.functionClasses[i].getName().lastIndexOf('.');
+    functionsName[i] = TimeFunction.functionClasses[i].getName().substring(idx+3);
   }
   
   //File toLoad = new File("/home/gweltaz/Bureau/svg/bois.json");
@@ -133,6 +134,7 @@ void setup() {
 void select(ComplexShape part) {
   showUI = true;
   selected = part;
+  selectedPostureTree = avatar.getCurrentPosture().getPostureTree().findByShape(selected);
   renderer.setSelected(part);
   if (selected == null) {
     cp5.remove("accordion");
@@ -150,11 +152,10 @@ void savePosture() {
   String postureName = mainScreen.transport.postureName.getText();
   if (postureName == null || postureName.trim().isEmpty())
     postureName = "posture" + postureIndex;
-  posture.name = postureName;
+  posture.setName(postureName);
+  posture.setDuration(mainScreen.transport.animDuration.getValue());
 
-  posture.duration = mainScreen.transport.animDuration.getValue();
-
-  Animation[][] groups = new Animation[avatar.getPartsList().length][];
+  /*Animation[][] groups = new Animation[avatar.getPartsList().length][];
   Arrays.fill(groups, null);
   for (int i = 0; i < groups.length; i++) {
     ComplexShape part = avatar.getPartsList()[i];
@@ -169,7 +170,7 @@ void savePosture() {
     postures.updatePosture(postureIndex, posture);
   }
 
-  avatar.postures = postures;
+  avatar.postures = postures;*/
   fileDirty = false;
 }
 

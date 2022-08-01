@@ -27,7 +27,7 @@ class Timeline extends MoveableGroup {
     x = width - accordion.getWidth() - groupWidth - 2*margin;
     y = margin + barHeight + 1;
     
-    this.fn = (TFTimetable) selected.getAnimation(animNum).getFunction();
+    this.fn = (TFTimetable) selectedPostureTree.getAnimations().get(animNum).getFunction();
     
     paramLocked = true;
 

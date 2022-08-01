@@ -111,24 +111,26 @@ public class LoadScreen extends Screen {
     // postures are kept separated for simplicity
     // rather than storing and retrieving it from the Avatar class
     postureIndex = 0;
-    if (newAvatar.postures != null) {
-      postures = newAvatar.postures; // Creates problems if newAvatar has a different config than previous avatar
-      avatar.postures = postures;
-      mainScreen.transport.postureName.setText(postures.getPosture(0).name);
-      mainScreen.transport.animDuration.setValue(postures.getPosture(0).duration);
-      mainScreen.transport.prevAnimDuration = postures.getPosture(0).duration;
+    if (newAvatar.getCurrentPosture() != null) {
+      println("TODO, function keepGeomFn");
+      //postures = newAvatar.postures; // Creates problems if newAvatar has a different config than previous avatar
+      //avatar.postures = postures;
+      mainScreen.transport.postureName.setText(avatar.getCurrentPosture().getName());
+      mainScreen.transport.animDuration.setValue(avatar.getCurrentPosture().getDuration());
+      mainScreen.transport.pAnimDuration = avatar.getCurrentPosture().getDuration();
       avatar.loadPosture(0);
       setFileDirty();
     }
 
     // Update pivots and transforms
+    /*
     for (ComplexShape cs : newAvatar.getPartsList()) {
       ComplexShape backCs = avatar.getShape().getById(cs.getId());
       if (backCs != null) {
         backCs.setLocalOrigin(cs.getLocalOrigin());
         backCs.setTransform(cs.getTransform());
       }
-    }
+    }*/
 
     mainScreen.showUI();
 

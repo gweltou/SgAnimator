@@ -274,7 +274,7 @@ void updateUI() {
     timeline.remove();
 
   PVector pos = new PVector();
-  Animation[] animationList = selected.getAnimationList();
+  ArrayList<Animation> animationList = selectedPostureTree.getAnimations();
   int animNum = 0;
   Group g;
 
@@ -297,7 +297,7 @@ void updateUI() {
       .onEnter(toFront)
       .onLeave(close)
       .addItems(functionsName)
-      .setValue(Arrays.asList(Animation.timeFunctions).indexOf(anim.getFunction().getClass()))
+      .setValue(Arrays.asList(TimeFunction.functionClasses).indexOf(anim.getFunction().getClass()))
       .setGroup(g)
       .close()
       ;
@@ -451,7 +451,7 @@ void updateUI() {
   g.setBackgroundHeight((int) pos.y);
   accordion.addItem(g);
 
-  if (keepsOpenAnimNum >= 0 && keepsOpenAnimNum <= animationList.length) {
+  if (keepsOpenAnimNum >= 0 && keepsOpenAnimNum <= animationList.size()) {
     accordion.open(keepsOpenAnimNum);
   } else {
     accordion.open(0);
@@ -465,7 +465,7 @@ void updateUI() {
 
 
 void drawParams(Group g, int animNum, PVector pos) {
-  Animation anim = selected.getAnimationList()[animNum];
+  Animation anim = selectedPostureTree.getAnimations().get(animNum);
 
   for (TFParam param : anim.getFunction().getParams()) {
     switch (param.type) {
@@ -561,7 +561,7 @@ void drawParams(Group g, int animNum, PVector pos) {
 void drawBottomButtons(Group g, int animNum, PVector pos) {
   boolean bottomButtons = false;
 
-  if (animNum < selected.getAnimationList().length) {
+  if (animNum < selectedPostureTree.getAnimations().size()) {
     // Copy animation
     cp5.addButton("copybtn"+animNum)
       .setLabel("copy")
@@ -602,7 +602,7 @@ void drawBottomButtons(Group g, int animNum, PVector pos) {
     }
     )
       ;
-    if (animNum == selected.getAnimationList().length-1)
+    if (animNum == selectedPostureTree.getAnimations().size()-1)
       cp5.getController("swapdown"+animNum).hide();
 
     bottomButtons = true;

@@ -1,4 +1,4 @@
-ContextMenu contextMenu; //<>//
+ContextMenu contextMenu; //<>// //<>//
 //ContextMenu partsMenu;
 FunctionAccordion accordion;
 
@@ -347,12 +347,23 @@ public class MainScreen extends Screen {
         avatar.update(1f/framerate);
 
       avatar.draw(renderer);
-      avatar.drawSelectedOnly(renderer);
+      
+      renderer.setColor(0f, 1f, 0f, 0.6f);
+      renderer.lockColor();
+      if (selected.getParent() != null) {
+        renderer.pushMatrix(selected.getParent().getAbsoluteTransform());
+        selected.draw(renderer, selectedPostureTree);
+        renderer.popMatrix();
+      } else {
+        selected.draw(renderer, selectedPostureTree);
+      }
+      //avatar.drawSelectedOnly(renderer);
+      renderer.unlockColor();
     }
 
     if (showUI) {
       if (selected != null) {
-        selected.drawPivot(renderer);
+        selected.drawPivot(renderer, selectedPostureTree);
 
         if (!playing) {
           // Draw bounding box
