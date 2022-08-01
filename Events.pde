@@ -261,6 +261,7 @@ void loadJsonFile(File file) {
   }
 
   avatar = newAvatar;
+  println(avatar.getPostures().size() + " postures");
 
   mainScreen.partsList.setItems(avatar.getPartsNamePre());
 

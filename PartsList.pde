@@ -13,7 +13,7 @@ class PartsList extends MoveableGroup {
     public void highlightPart() {
       if (itemHover != oldItemHover) {
         if (itemHover >= 0 && itemHover < avatar.getPartsList().length) {
-          renderer.setSelected(avatar.getPartsList()[itemHover]);
+          //XXX renderer.setSelected(avatar.getPartsList()[itemHover]);
         }
       }
       oldItemHover = itemHover;
@@ -26,7 +26,7 @@ class PartsList extends MoveableGroup {
     }
     @Override protected void onLeave() {
       super.onLeave();
-      renderer.setSelected(selected);
+      //renderer.setSelected(selected);
     }
     @Override protected void onMove() {
       super.onMove();

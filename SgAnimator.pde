@@ -1,6 +1,7 @@
 // programme python "key-mon" pour afficher les touches du clavier
 
 // TODO:
+// Rotation softtransform autour du point de pivot avec Maj
 // Revoir la fenêtre de sur-chargement de fichier (pour la version 0.8)
 // Editor : Part selection menu when click on many overlaping parts
 // Lib : Part affine transform per posture
@@ -126,21 +127,20 @@ void setup() {
     functionsName[i] = TimeFunction.functionClasses[i].getName().substring(idx+3);
   }
   
-  //File toLoad = new File("/home/gweltaz/Bureau/svg/bois.json");
-  //loadJsonFile(toLoad);
+  File toLoad = new File("/home/gweltaz/Bureau/svg/tete.json");
+  loadJsonFile(toLoad);
 }
 
 
 void select(ComplexShape part) {
   showUI = true;
-  selected = part;
-  selectedPostureTree = avatar.getCurrentPosture().getPostureTree().findByShape(selected);
-  renderer.setSelected(part);
+  selected = part;  
+  //renderer.setSelected(part);
   if (selected == null) {
     cp5.remove("accordion");
     accordion = null;
   } else {
-    //avatar.getShape().invalidateBoundingBox(); // Fixes bb not updated between parts selection (which moves when playing)
+    selectedPostureTree = avatar.getCurrentPosture().getPostureTree().findByShape(selected);
     updateUI();
   }
 }
@@ -155,22 +155,6 @@ void savePosture() {
   posture.setName(postureName);
   posture.setDuration(mainScreen.transport.animDuration.getValue());
 
-  /*Animation[][] groups = new Animation[avatar.getPartsList().length][];
-  Arrays.fill(groups, null);
-  for (int i = 0; i < groups.length; i++) {
-    ComplexShape part = avatar.getPartsList()[i];
-    if (part.getAnimationList().length > 0)
-      groups[i] = part.getAnimationList();
-  }
-  posture.groups = groups;
-
-  if (postureIndex >= postures.size()) {
-    postures.addPosture(posture);
-  } else {
-    postures.updatePosture(postureIndex, posture);
-  }
-
-  avatar.postures = postures;*/
   fileDirty = false;
 }
 

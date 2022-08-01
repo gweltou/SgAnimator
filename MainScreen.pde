@@ -1,15 +1,14 @@
-ContextMenu contextMenu; //<>// //<>//
+ContextMenu contextMenu; //<>//
 //ContextMenu partsMenu;
 FunctionAccordion accordion;
 
 
 public class MainScreen extends Screen {
   Affine2 transform; // Window view transform
-  
+
   private boolean setPivot = false;
   private boolean playing = false;
   private float defaultFramerate = frameRate;
-  //private float recordingFramerate = 25f;
   private float framerate = defaultFramerate;
   private int remainingFrames = 0;
   private boolean clearBackground = true;
@@ -20,8 +19,9 @@ public class MainScreen extends Screen {
   private Camera camera = new Camera();
   private PGraphics spritesheetBuffer;
   private int spritesheetWidth, spritesheetHeight;
-  
+
   private PartsList partsList;
+  private ComplexShape highlightedPart = null;
 
   private int mouseClickBtn;
   private Vector2 mouseClickPos = new Vector2();
@@ -347,18 +347,27 @@ public class MainScreen extends Screen {
         avatar.update(1f/framerate);
 
       avatar.draw(renderer);
-      
-      renderer.setColor(0f, 1f, 0f, 0.6f);
-      renderer.lockColor();
-      if (selected.getParent() != null) {
-        renderer.pushMatrix(selected.getParent().getAbsoluteTransform());
-        selected.draw(renderer, selectedPostureTree);
-        renderer.popMatrix();
-      } else {
-        selected.draw(renderer, selectedPostureTree);
+
+      if (highlightedPart != null || selected != null) {
+        ComplexShape toHighlight;
+        PostureTree pt;
+        if (highlightedPart != null) {
+          toHighlight = highlightedPart;
+          pt = avatar.getCurrentPosture().getPostureTree().findByShape(highlightedPart);
+        } else {
+          toHighlight = selected;
+        }
+        renderer.setColor(0f, 1f, 0f, 0.6f);
+        renderer.lockColor();
+        if (toHighlight.getParent() != null) {
+          renderer.pushMatrix(toHighlight.getParent().getAbsoluteTransform(selectedPostureTree.getParent()));
+          toHighlight.draw(renderer, selectedPostureTree);
+          renderer.popMatrix();
+        } else {
+          toHighlight.draw(renderer, selectedPostureTree);
+        }
+        renderer.unlockColor();
       }
-      //avatar.drawSelectedOnly(renderer);
-      renderer.unlockColor();
     }
 
     if (showUI) {
@@ -470,7 +479,7 @@ public class MainScreen extends Screen {
       accordion.show();
     partsList.show();
     transport.show();
-    renderer.setSelected(selected);
+    //renderer.setSelected(selected);
     if (timeline != null)
       timeline.show();
 
@@ -485,7 +494,7 @@ public class MainScreen extends Screen {
     camera.hide();
     contextMenu.hide();
     transport.hide();
-    renderer.setSelected(null);
+    //renderer.setSelected(null);
     if (timeline != null)
       timeline.hide();
 
@@ -511,6 +520,8 @@ public class MainScreen extends Screen {
           transport.nextPosture();
         }
       } else {
+        //println("key:" + key);
+        //println("keyCode:" + keyCode);
         switch (key) {
         case 'p':  // Play/Pause animation
           if (playing) {
@@ -707,10 +718,11 @@ public class MainScreen extends Screen {
         Vector2 mouseWorldPos = getWorldPos(mouseX, mouseY);
         ComplexShape[] parts = avatar.getPartsList();
         ComplexShape clickedPart = null;
-        //avatar.getShape().invalidateBoundingBox();
+        avatar.getShape().invalidateBoundingBox();
         int i;
         for (i = parts.length-1; i >= 0; i--) {
-          if (parts[i].contains(mouseWorldPos)) {
+          PostureTree pt = avatar.getCurrentPosture().getPostureTree().findByShape(parts[i]);
+          if (parts[i].contains(mouseWorldPos.x, mouseWorldPos.y, pt)) {
             clickedPart = parts[i];
             break;
           }

@@ -5,7 +5,7 @@ public class WelcomeScreen extends Screen {
   float innerRadius;
 
   public WelcomeScreen() {
-    int numWings = floor(random(12, 32));
+    int numWings = floor(random(12, 24));
     innerRadius = numWings * 3.2f;
     int r1 = floor(random(1, 7));
     float speed = 10f;
@@ -81,8 +81,8 @@ public class WelcomeScreen extends Screen {
     drawKey((width/2) - 90, 36 + height/2, "H", 32);
 
     textFont(defaultFontSmall);
-    text("Ver. " + version, width-80, height-40);
-    text("Lib. " + PRenderer.version(), width-80, height-20);
+    text("Ver. " + version, width-80, height-60);
+    text("Lib. " + PRenderer.version(), width-80, height-40);
   }
 
   @Override
